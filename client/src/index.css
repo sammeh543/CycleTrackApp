@@ -1,0 +1,759 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === THEME VARIABLES === */
+:root {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 291 47% 42%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 225 73% 57%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 273 48% 45%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+  --indigo-bar: #6366f1;
+  /* Chart colors */
+  --chart-1: 291 47% 42%;
+  --chart-2: 225 73% 57%;
+  --chart-3: 273 48% 45%;
+  --chart-4: 263 67% 65%;
+  --chart-5: 326 100% 74%;
+  /* Additional colors specific to the app */
+  --sidebar-background: 240 10% 3.9%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 291 47% 42%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 273 48% 45%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 240 4.9% 83.9%;
+}
+
+.theme-starry {
+  --background: 235 44% 12%; /* deep blue */
+  --foreground: 220 16% 90%;
+  --muted: 245 32% 18%;
+  --muted-foreground: 220 12% 70%;
+  --popover: 238 38% 15%;
+  --popover-foreground: 220 16% 90%;
+  --card: 238 38% 15%;
+  --card-foreground: 220 16% 90%;
+  --border: 245 32% 18%;
+  --input: 245 32% 18%;
+  --primary: 263 67% 65%; /* nebula purple */
+  --primary-foreground: 220 16% 90%;
+  --secondary: 225 73% 57%;
+  --secondary-foreground: 220 16% 90%;
+  --accent: 326 100% 74%; /* nebula pink */
+  --accent-foreground: 220 16% 90%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 220 16% 90%;
+  --ring: 263 67% 65%;
+  --radius: 0.5rem;
+  --button-hover: 235 50% 25% / 0.7; /* toned down hover */
+}
+
+.theme-nebula {
+  --background: 270 70% 12%;
+  --foreground: 270 30% 96%;
+  --muted: 270 50% 18%;
+  --muted-foreground: 270 20% 80%;
+  --popover: 270 60% 15%;
+  --popover-foreground: 270 30% 96%;
+  --card: 270 60% 15%;
+  --card-foreground: 270 30% 96%;
+  --border: 270 40% 25%;
+  --input: 270 40% 25%;
+  --primary: 290 100% 70%;
+  --primary-foreground: 270 30% 96%;
+  --secondary: 200 100% 70%;
+  --secondary-foreground: 270 30% 96%;
+  --accent: 320 100% 70%;
+  --accent-foreground: 270 30% 96%;
+  --destructive: 0 70% 60%;
+  --destructive-foreground: 270 30% 96%;
+  --ring: 290 100% 70%;
+  --radius: 0.5rem;
+  --button-hover: 270 50% 25% / 0.7; /* toned down hover */
+}
+
+.theme-pinkwhite {
+  --background: 330 50% 98%; /* soft white-pink */
+  --foreground: 330 40% 10%; /* much darker text for readability */
+  --muted: 330 40% 96%;
+  --muted-foreground: 330 30% 30%;
+  --popover: 330 40% 97%;
+  --popover-foreground: 330 40% 10%;
+  --card: 330 40% 97%;
+  --card-foreground: 330 40% 10%;
+  --border: 340 30% 85%;
+  --input: 340 30% 85%;
+  --primary: 340 80% 60%; /* deeper pink for buttons */
+  --primary-foreground: 330 50% 98%;
+  --secondary: 340 90% 85%;
+  --secondary-foreground: 330 40% 10%;
+  --accent: 320 60% 55%; /* purple accent for contrast */
+  --accent-foreground: 330 40% 10%;
+  --destructive: 0 70% 40%;
+  --destructive-foreground: 330 50% 98%;
+  --ring: 340 80% 60%;
+  --radius: 0.5rem;
+  --button-selected: 340 80% 70%; /* match physical symptoms */
+  --button-hover: 340 80% 70%; /* match selected cervical mucus pink */
+}
+
+.theme-beach {
+  --background: 190 60% 95%; /* pale teal sand */
+  --foreground: 190 50% 20%;
+  --muted: 190 40% 90%;
+  --muted-foreground: 190 30% 40%;
+  --popover: 190 40% 98%;
+  --popover-foreground: 190 50% 20%;
+  --card: 190 40% 98%;
+  --card-foreground: 190 50% 20%;
+  --border: 40 30% 80%;
+  --input: 40 30% 80%;
+  --primary: 190 80% 50%; /* teal */
+  --primary-foreground: 190 60% 98%;
+  --secondary: 40 90% 85%; /* sand */
+  --secondary-foreground: 190 50% 20%;
+  --accent: 50 100% 70%;
+  --accent-foreground: 190 50% 20%;
+  --destructive: 0 70% 40%;
+  --destructive-foreground: 190 60% 98%;
+  --ring: 40 90% 70%;
+  --radius: 0.5rem;
+  --scrollbar-thumb: 50 100% 70% / 0.35; /* faded yellow */
+  --scrollbar-thumb-hover: 50 100% 70% / 0.6;
+  --theme-text: 190 50% 20%; /* darker text for theme bubble */
+}
+
+.theme-ocean {
+  --background: 190 66% 22%; /* dark teal wide background */
+  --foreground: 190 60% 96%; /* much lighter for good contrast */
+  --muted: 190 40% 30%;
+  --muted-foreground: 190 30% 80%;
+  --popover: 190 40% 27%;
+  --popover-foreground: 190 60% 96%;
+  --card: 190 60% 28%; /* slightly lighter/different teal for main container */
+  --card-foreground: 190 60% 96%;
+  --border: 190 30% 40%;
+  --input: 190 30% 40%;
+  --primary: 190 80% 50%; /* keep beach teal for buttons */
+  --primary-foreground: 190 60% 98%;
+  --secondary: 40 90% 85%; /* sand accent */
+  --secondary-foreground: 190 66% 22%;
+  --accent: 50 100% 70%;
+  --accent-foreground: 190 60% 96%;
+  --destructive: 0 70% 40%;
+  --destructive-foreground: 190 60% 98%;
+  --ring: 40 90% 70%;
+  --radius: 0.5rem;
+  --scrollbar-thumb: 50 100% 70% / 0.35;
+  --scrollbar-thumb-hover: 50 100% 70% / 0.6;
+  --theme-text: 190 60% 96%; /* lighter for theme bubble */
+}
+
+.theme-galaxy {
+  --background: 260 60% 13%; /* deep space blue */
+  --foreground: 230 20% 96%; /* brighter text */
+  --muted: 260 40% 20%;
+  --muted-foreground: 230 12% 85%; /* lighter muted text */
+  --popover: 260 50% 17%;
+  --popover-foreground: 230 20% 96%;
+  --card: 260 50% 17%;
+  --card-foreground: 230 20% 96%;
+  --border: 260 40% 20%;
+  --input: 260 40% 20%;
+  --primary: 290 100% 70%; /* magenta */
+  --primary-foreground: 230 20% 96%;
+  --secondary: 200 100% 70%; /* blue */
+  --secondary-foreground: 230 20% 96%;
+  --accent: 320 100% 70%; /* pink */
+  --accent-foreground: 230 20% 96%;
+  --destructive: 0 70% 60%;
+  --destructive-foreground: 230 20% 96%;
+  --ring: 290 100% 70%;
+  --radius: 0.5rem;
+  --button-hover: 260 50% 25% / 0.7;
+  --theme-text: 230 20% 96%;
+}
+
+.theme-aurora {
+  --background: 160 60% 15%; /* aurora green */
+  --foreground: 120 20% 98%; /* brighter text */
+  --muted: 160 40% 23%;
+  --muted-foreground: 120 12% 85%;
+  --popover: 160 50% 18%;
+  --popover-foreground: 120 20% 98%;
+  --card: 160 50% 18%;
+  --card-foreground: 120 20% 98%;
+  --border: 160 40% 23%;
+  --input: 160 40% 23%;
+  --primary: 190 100% 70%; /* teal */
+  --primary-foreground: 120 20% 98%;
+  --secondary: 300 100% 70%; /* purple */
+  --secondary-foreground: 120 20% 98%;
+  --accent: 210 100% 70%; /* blue accent for hover */
+  --accent-foreground: 120 20% 98%;
+  --destructive: 0 70% 60%;
+  --destructive-foreground: 120 20% 98%;
+  --ring: 190 100% 70%;
+  --radius: 0.5rem;
+  --button-hover: 210 100% 30% / 0.7;
+  --theme-text: 120 20% 98%;
+}
+
+.theme-cyberpunk {
+  --background: 280 100% 8%; /* deep violet/blue */
+  --foreground: 160 100% 70%; /* neon green/cyan */
+  --muted: 280 80% 18%;
+  --muted-foreground: 160 80% 70%;
+  --popover: 280 100% 12%;
+  --popover-foreground: 160 100% 70%;
+  --card: 280 100% 12%;
+  --card-foreground: 160 100% 70%;
+  --border: 200 100% 60%; /* neon blue border */
+  --input: 160 100% 70%;
+  --primary: 200 100% 60%; /* neon blue */
+  --primary-foreground: 280 100% 8%;
+  --secondary: 160 100% 70%; /* neon green/cyan */
+  --secondary-foreground: 160 100% 10%;
+  --accent: 200 100% 70%; /* blue accent */
+  --accent-foreground: 160 100% 70%;
+  --destructive: 0 100% 60%;
+  --destructive-foreground: 160 100% 70%;
+  --ring: 200 100% 60%;
+  --radius: 0.5rem;
+  --glow: 0 0 12px #00fff7, 0 0 32px #0099ff;
+  --theme-text: 160 100% 70%;
+}
+
+.theme-synthwave {
+  --background: 260 90% 12%; /* deep blue/purple */
+  --foreground: 52 100% 70%; /* neon yellow */
+  --muted: 260 70% 22%;
+  --muted-foreground: 320 100% 70%;
+  --popover: 260 90% 16%;
+  --popover-foreground: 52 100% 70%;
+  --card: 260 90% 16%;
+  --card-foreground: 52 100% 70%;
+  --border: 320 100% 70%; /* neon magenta border */
+  --input: 52 100% 70%;
+  --primary: 320 100% 70%; /* neon magenta */
+  --primary-foreground: 260 90% 12%;
+  --secondary: 200 100% 60%; /* neon blue */
+  --secondary-foreground: 52 100% 70%;
+  --accent: 52 100% 70%; /* neon yellow accent */
+  --accent-foreground: 320 100% 70%;
+  --destructive: 0 100% 60%;
+  --destructive-foreground: 52 100% 70%;
+  --ring: 320 100% 70%;
+  --radius: 0.5rem;
+  --glow: 0 0 8px #ffe600, 0 0 16px #ff00ea;
+  --theme-text: 52 100% 70%;
+}
+
+.theme-lunar {
+  --background: 220 18% 16%;   /* deep midnight blue */
+  --foreground: 220 30% 96%;   /* moonlit white */
+  --muted: 220 16% 22%;
+  --muted-foreground: 220 18% 80%;
+  --popover: 220 20% 18%;
+  --popover-foreground: 220 30% 96%;
+  --card: 220 20% 20%;
+  --card-foreground: 220 30% 96%;
+  --border: 220 10% 40%;
+  --input: 220 10% 40%;
+  --primary: 60 30% 90%;   /* pale moon yellow */
+  --primary-foreground: 220 18% 16%;
+  --secondary: 220 18% 36%; /* moon shadow blue */
+  --secondary-foreground: 220 30% 96%;
+  --accent: 240 60% 80%;   /* soft blue accent */
+  --accent-foreground: 220 30% 96%;
+  --destructive: 0 70% 60%;
+  --destructive-foreground: 220 30% 96%;
+  --ring: 60 30% 90%;
+  --radius: 0.5rem;
+  --glow: 0 0 8px #eae6c4, 0 0 16px #b3c7f7;
+  --theme-text: 220 30% 96%;
+}
+
+.theme-moon {
+  --background: 220 18% 16%;   /* deep midnight blue */
+  --foreground: 220 30% 96%;   /* moonlit white */
+  --muted: 220 16% 22%;
+  --muted-foreground: 220 18% 80%;
+  --popover: 220 20% 18%;
+  --popover-foreground: 220 30% 96%;
+  --card: 220 18% 18%;
+  --card-foreground: 220 30% 96%;
+  --border: 220 18% 22%;
+  --input: 220 18% 22%;
+  --primary: 60 30% 90%;   /* pale moon yellow */
+  --primary-foreground: 220 18% 16%;
+  --secondary: 220 18% 36%; /* moon shadow blue */
+  --secondary-foreground: 220 30% 96%;
+  --accent: 240 60% 80%;   /* soft blue accent */
+  --accent-foreground: 220 30% 96%;
+  --destructive: 0 70% 60%;
+  --destructive-foreground: 220 30% 96%;
+  --ring: 60 30% 90%;
+  --radius: 0.5rem;
+  --glow: none;
+  --theme-text: 220 30% 96%;
+  --text-selected-dark: #23263a;
+  --text-selected-light: #eae6c4;
+  --button-hover-border: rgba(234, 230, 196, 0.5);
+}
+
+/* === THEME-SPECIFIC COMPONENT STYLES === */
+/* Symptom button, label, and period status overrides per theme */
+.theme-moon .symptom-btn .symptom-label { color: hsl(220deg 11.07% 69.18%) !important; }
+.theme-moon .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #eae6c4) !important; }
+.theme-starry .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #d7e5ff) !important; }
+.theme-nebula .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #f5eaff) !important; }
+.theme-pinkwhite .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
+.theme-beach .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
+.theme-ocean .symptom-btn .symptom-label { color: var(--foreground, #f1f8fa) !important; }
+.theme-ocean .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
+.theme-galaxy .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
+.theme-aurora .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
+.theme-lunar .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #eae6c4) !important; text-shadow: 0 0 8px #eae6c4, 0 0 16px #b3c7f7; }
+.theme-cyberpunk .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #00fff7) !important; text-shadow: 0 0 8px #00fff7, 0 0 16px #0099ff; }
+.theme-synthwave .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #ffe600) !important; text-shadow: 0 0 8px #ffe600, 0 0 16px #ff00ea; }
+
+/* Period status and cervical mucus themeable selectors (only moon overrides, others default) */
+.theme-moon .period-status-btn.selected .symptom-label { color: var(--text-selected-dark, #23263a) !important; }
+.theme-moon .cervical-mucus-btn.selected, .theme-moon .cervical-mucus-btn.selected span { color: #23263a !important; }
+
+/* Upcoming event boxes (calendar tab) */
+.theme-ocean .bg-primary, .theme-ocean .bg-primary.bg-opacity-10, .theme-ocean .border-primary { background-color: hsl(var(--primary) / 0.10) !important; border-color: hsl(var(--primary)) !important; }
+.theme-ocean .upcoming-box, .theme-ocean .bg-primary.bg-opacity-10 { color: var(--foreground, #f1f8fa) !important; }
+.theme-ocean .upcoming-box .font-medium, .theme-ocean .upcoming-box .text-sm, .theme-ocean .upcoming-box .text-xs, .theme-ocean .bg-primary.bg-opacity-10 .font-medium, .theme-ocean .bg-primary.bg-opacity-10 .text-sm, .theme-ocean .bg-primary.bg-opacity-10 .text-xs { color: var(--foreground, #f1f8fa) !important; }
+[class*="theme-"] .bg-primary.bg-opacity-10 { background-color: hsl(var(--primary) / 0.10) !important; border-color: hsl(var(--primary)) !important; }
+[class*="theme-"] .bg-primary.bg-opacity-10, [class*="theme-"] .bg-primary.bg-opacity-10 .font-medium, [class*="theme-"] .bg-primary.bg-opacity-10 .text-sm, [class*="theme-"] .bg-primary.bg-opacity-10 .text-xs { color: var(--foreground, #fff) !important; }
+
+/* === BASE STYLES === */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Custom scrollbar for webkit browsers */
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-secondary rounded-sm;
+  }
+
+  /* WebKit browsers */
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
+    border: 2px solid white;
+    box-shadow: 0 0 2px rgba(0,0,0,0.2);
+  }
+
+  /* Firefox */
+  input[type="range"]::-moz-range-thumb {
+    @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
+    border: 2px solid white;
+    box-shadow: 0 0 2px rgba(0,0,0,0.2);
+  }
+
+  /* Edge & IE */
+  input[type="range"]::-ms-thumb {
+    @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
+    border: 2px solid white;
+    box-shadow: 0 0 2px rgba(0,0,0,0.2);
+  }
+}
+
+/* === UTILITIES === */
+@layer utilities {
+  .ripple {
+    @apply relative overflow-hidden;
+  }
+
+  .ripple:after {
+    @apply content-[''] block absolute w-full h-full top-0 left-0 pointer-events-none bg-no-repeat bg-center opacity-0 transition-all duration-300;
+    background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+    transform: scale(10, 10);
+  }
+
+  .ripple:active:after {
+    @apply transform scale-0 opacity-30 transition-none;
+  }
+}
+
+/* === APP-SPECIFIC STYLES === */
+.calendar-day {
+  @apply aspect-square flex items-center justify-center text-sm rounded-full cursor-pointer transition-colors relative;
+}
+
+.calendar-day:not(.empty):hover {
+  @apply bg-muted;
+}
+
+.calendar-day.period {
+  @apply bg-red-400/90 border border-red-500 text-white font-medium;
+}
+
+.calendar-day.fertile {
+  @apply bg-blue-400/90 border border-blue-500 text-white font-medium;
+}
+
+.symptom-indicator {
+  @apply w-3 h-3 rounded-full bg-accent absolute bottom-0.5;
+  opacity: 0.9;
+}
+
+.spotting-indicator {
+  @apply w-3 h-3 rounded-full bg-gray-400 absolute bottom-0.5 right-0.5;
+  opacity: 0.9;
+}
+
+.date-number {
+  @apply inline-block text-foreground;
+  opacity: 1 !important;
+}
+
+/* Every calendar day shows the number clearly in white, regardless of hover state */
+.calendar-day:not(.period):not(.fertile):not(.today) .date-number {
+  @apply text-foreground;
+}
+
+.calendar-day.today {
+  @apply bg-primary text-white font-medium;
+}
+
+.calendar-day.empty {
+  @apply text-gray-500;
+}
+
+/* Phase colors */
+.phase-menstrual {
+  @apply bg-red-400/90 text-white;
+}
+
+.phase-follicular {
+  @apply bg-yellow-400/90 text-white;
+}
+
+.phase-ovulation {
+  @apply bg-blue-400/90 text-white;
+}
+
+.phase-luteal {
+  @apply bg-purple-400/90 text-white;
+}
+
+/* Animation for button flash */
+@keyframes flash-blue {
+  0% { background-color: rgba(59, 130, 246, 0.2); }
+  50% { background-color: rgba(59, 130, 246, 0.8); }
+  100% { background-color: rgba(59, 130, 246, 0.2); }
+}
+
+.animate-flash-blue {
+  animation: flash-blue 0.3s ease-in-out;
+}
+
+.bottom-nav-btn {
+  @apply flex flex-col items-center py-3 px-5 text-muted-foreground;
+}
+
+.bottom-nav-btn.active {
+  @apply text-primary;
+}
+
+/* Apply touch-friendly padding for inputs on mobile */
+.input-container {
+  @apply py-3;
+}
+
+.input-container label {
+  @apply mb-2 block;
+}
+
+/* Slider styles */
+.slider-container {
+  @apply w-full relative;
+}
+
+input[type="range"] {
+  @apply h-2 rounded-full appearance-none w-full bg-secondary outline-none;
+  -webkit-appearance: none;
+}
+
+/* Custom scrollbar for beach theme */
+.theme-beach ::-webkit-scrollbar-thumb {
+  background: hsla(var(--scrollbar-thumb));
+}
+.theme-beach ::-webkit-scrollbar-thumb:hover {
+  background: hsla(var(--scrollbar-thumb-hover));
+}
+
+/* Theme selector text color override */
+.theme-name[data-theme="pinkwhite"],
+.theme-name[data-theme="beach"] {
+  color: #3a2323 !important; /* very dark readable brown */
+}
+
+.theme-beach .theme-name,
+.theme-name[data-theme="beach"] {
+  color: #17404e !important; /* dark teal for beach */
+}
+
+/* Select Symptoms Popup (analysis page) - symptom item hover/selected text color */
+.symptom-item:hover span,
+.symptom-item.selected span,
+.theme-pinkwhite .symptom-item:hover span,
+.theme-pinkwhite .symptom-item.selected span,
+.theme-beach .symptom-item:hover span,
+.theme-beach .symptom-item.selected span {
+  color: #2d1a05 !important; /* dark readable text */
+  background: none !important;
+}
+
+/* Remove any yellow color from all generic .symptom-label, only apply to selected symptom button */
+.symptom-label {
+  /* color: inherit !important; */
+}
+
+.theme-moon .symptom-btn .symptom-label {
+  color: hsl(220deg 11.07% 69.18%) !important;
+}
+
+.theme-moon .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #eae6c4) !important;
+}
+
+.theme-moon .period-status-btn.selected .symptom-label {
+  color: var(--text-selected-dark, #23263a) !important;
+}
+
+/* Remove any color from intensity labels */
+.p-3.pt-2.pb-4.bg-card.border.border-t-0.border-primary\/50.rounded-b-lg .text-xs span {
+  color: inherit !important;
+}
+
+/* Intensity labels should always use normal foreground color */
+span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
+  color: var(--foreground, #eae6c4) !important;
+}
+
+.theme-moon .symptom-intensity-label svg,
+.theme-moon svg.symptom-intensity-label {
+  background: none !important;
+  color: var(--foreground, #eae6c4) !important;
+  fill: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Theme selector text color override */
+.theme-pinkwhite .theme-name,
+.theme-beach .theme-name {
+  color: hsl(var(--theme-text, 330 40% 10%)) !important;
+}
+.theme-starry .theme-name {
+  color: hsl(240 20% 85%) !important;
+}
+.theme-nebula .theme-name {
+  color: hsl(270 30% 96%) !important;
+}
+.theme-galaxy .theme-name {
+  color: hsl(var(--theme-text)) !important;
+}
+.theme-aurora .theme-name {
+  color: hsl(var(--theme-text)) !important;
+}
+
+/* Button hover/selected for all themes */
+.theme-pinkwhite .symptom-btn:hover,
+.theme-pinkwhite .symptom-btn:focus {
+  background: hsl(var(--button-hover));
+}
+.theme-pinkwhite .symptom-btn.selected {
+  background: hsl(var(--button-selected));
+}
+.theme-starry .symptom-btn:hover,
+.theme-starry .symptom-btn:focus {
+  background: hsl(var(--button-hover));
+}
+.theme-nebula .symptom-btn:hover,
+.theme-nebula .symptom-btn:focus {
+  background: hsl(var(--button-hover));
+}
+.theme-galaxy .symptom-btn:hover,
+.theme-galaxy .symptom-btn:focus {
+  background: hsl(var(--button-hover));
+}
+.theme-aurora .symptom-btn:hover,
+.theme-aurora .symptom-btn:focus {
+  background: hsl(var(--button-hover));
+}
+
+/* Beach theme: Show More/View All Symptoms hover color */
+.theme-beach .symptom-btn:hover,
+.theme-beach .symptom-btn:focus {
+  background: rgb(251, 228, 182) !important;
+  color: #2d1a05 !important;
+}
+
+/* Highlight color override for Select Symptoms popup */
+.select-symptoms-popup .highlighted,
+.theme-pinkwhite .select-symptoms-popup .highlighted,
+.theme-beach .select-symptoms-popup .highlighted {
+  background: #e9cfa3 !important; /* sandy brown */
+  color: #2d1a05 !important; /* dark readable text */
+}
+
+/* Neon Glow Utility */
+.theme-cyberpunk .glow, .theme-synthwave .glow {
+  box-shadow: var(--glow);
+  text-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+}
+
+.theme-cyberpunk .fertile-window-box {
+  background-color: hsl(200, 100%, 16%) !important;
+  color: #00fff7 !important;
+  border-left: 4px solid #00fff7 !important;
+}
+.theme-galaxy .fertile-window-box {
+  background-color: hsl(200, 100%, 18%) !important;
+  color: hsl(230, 20%, 96%) !important;
+  border-left: 4px solid hsl(200, 100%, 70%) !important;
+}
+.theme-aurora .fertile-window-box {
+  background-color: hsl(160, 60%, 22%) !important;
+  color: hsl(120, 20%, 98%) !important;
+  border-left: 4px solid hsl(160, 100%, 70%) !important;
+}
+.theme-ocean .fertile-window-box {
+  background-color: hsl(190, 66%, 28%) !important;
+  color: hsl(190, 50%, 20%) !important;
+  border-left: 4px solid hsl(190, 80%, 50%) !important;
+}
+
+.theme-moon .selected,
+.theme-moon .button-selected,
+.theme-moon .btn-selected,
+.theme-moon .period-status.selected,
+.theme-moon .cervical-mucus.selected {
+  /* No color here! */
+}
+
+.theme-moon .symptom-btn.selected {
+  color: var(--text-selected-light, #eae6c4) !important;
+}
+
+.theme-moon .period-status-btn.selected .period-status-label {
+  color: #23263a !important;
+}
+
+.theme-moon .cervical-mucus-btn.selected,
+.theme-moon .cervical-mucus-btn.selected span {
+  color: #23263a !important;
+}
+
+.theme-moon .symptom-btn:not(.selected):hover {
+  outline: 2px solid var(--button-hover-border);
+  outline-offset: -2px;
+}
+
+/* Remove any yellow color from all generic .symptom-label, only apply to selected symptom button */
+.symptom-label {
+  /* color: inherit !important; */
+}
+
+.theme-moon .symptom-btn .symptom-label {
+  color: hsl(220deg 11.07% 69.18%) !important;
+}
+
+.theme-moon .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #eae6c4) !important;
+}
+
+.theme-moon .period-status-btn.selected .symptom-label {
+  color: var(--text-selected-dark, #23263a) !important;
+}
+
+/* Remove any color from intensity labels */
+.p-3.pt-2.pb-4.bg-card.border.border-t-0.border-primary\/50.rounded-b-lg .text-xs span {
+  color: inherit !important;
+}
+
+/* Intensity labels should always use normal foreground color */
+span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
+  color: var(--foreground, #eae6c4) !important;
+}
+
+.theme-moon .symptom-intensity-label svg,
+.theme-moon svg.symptom-intensity-label {
+  background: none !important;
+  color: var(--foreground, #eae6c4) !important;
+  fill: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Themeable upcoming event boxes for calendar tab */
+.theme-ocean .bg-primary,
+.theme-ocean .bg-primary.bg-opacity-10,
+.theme-ocean .border-primary {
+  background-color: hsl(var(--primary) / 0.10) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+.theme-ocean .upcoming-box,
+.theme-ocean .bg-primary.bg-opacity-10 {
+  color: var(--foreground, #f1f8fa) !important;
+}
+.theme-ocean .upcoming-box .font-medium,
+.theme-ocean .upcoming-box .text-sm,
+.theme-ocean .upcoming-box .text-xs,
+.theme-ocean .bg-primary.bg-opacity-10 .font-medium,
+.theme-ocean .bg-primary.bg-opacity-10 .text-sm,
+.theme-ocean .bg-primary.bg-opacity-10 .text-xs {
+  color: var(--foreground, #f1f8fa) !important;
+}
+
+/* General: make sure all .bg-primary.bg-opacity-10 boxes are themeable */
+[class*="theme-"] .bg-primary.bg-opacity-10 {
+  background-color: hsl(var(--primary) / 0.10) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+[class*="theme-"] .bg-primary.bg-opacity-10,
+[class*="theme-"] .bg-primary.bg-opacity-10 .font-medium,
+[class*="theme-"] .bg-primary.bg-opacity-10 .text-sm,
+[class*="theme-"] .bg-primary.bg-opacity-10 .text-xs {
+  color: var(--foreground, #fff) !important;
+}

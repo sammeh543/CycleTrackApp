@@ -1,0 +1,186 @@
+import React, { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Download, Mail, Upload, FileDown, Save, FileJson, FileSpreadsheet } from 'lucide-react';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { format } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+
+interface DataExportProps {
+  userId: number;
+}
+
+const DataExport: React.FC<DataExportProps> = ({ userId }) => {
+  const [isImporting, setIsImporting] = useState(false);
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
+
+  // Handler for CSV download
+  const handleDownloadCSV = () => {
+    window.open(`/api/export/${userId}`, '_blank');
+  };
+
+  // Handler for JSON backup download
+  const handleDownloadJSON = async () => {
+    try {
+      // Fetch all user data, including medications
+      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, dailyNotes, userSettings, medications] = await Promise.all([
+        fetch(`/api/cycles?userId=${userId}`).then(res => res.json()),
+        fetch(`/api/flow-records?userId=${userId}`).then(res => res.json()),
+        fetch(`/api/mood-records?userId=${userId}`).then(res => res.json()),
+        fetch(`/api/user-symptoms?userId=${userId}`).then(res => res.json()),
+        fetch(`/api/symptom-records?userId=${userId}`).then(res => res.json()),
+        fetch(`/api/daily-notes?userId=${userId}`).then(res => res.json()),
+        fetch(`/api/user-settings/${userId}`).then(res => res.json()),
+        fetch(`/api/medications?userId=${userId}`).then(res => res.json())
+      ]);
+
+      // Filter out default symptoms before export
+      const customSymptoms = symptoms.filter((s: any) => !s.isDefault);
+      // Prepare data for export
+      const exportData = {
+        userId,
+        exportDate: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+        data: {
+          cycles,
+          flowRecords,
+          moodRecords,
+          symptoms: customSymptoms,
+          symptomRecords,
+          dailyNotes,
+          userSettings,
+          medications
+        }
+      };
+
+      // Create and download the JSON file
+      const jsonData = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cycle_backup_${format(new Date(), 'yyyy-MM-dd')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Backup Created",
+        description: "Your data backup has been downloaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Backup Failed",
+        description: "There was an error creating your backup. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handler for file import
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.json')) {
+      toast({
+        title: "Invalid File",
+        description: "Please select a valid JSON backup file.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPendingImportFile(file);
+    setImportDialogOpen(true);
+  };
+
+  const confirmImport = () => {
+    if (!pendingImportFile) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        setIsImporting(true);
+        const importedData = JSON.parse(e.target?.result as string);
+        if (!importedData.userId || !importedData.data) {
+          throw new Error("Invalid backup file format");
+        }
+        await apiRequest('POST', '/api/import', {
+          userId,
+          importData: importedData.data
+        });
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        setPendingImportFile(null);
+        setImportDialogOpen(false);
+        queryClient.invalidateQueries();
+        toast({
+          title: "Import Successful",
+          description: "Your data has been imported successfully.",
+        });
+      } catch (error) {
+        console.error("Import error:", error);
+        toast({
+          title: "Import Failed",
+          description: "There was an error importing your data. Please check the file format and try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsImporting(false);
+      }
+    };
+    reader.readAsText(pendingImportFile);
+  };
+
+  const cancelImport = () => {
+    setPendingImportFile(null);
+    setImportDialogOpen(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  return (
+    <Card className="mb-6">
+      <CardContent className="p-4">
+        <h3 className="text-lg font-semibold mb-3">Export & Backup</h3>
+        <div className="flex flex-col gap-4">
+          <Button onClick={handleDownloadCSV} variant="outline" className="flex items-center gap-2">
+            <FileSpreadsheet className="w-4 h-4" />
+            Download Data as CSV
+          </Button>
+          <Button onClick={handleDownloadJSON} variant="outline" className="flex items-center gap-2">
+            <FileJson className="w-4 h-4" />
+            Download Full Backup (JSON)
+          </Button>
+        </div>
+      </CardContent>
+      <AlertDialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Import</AlertDialogTitle>
+            <AlertDialogDescription>
+              Importing a backup will overwrite all your existing data. This cannot be undone. Continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelImport}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmImport} autoFocus className="bg-destructive text-destructive-foreground hover:bg-red-600 hover:text-white">Import Backup</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Card>
+  );
+};
+
+export default DataExport;

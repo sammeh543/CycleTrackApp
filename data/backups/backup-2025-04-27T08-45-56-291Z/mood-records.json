@@ -1,0 +1,110 @@
+[
+  {
+    "userId": 1,
+    "date": "2025-04-27",
+    "mood": "okay",
+    "id": 1
+  },
+  {
+    "userId": 1,
+    "date": "2025-02-25",
+    "mood": "okay",
+    "id": 2
+  },
+  {
+    "userId": 1,
+    "date": "2025-02-26",
+    "mood": "good",
+    "id": 3
+  },
+  {
+    "userId": 1,
+    "date": "2025-02-27",
+    "mood": "okay",
+    "id": 4
+  },
+  {
+    "userId": 1,
+    "date": "2025-02-28",
+    "mood": "bad",
+    "id": 5
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-02",
+    "mood": "awful",
+    "id": 6
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-03",
+    "mood": "awful",
+    "id": 7
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-04",
+    "mood": "bad",
+    "id": 8
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-01",
+    "mood": "bad",
+    "id": 9
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-02",
+    "mood": "good",
+    "id": 10
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-03",
+    "mood": "great",
+    "id": 11
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-04",
+    "mood": "good",
+    "id": 12
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-06",
+    "mood": "great",
+    "id": 13
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-26",
+    "mood": "awful",
+    "id": 14
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-25",
+    "mood": "awful",
+    "id": 15
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-24",
+    "mood": "bad",
+    "id": 16
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-23",
+    "mood": "okay",
+    "id": 17
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-22",
+    "mood": "good",
+    "id": 18
+  }
+]

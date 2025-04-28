@@ -1,0 +1,9 @@
+{
+  "dataPath": "./data",
+  "port": 5000,
+  "logLevel": "info",
+  "backupInterval": 24,
+  "maxBackups": 7,
+  "ipWhitelistEnabled": true,
+  "ipWhitelistFile": "./ip-whitelist.txt"
+}

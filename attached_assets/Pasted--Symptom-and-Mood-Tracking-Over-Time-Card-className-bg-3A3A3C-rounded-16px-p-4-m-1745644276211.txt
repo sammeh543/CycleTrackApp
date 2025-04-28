@@ -1,0 +1,208 @@
+{/* Symptom and Mood Tracking Over Time */}
+      <Card className="bg-[#3A3A3C] rounded-[16px] p-4 mb-6">
+        <CardContent className="p-0">
+          <h3 className="text-lg font-semibold mb-4">Changes Over Time</h3>
+          
+          {/* Symptom tracking */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium mb-2">Symptom Intensity Over Time</h4>
+            
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-full text-xs"
+                  onClick={() => {
+                    if (allSymptoms.length > 0) {
+                      setSelectedSymptoms(allSymptoms);
+                    }
+                  }}
+                >
+                  Select All
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="rounded-full text-xs"
+                  onClick={() => {
+                    if (allSymptoms.length > 0) {
+                      setSelectedSymptoms([allSymptoms[0]]);
+                    }
+                  }}
+                >
+                  Deselect All
+                </Button>
+              </div>
+              
+              <div className="flex items-center">
+                <span className="mr-2 text-xs text-[#636366]">Show cycle phases</span>
+                <div 
+                  role="button"
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none cursor-pointer ${
+                    showCyclePhases ? 'bg-secondary' : 'bg-input'
+                  }`}
+                  onClick={() => setShowCyclePhases(!showCyclePhases)}
+                >
+                  <span className={`${showCyclePhases ? 'translate-x-5' : 'translate-x-1'} inline-block h-4 w-4 rounded-full bg-background transition-transform`}></span>
+                </div>
+                <span className="ml-2 text-xs">{showCyclePhases ? 'On' : 'Off'}</span>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 mb-4 max-h-24 overflow-y-auto">
+              {allSymptoms.map((symptom) => (
+                <Button
+                  key={symptom}
+                  variant={selectedSymptoms.includes(symptom) ? "secondary" : "outline"}
+                  className="rounded-full text-xs h-8"
+                  onClick={() => toggleSymptomSelection(symptom)}
+                >
+                  {symptom}
+                </Button>
+              ))}
+            </div>
+            
+            <div className="h-64 relative mb-4">
+              <svg width="100%" height="100%" viewBox="0 0 500 200">              
+                {/* Phase background colors if enabled */}
+                {showCyclePhases && symptomData.length > 0 && (
+                  <>
+                    {symptomData.map((data, i) => {
+                      // Calculate width of each section
+                      const segmentWidth = 500 / Math.max(1, symptomData.length - 1);
+                      const x = i * segmentWidth;
+                      const width = i < symptomData.length - 1 ? segmentWidth : 10;
+                      
+                      // Use inline styling with consistent colors
+                      return data.phase ? (
+                        <rect 
+                          key={i} 
+                          x={x} 
+                          y={0} 
+                          width={width} 
+                          height={200}
+                          style={{
+                            fill:
+                              data.phase === "follicular" ? "rgba(249, 224, 118, 0.3)" :
+                              data.phase === "ovulation" ? "rgba(0, 0, 205, 0.25)" :
+                              data.phase === "luteal" ? "rgba(75, 0, 130, 0.2)" :
+                              data.phase === "period" ? "rgba(220, 20, 60, 0.3)" :
+                              "transparent"
+                          }}
+                        />
+                      ) : null;
+                    })}
+                  </>
+                )}
+                
+                {/* Grid lines */}
+                <line x1="0" y1="0" x2="500" y2="0" stroke="#48484A" strokeWidth="1" />
+                <line x1="0" y1="40" x2="500" y2="40" stroke="#48484A" strokeWidth="1" />
+                <line x1="0" y1="80" x2="500" y2="80" stroke="#48484A" strokeWidth="1" />
+                <line x1="0" y1="120" x2="500" y2="120" stroke="#48484A" strokeWidth="1" />
+                <line x1="0" y1="160" x2="500" y2="160" stroke="#48484A" strokeWidth="1" />
+                <line x1="0" y1="200" x2="500" y2="200" stroke="#48484A" strokeWidth="1" />
+                
+                {/* Y-axis labels (0-5 scale) */}
+                <text x="10" y="200" fill="#636366" fontSize="10">0</text>
+                <text x="10" y="160" fill="#636366" fontSize="10">1</text>
+                <text x="10" y="120" fill="#636366" fontSize="10">2</text>
+                <text x="10" y="80" fill="#636366" fontSize="10">3</text>
+                <text x="10" y="40" fill="#636366" fontSize="10">4</text>
+                <text x="10" y="15" fill="#636366" fontSize="10">5</text>
+                
+                {/* Data lines for each selected symptom */}
+                {selectedSymptoms.map((symptomName, index) => {
+                  const color = [
+                    '#9C6DFF', /* Bright purple */
+                    '#4DA6FF', /* Bright blue */
+                    '#FF7EB6', /* Pink */
+                    '#4AC6B7', /* Teal */
+                    '#FFCC33', /* Gold */
+                    '#7978E9', /* Periwinkle */
+                    '#FF6E6A'  /* Coral */
+                  ][index % 7];
+                  
+                  return (
+                    <g key={symptomName}>
+                      <path 
+                        d={symptomData.map((data, i) => {
+                          const x = (i * 500) / Math.max(1, symptomData.length - 1);
+                          // Scale from 0-5 to chart height (200px)
+                          const y = 200 - (data[symptomName] / 5) * 200;
+                          return `${i === 0 ? 'M' : 'L'}${x},${y}`;
+                        }).join(' ')} 
+                        stroke={color} 
+                        strokeWidth="2"
+                        fill="none" 
+                      />
+                      
+                      {/* Data points */}
+                      {symptomData.map((data, i) => {
+                        const x = (i * 500) / Math.max(1, symptomData.length - 1);
+                        // Scale from 0-5 to chart height (200px)
+                        const y = 200 - (data[symptomName] / 5) * 200;
+                        return data[symptomName] > 0 ? (
+                          <circle 
+                            key={i} 
+                            cx={x} 
+                            cy={y} 
+                            r="4" 
+                            fill={color} 
+                          />
+                        ) : null;
+                      })}
+                    </g>
+                  );
+                })}
+                
+                {/* Date labels - show fewer labels if many data points */}
+                {symptomData.map((data, i) => {
+                  // Only show labels at reasonable intervals based on data length
+                  const interval = symptomData.length <= 14 ? 1 : 
+                                   symptomData.length <= 30 ? 2 :
+                                   symptomData.length <= 60 ? 5 : 10;
+                  
+                  if (i % interval === 0 || i === symptomData.length - 1) {
+                    const x = (i * 500) / Math.max(1, symptomData.length - 1);
+                    return (
+                      <text 
+                        key={i} 
+                        x={x} 
+                        y="220" 
+                        textAnchor="middle" 
+                        fill="#E6E6FA" 
+                        fontSize="9"
+                      >
+                        {data.month}
+                      </text>
+                    );
+                  }
+                  return null;
+                })}
+              </svg>
+            </div>
+            
+            <div className="flex flex-wrap gap-x-5 gap-y-2 mt-2">
+              {selectedSymptoms.map((symptomName, index) => {
+                const color = [
+                  '#9C6DFF', /* Bright purple */
+                  '#4DA6FF', /* Bright blue */
+                  '#FF7EB6', /* Pink */
+                  '#4AC6B7', /* Teal */
+                  '#FFCC33', /* Gold */
+                  '#7978E9', /* Periwinkle */
+                  '#FF6E6A'  /* Coral */
+                ][index % 7];
+                
+                return (
+                  <div key={symptomName} className="flex items-center">
+                    <span className="inline-block w-3 h-3 rounded-full mr-1" style={{ backgroundColor: color }}></span>
+                    <span className="text-sm">{symptomName}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
