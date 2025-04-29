@@ -86,12 +86,13 @@ process.on("uncaughtException", (err) => {
     // Use port from config or fallback to 5000
     // this serves both the API and the client
     const port = config.port || 5000;
+    const host = config.host || "0.0.0.0";
     server.listen({
       port,
-      host: "0.0.0.0",
+      host,
       reusePort: true,
     }, () => {
-      log(`CycleSense serving on port ${port}`);
+      log(`CycleSense serving at http://${host}:${port}`);
       log(`Data path: ${config.dataPath}`);
     }).on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {

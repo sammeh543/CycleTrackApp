@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "userId": 1,
+    "date": "2025-04-29",
+    "intensity": "medium",
+    "id": 1,
+    "cycleId": 3
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-28",
+    "intensity": "heavy",
+    "id": 4,
+    "cycleId": 3
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-25",
+    "intensity": "light",
+    "id": 5
+  },
+  {
+    "userId": 1,
+    "cycleId": 3,
+    "date": "2025-04-26",
+    "intensity": "light",
+    "id": 6
+  },
+  {
+    "userId": 1,
+    "cycleId": 3,
+    "date": "2025-04-27",
+    "intensity": "medium",
+    "id": 7
+  }
+]

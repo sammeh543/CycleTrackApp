@@ -1,4 +1,5 @@
 #!/bin/bash
+cd "$(dirname "$0")"
 # CycleSense Desktop Launcher
 
 if ! command -v node &> /dev/null; then

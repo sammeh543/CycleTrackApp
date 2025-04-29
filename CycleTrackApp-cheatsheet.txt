@@ -35,6 +35,10 @@ CycleTrackApp Cheat Sheet
 - Run Electron dev (hot reload):          start-CycleSense-dev.bat
 - Run Electron prod (no reload):          start-CycleSense.bat
 - Build portable EXE for distribution:    MakePortableExe.bat
+- Run browser prod (with build):          start-broswer-prod.bat
+- Run browser prod (NO build):            start-broswer-prod-nobuild.bat  [requires manual npm run build first]
+- Run Pi prod (with build):               start-pi-prod.sh
+- Run Pi prod (NO build):                 start-pi-prod-nobuild.sh  [requires manual npm run build first]
 
 5. Common Problems
 ------------------

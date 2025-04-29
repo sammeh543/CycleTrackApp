@@ -63,7 +63,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         medications: [],
         defaultCycleLength: 28,
         defaultPeriodLength: 5,
-        showPmddSymptoms: true
+        showPmddSymptoms: true,
+        showIntimateActivity: true
       });
 
       res.status(201).json(user);
@@ -646,7 +647,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           medications: [],
           defaultCycleLength: 28,
           defaultPeriodLength: 5,
-          showPmddSymptoms: true
+          showPmddSymptoms: true,
+          showIntimateActivity: true
         });
       }
 
@@ -786,26 +788,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fetch all user data
-      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, notes] = await Promise.all([
+      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, notes, cervicalMucusRecords, sexRecords, medicationRecords] = await Promise.all([
         storage.getCycles(userId),
         storage.getFlowRecords(userId),
         storage.getMoodRecords(userId),
         storage.getUserSymptoms(userId),
         storage.getSymptomRecords(userId),
-        storage.getDailyNotes(userId)
+        storage.getDailyNotes(userId),
+        storage.getCervicalMucusRecords ? storage.getCervicalMucusRecords(userId) : Promise.resolve([]),
+        storage.getSexRecords ? storage.getSexRecords(userId) : Promise.resolve([]),
+        (typeof medicationStorage !== 'undefined' && medicationStorage.getAll) ? Promise.resolve(medicationStorage.getAll(userId)) : Promise.resolve([])
       ]);
 
       // Prepare CSV content
-      let csvContent = "Date,CycleDay,Flow,Mood,Symptoms,Notes\n";
+      let csvContent = "Date,CycleDay,Flow,Mood,Symptoms,CervicalMucus,Medications,Intimacy,Notes\n";
 
       // Create a map of dates to record data
       const datesToProcess = new Set<string>();
 
       // Add all dates from various records
-      flowRecords.forEach(record => datesToProcess.add(record.date.toString().split('T')[0]));
-      moodRecords.forEach(record => datesToProcess.add(record.date.toString().split('T')[0]));
-      symptomRecords.forEach(record => datesToProcess.add(record.date.toString().split('T')[0]));
-      notes.forEach(note => datesToProcess.add(note.date.toString().split('T')[0]));
+      flowRecords.forEach((record: any) => datesToProcess.add(record.date.toString().split('T')[0]));
+      moodRecords.forEach((record: any) => datesToProcess.add(record.date.toString().split('T')[0]));
+      symptomRecords.forEach((record: any) => datesToProcess.add(record.date.toString().split('T')[0]));
+      notes.forEach((note: any) => datesToProcess.add(note.date.toString().split('T')[0]));
 
       // Process each date
       const sortedDates = Array.from(datesToProcess).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
@@ -830,22 +835,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Find flow
-        const flowRecord = flowRecords.find(record => record.date.toString().split('T')[0] === dateStr);
+        const flowRecord = flowRecords.find((record: any) => record.date.toString().split('T')[0] === dateStr);
         const flow = flowRecord ? flowRecord.intensity : "";
 
         // Find mood
-        const moodRecord = moodRecords.find(record => record.date.toString().split('T')[0] === dateStr);
+        const moodRecord = moodRecords.find((record: any) => record.date.toString().split('T')[0] === dateStr);
         const mood = moodRecord ? moodRecord.mood : "";
 
         // Find symptoms
-        const dateSymptomRecords = symptomRecords.filter(record => record.date.toString().split('T')[0] === dateStr);
+        const dateSymptomRecords = symptomRecords.filter((record: any) => record.date.toString().split('T')[0] === dateStr);
         let symptomsList = "";
 
         if (dateSymptomRecords.length > 0) {
           const symptomNames: string[] = [];
 
           for (const record of dateSymptomRecords) {
-            const symptom = symptoms.find(s => s.id === record.symptomId);
+            const symptom = symptoms.find((s: any) => s.id === record.symptomId);
             if (symptom) {
               symptomNames.push(symptom.name);
             }
@@ -854,12 +859,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           symptomsList = symptomNames.join(", ");
         }
 
+        // Find cervical mucus
+        const mucusRecord = cervicalMucusRecords.find((record: any) => record.date.toString().split('T')[0] === dateStr);
+        const cervicalMucus = mucusRecord ? mucusRecord.type : "";
+
+        // Find medications (may be multiple per day)
+        let medicationsList = "";
+        if (Array.isArray(medicationRecords)) {
+          const medsForDate = medicationRecords.filter((record: any) => record.date && record.date.toString().split('T')[0] === dateStr);
+          if (medsForDate.length > 0) {
+            medicationsList = medsForDate.map((med: any) => med.name + (med.dose ? ` (${med.dose})` : "")).join("; ");
+          }
+        }
+
+        // Find intimacy/sex record
+        const sexRecord = sexRecords.find((record: any) => record.date && record.date.toString().split('T')[0] === dateStr);
+        const intimacy = sexRecord ? "Yes" : "";
+
         // Find notes
-        const dailyNote = notes.find(note => note.date.toString().split('T')[0] === dateStr);
+        const dailyNote = notes.find((note: any) => note.date.toString().split('T')[0] === dateStr);
         const noteText = dailyNote ? dailyNote.notes.replace(/\n/g, " ").replace(/,/g, ";") : "";
 
         // Add row to CSV
-        csvContent += `${formattedDate},${cycleDay},${flow},${mood},${symptomsList},"${noteText}"\n`;
+        csvContent += `${formattedDate},${cycleDay},${flow},${mood},${symptomsList},${cervicalMucus},${medicationsList},${intimacy},"${noteText}"\n`;
       }
 
       // Set response headers for CSV download

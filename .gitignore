@@ -104,3 +104,6 @@ ehthumbs_vista.db
 
 # Drizzle temporary files
 *.session.sql
+
+# Raspberry Pi personal notes and scripts
+/pi/ # Re-added to exclude personal notes and flowcharts from git

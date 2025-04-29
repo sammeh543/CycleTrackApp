@@ -6,6 +6,7 @@ import path from 'path';
 interface AppConfig {
   dataPath: string;
   port: number;
+  host?: string;
   logLevel: string;
   backupInterval: number;
   maxBackups: number;
@@ -17,6 +18,7 @@ interface AppConfig {
 const defaultConfig: AppConfig = {
   dataPath: './data',
   port: 5000,
+  host: '0.0.0.0',
   logLevel: 'info',
   backupInterval: 24, // hours
   maxBackups: 7,

@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 REM CycleTrackApp - Server/Browser Dev Mode
 REM This script starts the server (network/browser version) with hot reload for development.
 echo Starting CycleTrackApp server (network/browser version, Dev Mode, Hot Reload)...

@@ -1,9 +1,13 @@
 {
+  "_comment": "CycleTrackApp config. For Tailscale/Termux: set host to '0.0.0.0' for LAN/VPN access. Set corsEnabled true for cross-device access. Set uiPassword for basic web UI protection. Edit port if needed.",
   "dataPath": "./data",
   "port": 5000,
+  "host": "0.0.0.0",
   "logLevel": "info",
   "backupInterval": 24,
   "maxBackups": 7,
   "ipWhitelistEnabled": false,
-  "ipWhitelistFile": "./ip-whitelist.txt"
+  "ipWhitelistFile": "./ip-whitelist.txt",
+  "corsEnabled": true,
+  "uiPassword": "changeMe123"
 }

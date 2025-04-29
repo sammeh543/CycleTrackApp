@@ -14,21 +14,5 @@
     "showPmddSymptoms": true,
     "id": 1,
     "showIntimateActivity": true
-  },
-  {
-    "userId": 1,
-    "emailNotifications": true,
-    "reminderEnabled": true,
-    "fertileWindowAlerts": false,
-    "weeklySummary": true,
-    "language": "English",
-    "dataStorage": "local",
-    "hiddenSymptoms": [],
-    "medications": [],
-    "defaultCycleLength": 28,
-    "defaultPeriodLength": 5,
-    "showPmddSymptoms": true,
-    "id": 2,
-    "showIntimateActivity": true
   }
 ]

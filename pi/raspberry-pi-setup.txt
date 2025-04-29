@@ -1,0 +1,178 @@
+# CycleTrackApp Raspberry Pi Setup Guide (PRIVATE)
+
+This file is .gitignored and for your personal reference only.
+
+---
+
+## Best Raspberry Pi Models for CycleTrackApp and SillyTavern
+
+**Recommended:**
+- **Raspberry Pi 4 Model B (4GB or 8GB RAM)**
+  - Quad-core 1.5GHz CPU
+  - Plenty of power for running multiple Node.js apps
+  - 4GB is enough, 8GB is best for heavy multitasking
+- **Raspberry Pi 5 (4GB or 8GB RAM)**
+  - Quad-core 2.4GHz CPU (much faster)
+  - More future-proof, but more expensive and may be harder to find
+- **Raspberry Pi 400**
+  - 4GB RAM, built into a keyboard
+  - Same internals as Pi 4 4GB, great for desktop or server
+
+**Not recommended:**
+- Pi 3B+ or older: Only for very light use
+- Pi Zero/Zero 2: Not enough power for multiple apps
+
+**What to buy:**
+- Pi 4 Model B (4GB or 8GB)
+- Official power supply
+- 32GB+ microSD card (A1/A2 rated)
+- Case with cooling (heatsink/fan)
+- (Optional) Ethernet cable
+
+**Where to buy:**
+- [raspberrypi.com/products](https://www.raspberrypi.com/products/)
+- Amazon, CanaKit, Vilros, PiShop.us, Micro Center, etc.
+
+| Model         | RAM Options | Good For         | Notes                                  |
+|-------------- |------------|------------------|----------------------------------------|
+| Pi 4 Model B  | 2/4/8 GB   | Your use case    | 4GB+ recommended, best value           |
+| Pi 5          | 4/8 GB     | Power users      | More expensive, harder to find         |
+| Pi 400        | 4 GB       | Desktop/server   | Keyboard form factor, same as Pi 4 4GB |
+
+---
+
+## 1. What You’ll Need
+- Raspberry Pi with Raspberry Pi OS (or compatible Debian-based Linux)
+- SD card, network, SSH or monitor/keyboard
+
+---
+
+## 2. Basic Setup Steps
+
+### a. Update your Pi
+sudo apt update && sudo apt upgrade -y
+
+### b. Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+node -v
+npm -v
+
+### c. Install Git (if needed)
+sudo apt install git -y
+
+### d. Clone or Copy Your Project
+# If using GitHub:
+git clone <your-repo-url>
+# Or copy project folder to the Pi
+
+### e. Install Dependencies
+cd CycleTrackApp
+npm install
+
+### f. Configure for Pi
+- Edit config.json if needed (set "host": "0.0.0.0", set "port" if you want)
+- Make sure your data path is writable
+
+### g. Run Your App
+# Use your Pi script:
+chmod +x start-pi-prod-nobuild.sh
+./start-pi-prod-nobuild.sh
+# Or run directly:
+node server/index.js
+# or if TypeScript:
+npx ts-node server/index.ts
+
+---
+
+## 3. (Optional) Install Tailscale on the Pi
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+# Log in using your browser (link provided by Tailscale)
+
+---
+
+## 4. Accessing the App
+From any Tailscale-connected device:
+http://<pi-tailscale-ip>:<port>/today
+
+---
+
+## 5. Tips
+- Use pm2 or screen/tmux to keep your app running in the background
+- To autostart on boot: pm2 startup or create a systemd service
+
+---
+
+## 6. How does a bare Raspberry Pi run standalone?
+
+- The Raspberry Pi is a full computer on a single circuit board (“single-board computer”).
+- All you need is:
+  - A microSD card with Raspberry Pi OS (or another Linux) installed
+  - Power (USB-C or micro-USB, depending on model)
+  - (Optional) Ethernet or WiFi for network
+  - (Optional) Monitor, keyboard, mouse for setup—after that, you can use SSH or remote tools
+- Once set up, you can unplug the monitor/keyboard—just power and network is enough. It will keep running your app!
+
+## 7. Make your app auto-start on boot (so it runs even after a reboot/power outage):
+
+### Using pm2 (recommended for Node apps):
+```
+sudo npm install -g pm2
+cd /path/to/your/app
+pm2 start ./start-pi-prod-nobuild.sh --name CycleTrackApp
+pm2 save
+pm2 startup
+# Follow the instructions to run the command it prints (for systemd)
+```
+
+### Using a systemd service (alternative):
+```
+1. Create a file /etc/systemd/system/cycletrackapp.service with:
+   [Unit]
+   Description=CycleTrackApp Server
+   After=network.target
+
+   [Service]
+   Type=simple
+   User=pi
+   WorkingDirectory=/home/pi/CycleTrackApp
+   ExecStart=/home/pi/CycleTrackApp/start-pi-prod-nobuild.sh
+   Restart=on-failure
+
+   [Install]
+   WantedBy=multi-user.target
+
+2. Enable and start:
+   sudo systemctl enable cycletrackapp
+   sudo systemctl start cycletrackapp
+```
+
+---
+
+# End of Raspberry Pi Setup Guide
+    
+### Using a systemd service (alternative):
+
+1. Create a file /etc/systemd/system/cycletrackapp.service with:
+   [Unit]
+   Description=CycleTrackApp Server
+   After=network.target
+
+   [Service]
+   Type=simple
+   User=pi
+   WorkingDirectory=/home/pi/CycleTrackApp
+   ExecStart=/home/pi/CycleTrackApp/start-pi-prod-nobuild.sh
+   Restart=on-failure
+
+   [Install]
+   WantedBy=multi-user.target
+
+2. Enable and start:
+   sudo systemctl enable cycletrackapp
+   sudo systemctl start cycletrackapp
+
+---
+
+# End of Raspberry Pi Setup Guide
