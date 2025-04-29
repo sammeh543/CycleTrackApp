@@ -114,6 +114,7 @@ You can customize the application settings by editing the `config.json` file:
 ```
 
 ## Using the Application
+Screenshots are available in the [Screenshots](#screenshots) section.
 
 ### Today View
 
@@ -127,7 +128,6 @@ You can customize the application settings by editing the `config.json` file:
 - Intimate activity (for those who track)
 - Daily notes
 - PMDD and Intimacy can be toggled on/off in Settings
-
 
 ### Calendar View
 
@@ -168,25 +168,6 @@ This application values your privacy:
 - No data is sent to external servers
 - You control your data: export, backup, and restore at any time
 
-### Screenshots
-
-
-![Today View](assets/Screenshot%202025-04-29%20025534.png)
-![Symptoms Tracking](assets/Screenshot%202025-04-29%20025605.png)
-![Medication, Intimacy, Notes](assets/Screenshot%202025-04-29%20025638.png)
-![Calendar View](assets/Screenshot%202025-04-29%20025722.png)
-![Analysis View](assets/Screenshot%202025-04-29%20030014.png)
-![Charts](assets/Screenshot%202025-04-29%20030041.png)
-![Charts](assets/Screenshot%202025-04-29%20030052.png)
-![Settings](assets/Screenshot%202025-04-29%20030122.png)
-![Custom Backgrounds](assets/Screenshot%202025-04-29%20030205.png)
-
-### Themes
-
-![nebula](assets/nebula.png)
-![pinkwhite](assets/pinkwhite.png)
-![starry](assets/starry.png)
-![synthwave](assets/synthwave.png)
 
 ## Network Access & IP Whitelisting (Web/Server Mode)
 
@@ -264,6 +245,28 @@ If you see an error like `Error: listen EADDRINUSE: address already in use` or s
 - **Run:** Double-click `cleanup-ports-and-processes.bat` in the project folder. Also built into batch files for starting the app.
 - **What it does:** This script will automatically kill any processes using port 5000 (the dev server port) and any lingering Electron/Node processes.
 - **When to use:** Before starting the app if you see port errors, or any time you want to ensure a clean state.
+
+---
+
+### Screenshots
+
+
+![Today View](assets/Screenshot%202025-04-29%20025534.png)
+![Symptoms Tracking](assets/Screenshot%202025-04-29%20025605.png)
+![Medication, Intimacy, Notes](assets/Screenshot%202025-04-29%20025638.png)
+![Calendar View](assets/Screenshot%202025-04-29%20025722.png)
+![Analysis View](assets/Screenshot%202025-04-29%20030014.png)
+![Charts](assets/Screenshot%202025-04-29%20030041.png)
+![Charts](assets/Screenshot%202025-04-29%20030052.png)
+![Settings](assets/Screenshot%202025-04-29%20030122.png)
+![Custom Backgrounds](assets/Screenshot%202025-04-29%20030205.png)
+
+### Themes
+
+![nebula](assets/nebula.png)
+![pinkwhite](assets/pinkwhite.png)
+![starry](assets/starry.png)
+![synthwave](assets/synthwave.png)
 
 ---
 
