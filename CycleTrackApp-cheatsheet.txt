@@ -11,11 +11,48 @@ CycleTrackApp Cheat Sheet
 -------------------------------
 - To run in the browser (for testing web version):
   Double-click start-broswer-dev.bat
+  
+  **To run dev mode manually (without the .bat):**
+  1. (Optional) Kill any process using port 5000:
+     - Open PowerShell and run:
+       ```powershell
+       Get-Process -Id (Get-NetTCPConnection -LocalPort 5000 -State Listen).OwningProcess | Stop-Process -Force
+       ```
+     - Or use Task Manager to kill any process using port 5000.
+  2. Make sure you're in the project folder.
+  3. Install dependencies (if you haven't already):
+     ```sh
+     npm install
+     ```
+  4. Start the dev server with hot reload:
+     ```sh
+     npm run dev
+     ```
+  5. Open your browser to http://localhost:5000
 - To run in Electron with hot reload (for testing desktop version):
   Double-click start-CycleSense-dev.bat
 - To run the Electron app in production mode (no hot reload):
   Double-click start-CycleSense.bat
   (Make sure to run npm run build first if you changed code!)
+
+2a. Running the App Manually in Production
+------------------------------------------
+- **Electron Desktop App (Production):**
+    1. Build the app (if you changed code):
+       npm run build
+    2. Start Electron in production mode:
+       npm run start
+    3. Or double-click start-CycleSense.bat
+
+- **Web/Server App (Production):**
+    1. Build the app (if you changed code):
+       npm run build
+    2. Start the server:
+       Double-click start-broswer-prod.bat
+       (Or run the equivalent command in terminal, e.g. node server/index.js)
+    3. Access in browser at:
+       http://localhost:5000
+       Or from another device: http://<your-pc-ip>:5000
 
 3. Building a Portable EXE (for Distribution)
 ---------------------------------------------

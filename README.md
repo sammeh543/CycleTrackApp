@@ -117,7 +117,6 @@ You can customize the application settings by editing the `config.json` file:
 
 ### Today View
 
-The Today view allows you to track:
 - Period status (spotting, light, medium, heavy)
 - Mood
 - Cervical mucus type
@@ -132,7 +131,6 @@ The Today view allows you to track:
 
 ### Calendar View
 
-The Calendar view shows:
 - Period days (red)
 - Follicular phase (yellow)
 - Ovulation/fertile window (blue)
@@ -141,7 +139,6 @@ The Calendar view shows:
 
 ### Analysis View
 
-The Analysis view provides:
 - Average cycle length
 - Average period length
 - Common symptoms
@@ -150,6 +147,11 @@ The Analysis view provides:
 ## PMDD Symptoms Toggle
 
 - You can now choose whether to show or hide PMDD symptoms in the "Today" view via a toggle in App Settings.
+- This preference is saved and persists across sessions and restarts.
+
+### Intimacy Toggle
+
+- You can now choose whether to show or hide Intimacy in the "Today" view via a toggle in App Settings.
 - This preference is saved and persists across sessions and restarts.
 
 ## Data Export, Backup, and Restore
