@@ -13,7 +13,8 @@ const filesToExport = [
   'flow-records.json',
   'daily-notes.json',
   'cycles.json',
-  'cervical-mucus-records.json'
+  'cervical-mucus-records.json',
+  'sex-records.json'
 ];
 
 // Copy all except symptoms.json

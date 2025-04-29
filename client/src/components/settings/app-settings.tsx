@@ -233,8 +233,8 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
 
   const handleDownloadJSON = async () => {
     try {
-      // Fetch all user data, including medications
-      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, dailyNotes, userSettings, medications] = await Promise.all([
+      // Fetch all user data, including medications and sex records
+      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, dailyNotes, userSettings, medications, sexRecords] = await Promise.all([
         fetch(`/api/cycles?userId=${userId}`).then(res => res.json()),
         fetch(`/api/flow-records?userId=${userId}`).then(res => res.json()),
         fetch(`/api/mood-records?userId=${userId}`).then(res => res.json()),
@@ -242,8 +242,10 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
         fetch(`/api/symptom-records?userId=${userId}`).then(res => res.json()),
         fetch(`/api/daily-notes?userId=${userId}`).then(res => res.json()),
         fetch(`/api/user-settings/${userId}`).then(res => res.json()),
-        fetch(`/api/medications?userId=${userId}`).then(res => res.json())
+        fetch(`/api/medications?userId=${userId}`).then(res => res.json()),
+        fetch(`/api/sex-records?userId=${userId}`).then(res => res.json())
       ]);
+      console.log("[DEBUG] Sex Records fetched for export:", sexRecords);
 
       // Prepare data for export
       const exportData = {
@@ -257,7 +259,8 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
           symptomRecords,
           dailyNotes,
           userSettings,
-          medications
+          medications,
+          sexRecords
         }
       };
 

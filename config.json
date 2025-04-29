@@ -4,6 +4,6 @@
   "logLevel": "info",
   "backupInterval": 24,
   "maxBackups": 7,
-  "ipWhitelistEnabled": true,
+  "ipWhitelistEnabled": false,
   "ipWhitelistFile": "./ip-whitelist.txt"
 }

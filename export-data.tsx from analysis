@@ -35,9 +35,10 @@ const DataExport: React.FC<DataExportProps> = ({ userId }) => {
 
   // Handler for JSON backup download
   const handleDownloadJSON = async () => {
+    console.log("[DEBUG] handleDownloadJSON called");
     try {
       // Fetch all user data, including medications
-      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, dailyNotes, userSettings, medications] = await Promise.all([
+      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, dailyNotes, userSettings, medications, sexRecords] = await Promise.all([
         fetch(`/api/cycles?userId=${userId}`).then(res => res.json()),
         fetch(`/api/flow-records?userId=${userId}`).then(res => res.json()),
         fetch(`/api/mood-records?userId=${userId}`).then(res => res.json()),
@@ -45,8 +46,10 @@ const DataExport: React.FC<DataExportProps> = ({ userId }) => {
         fetch(`/api/symptom-records?userId=${userId}`).then(res => res.json()),
         fetch(`/api/daily-notes?userId=${userId}`).then(res => res.json()),
         fetch(`/api/user-settings/${userId}`).then(res => res.json()),
-        fetch(`/api/medications?userId=${userId}`).then(res => res.json())
+        fetch(`/api/medications?userId=${userId}`).then(res => res.json()),
+        fetch(`/api/sex-records?userId=${userId}`).then(res => res.json())
       ]);
+      console.log("[DEBUG] Sex Records fetched for export:", sexRecords);
 
       // Filter out default symptoms before export
       const customSymptoms = symptoms.filter((s: any) => !s.isDefault);
@@ -62,7 +65,8 @@ const DataExport: React.FC<DataExportProps> = ({ userId }) => {
           symptomRecords,
           dailyNotes,
           userSettings,
-          medications
+          medications,
+          sexRecords
         }
       };
 

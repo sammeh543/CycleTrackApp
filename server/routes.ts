@@ -928,6 +928,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (importData.medications) {
         medicationStorage.bulkImportMedications(userId, importData.medications);
       }
+      // Import sex records if present
+      if (importData.sexRecords) {
+        await Promise.all(importData.sexRecords.map((rec: any) => storage.createSexRecord(rec)));
+      }
+      // Some backups may use snake_case
+      if (importData.sex_records) {
+        await Promise.all(importData.sex_records.map((rec: any) => storage.createSexRecord(rec)));
+      }
 
       res.json({ success: true });
     } catch (error) {
@@ -974,6 +982,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Import medications if present
       if (backup.data.medications) {
         medicationStorage.bulkImportMedications(backup.userId || (backup.data.medications[0]?.userId ?? 1), backup.data.medications);
+      }
+      // Import sex records if present
+      if (backup.data.sexRecords) {
+        await Promise.all(backup.data.sexRecords.map((rec: any) => storage.createSexRecord(rec)));
+      }
+      // Some backups may use snake_case
+      if (backup.data.sex_records) {
+        await Promise.all(backup.data.sex_records.map((rec: any) => storage.createSexRecord(rec)));
       }
       res.json({ success: true });
     } catch (err: any) {
