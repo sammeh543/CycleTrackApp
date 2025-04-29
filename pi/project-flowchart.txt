@@ -1,0 +1,100 @@
+# CycleTrackApp Project - Bite-Sized Flowchart
+
+This file gives a high-level, step-by-step breakdown of how the CycleTrackApp works and is structured. Use this as a learning guide or quick reference!
+
+---
+
+## 1. User Flow (What happens when someone uses the app?)
+
+1. User opens the app in their browser (from PC, phone, or Pi via Tailscale/local network)
+2. Frontend (browser) sends requests to the backend (server)
+3. Backend handles requests, reads/writes data (e.g., flow records, settings)
+4. User sees updated info, can add, edit, or view records
+
+---
+
+## 2. Main Components
+
+- **Frontend** (client/src/)
+  - UI: Buttons, forms, charts, etc.
+  - Talks to backend using HTTP requests (fetch, axios, etc.)
+  - Built with Vite + TypeScript + modern JS
+
+- **Backend** (server/)
+  - Express.js server (index.ts)
+  - Loads config from config.json
+  - Handles API routes (add/view flow, settings, etc.)
+  - Reads/writes JSON files for data persistence
+
+- **Shared Code** (shared/)
+  - Utility functions, types, helpers used by both frontend and backend
+
+- **Data** (data/)
+  - JSON files storing user records, settings, etc.
+
+- **Scripts**
+  - start-*.bat/.sh: Start server in dev/prod, on Pi, etc.
+  - pi/: Raspberry Pi notes, scripts, setup guides
+
+---
+
+## 3. Project Flow (Step-by-Step)
+
+1. **Startup**
+   - Run a start script (e.g., start-prod.sh, start-pi-prod-nobuild.sh)
+   - Server loads config, ensures data directory exists
+   - Express server starts and listens for requests
+
+2. **User Interaction**
+   - User visits app in browser
+   - Frontend loads, shows UI
+   - User submits data (e.g., adds a flow record)
+   - Frontend sends API request to backend
+
+3. **Backend Logic**
+   - Express route receives request
+   - Validates/processes data
+   - Reads/writes to JSON files in data/
+   - Sends response back to frontend
+
+4. **Frontend Updates**
+   - Frontend receives response
+   - Updates UI to reflect changes
+
+5. **Repeat!**
+   - User continues to interact, data is persisted
+
+---
+
+## 4. Deployment/Access Flow
+
+- On PC: Start server, access via localhost
+- On Pi: Start server, access via Pi's IP or Tailscale IP
+- On phone/other device: Access via Tailscale IP or local network
+
+---
+
+## 5. Key Learning Points
+
+- Node.js/Express for backend
+- TypeScript for safety and clarity
+- Vite for fast frontend dev
+- REST API: Frontend <-> Backend communication
+- Data stored as JSON (easy to inspect and edit)
+- Scripts automate starting in different environments
+- Tailscale for secure remote access
+- Raspberry Pi = always-on, low-power server
+
+---
+
+## 6. Next Steps for Learning
+
+- Explore the code in client/src/ and server/
+- Try adding a new feature or route (e.g., a new tracker or report)
+- Look up Express.js, Vite, and TypeScript docs
+- Experiment with the scripts and config files
+- Use online tutorials to dive deeper into any part
+
+---
+
+# Happy Hacking! 🚀

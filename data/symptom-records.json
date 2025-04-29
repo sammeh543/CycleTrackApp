@@ -1,16 +1,1 @@
-[
-  {
-    "userId": 1,
-    "symptomId": 7,
-    "date": "2025-04-29",
-    "intensity": 3,
-    "id": 1
-  },
-  {
-    "userId": 1,
-    "symptomId": 23,
-    "date": "2025-04-29",
-    "intensity": 1,
-    "id": 2
-  }
-]
+[]

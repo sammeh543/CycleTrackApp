@@ -1,6 +1,13 @@
 # CycleSense
 
-A comprehensive web and desktop application for tracking menstrual cycles and PMDD symptoms, designed to help users monitor their health patterns over time.
+A local-first, privacy-focused menstrual and PMDD symptom tracker designed for people who want control over their data—without subscriptions, logins, or third-party tracking.
+
+- Track mood, symptoms, medications, and cycle data with full customization
+- Export your data as CSV or JSON for personal use or analysis
+- Run as a standalone desktop app or in a browser/server mode for flexibility
+- Stay 100% offline—your data never leaves your device
+
+This app was created to meet a real-life need for autonomy in health tracking, especially for those managing complex conditions like PMDD. It's functional, user-friendly, and deeply personal.
 
 ## Quick Start for All Users
 
@@ -31,24 +38,12 @@ A comprehensive web and desktop application for tracking menstrual cycles and PM
   ```
   This will install Electron and all required packages. You only need to do this once (or after updating dependencies).
 
----
-
-## Running CycleSense
-
-### Port & Process Cleanup (If you see 'port in use' errors)
-If you see an error like `Error: listen EADDRINUSE: address already in use` or suspect that Electron/Node processes are stuck, you can use the included cleanup script:
-
-- **Run:** Double-click `cleanup-ports-and-processes.bat` in the project folder.
-- **What it does:** This script will automatically kill any processes using port 5000 (the dev server port) and any lingering Electron/Node processes.
-- **When to use:** Before starting the app if you see port errors, or any time you want to ensure a clean state.
-
----
 
 ### A. Run as Portable Windows App (No Network Needed)
 - **Build the EXE:**
   - Double-click `MakePortableExe.bat` (or run `npm run build` then `npm run dist` from the command line).
   - This will create a portable EXE in the `dist` folder.
-  - **Note:** If you delete the `dist` folder and rebuild, a new `dist` will be created. As long as `dist` is listed in your `.gitignore`, it will remain ignored by git.
+  - **Note:** If you delete the `dist` folder and rebuild, a new `dist` will be created.
 - **Run the App:**
   - Open `dist` and double-click `CycleSense.exe`.
   - **Shortcut:** Make a shortcut to `CycleSense.exe` in the root for convenience. Must keep exe in `dist` folder.
@@ -56,11 +51,11 @@ If you see an error like `Error: listen EADDRINUSE: address already in use` or s
 
 ### B. Run as Server/Web App (Network Mode)
 - **Start the Server:**
-  - Double-click `start-broswer-dev.bat` for browser mode with hot reload (good for development or use from other devices on your network).
-  - Or use `start-CycleSense-dev.bat` for Electron desktop with hot reload (for development/testing on your PC only).
+  - Double-click `start-broswer-prod.bat` for browser mode (good for use from other devices on your network).
+
   - Or use `start-CycleSense.bat` for Electron desktop (production mode, no hot reload, on your PC only).
 - **Access from Browser/Network:**
-  - Only `start-broswer-dev.bat` allows access from other devices on your network (e.g., your phone). Use this for network/server mode.
+  - Only `start-broswer-prod.bat` allows access from other devices on your network (e.g., your phone). Use this for network/server mode.
 - **Note:** Running in server/web mode requires Node.js and npm to be installed and dependencies to be installed (see above).
 
 ---
@@ -69,11 +64,6 @@ If you see an error like `Error: listen EADDRINUSE: address already in use` or s
 - **You only need Node.js and npm to build or run the app from source.**
 - **You do NOT need to install Electron manually.** It's installed automatically with `npm install`.
 - **If you only use the portable EXE:** No Node.js, npm, or Electron install is needed on your PC after building.
----
-
-## Troubleshooting & Tips
-- **If you see errors about missing Node.js or npm:** Install them from https://nodejs.org
-- **If you see errors about missing dependencies:** Run `npm install` in the project folder.
 
 ---
 
@@ -133,8 +123,12 @@ The Today view allows you to track:
 - Cervical mucus type
 - Physical symptoms
 - Emotional symptoms
+- PMDD symptoms (for those who track)
 - Medications
+- Intimate activity (for those who track)
 - Daily notes
+- PMDD and Intimacy can be toggled on/off in Settings
+
 
 ### Calendar View
 
@@ -171,6 +165,26 @@ This application values your privacy:
 - All data is stored locally on your device
 - No data is sent to external servers
 - You control your data: export, backup, and restore at any time
+
+### Screenshots
+
+
+![Today View](assets/Screenshot%202025-04-29%20025534.png)
+![Symptoms Tracking](assets/Screenshot%202025-04-29%20025605.png)
+![Medication, Intimacy, Notes](assets/Screenshot%202025-04-29%20025638.png)
+![Calendar View](assets/Screenshot%202025-04-29%20025722.png)
+![Analysis View](assets/Screenshot%202025-04-29%20030014.png)
+![Charts](assets/Screenshot%202025-04-29%20030041.png)
+![Charts](assets/Screenshot%202025-04-29%20030052.png)
+![Settings](assets/Screenshot%202025-04-29%20030122.png)
+![Custom Backgrounds](assets/Screenshot%202025-04-29%20030205.png)
+
+### Themes
+
+![nebula](assets/nebula.png)
+![pinkwhite](assets/pinkwhite.png)
+![starry](assets/starry.png)
+![synthwave](assets/synthwave.png)
 
 ## Network Access & IP Whitelisting (Web/Server Mode)
 
@@ -211,16 +225,11 @@ You can access the app from other devices (like your phone) on the same WiFi net
 - **Classic Web Dev:**
   - Use `start-broswer-dev.bat` for browser-based hot reload and network access (for development or network/server mode).
 
----
 
-CycleSense is now available as a native Windows desktop application, powered by Electron! This version bundles both the backend server and frontend UI for a seamless, all-in-one experience.
-
----
-
-## Network Access (Web/Server Mode)
+## Running in Network/Server Mode
 
 If you want to access CycleSense from your phone or another device on your network:
-- Run `start-broswer-dev.bat` (see above for usage).
+- Run `start-broswer-prod.bat` (see above for usage).
 - Open a browser on your phone to `http://<your-pc-ip>:5000` (replace `<your-pc-ip>` with your PC's IP address).
 - All original web/server features are still available when running in this mode.
 
@@ -241,6 +250,18 @@ Otherwise, use `Start-CycleSense.bat` or `Start-CycleSense-dev.bat` for the port
 - If the Electron app window is blank, wait a few seconds for the server to start.
 - If you see errors, check the terminal for details.
 - I can't offer much help but you can always ask AI lol.
+
+### AdditionalTroubleshooting
+
+- **If you see errors about missing Node.js or npm:** Install them from https://nodejs.org
+- **If you see errors about missing dependencies:** Run `npm install` in the project folder.
+
+### Port & Process Cleanup (If you see 'port in use' errors)
+If you see an error like `Error: listen EADDRINUSE: address already in use` or suspect that Electron/Node processes are stuck, you can use the included cleanup script:
+
+- **Run:** Double-click `cleanup-ports-and-processes.bat` in the project folder. Also built into batch files for starting the app.
+- **What it does:** This script will automatically kill any processes using port 5000 (the dev server port) and any lingering Electron/Node processes.
+- **When to use:** Before starting the app if you see port errors, or any time you want to ensure a clean state.
 
 ---
 
