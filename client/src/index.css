@@ -2,6 +2,168 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === GLOW EFFECTS (theme-aware) === */
+/* === GLOW EFFECTS (theme-aware, only for specific themes) === */
+.theme-cyberpunk, .theme-synthwave, .theme-lunar, .theme-moon {
+  --glow-color: #00fff7;
+}
+.theme-synthwave {
+  --glow-color: #ff5efc;
+}
+.theme-lunar, .theme-moon {
+  --glow-color: #aee9ff;
+}
+
+.theme-cyberpunk .glow-btn,
+.theme-synthwave .glow-btn,
+.theme-lunar .glow-btn,
+.theme-moon .glow-btn {
+  box-shadow: 0 0 8px 2px var(--glow-color), 0 0 16px 4px var(--glow-color);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.theme-cyberpunk .glow-bar > rect,
+.theme-synthwave .glow-bar > rect,
+.theme-lunar .glow-bar > rect,
+.theme-moon .glow-bar > rect {
+  filter: drop-shadow(0 0 8px var(--glow-color)) drop-shadow(0 0 16px var(--glow-color));
+}
+.theme-cyberpunk .glow-switch,
+.theme-synthwave .glow-switch,
+.theme-lunar .glow-switch,
+.theme-moon .glow-switch {
+  box-shadow: 0 0 8px 2px var(--glow-color), 0 0 16px 4px var(--glow-color);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.theme-cyberpunk .glow-btn.selected, .theme-cyberpunk .glow-btn:focus, .theme-cyberpunk .glow-btn:active,
+.theme-synthwave .glow-btn.selected, .theme-synthwave .glow-btn:focus, .theme-synthwave .glow-btn:active,
+.theme-lunar .glow-btn.selected, .theme-lunar .glow-btn:focus, .theme-lunar .glow-btn:active,
+.theme-moon .glow-btn.selected, .theme-moon .glow-btn:focus, .theme-moon .glow-btn:active {
+  box-shadow: 0 0 16px 4px var(--glow-color), 0 0 24px 8px var(--glow-color);
+  border-color: var(--primary);
+}
+.theme-cyberpunk .glow-input,
+.theme-synthwave .glow-input,
+.theme-lunar .glow-input,
+.theme-moon .glow-input {
+  box-shadow: 0 0 6px 2px var(--glow-color);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.theme-cyberpunk .glow-input:focus, .theme-cyberpunk .glow-input.selected,
+.theme-synthwave .glow-input:focus, .theme-synthwave .glow-input.selected,
+.theme-lunar .glow-input:focus, .theme-lunar .glow-input.selected,
+.theme-moon .glow-input:focus, .theme-moon .glow-input.selected {
+  box-shadow: 0 0 12px 4px var(--glow-color);
+  border-color: var(--primary);
+}
+.theme-cyberpunk .glow-switch[data-state="checked"],
+.theme-synthwave .glow-switch[data-state="checked"],
+.theme-lunar .glow-switch[data-state="checked"],
+.theme-moon .glow-switch[data-state="checked"] {
+  box-shadow: 0 0 16px 4px var(--glow-color);
+}
+
+/* === THEME OVERRIDES === */
+.theme-cyberpunk {
+  --glow-color: #00fff7;
+}
+.theme-synthwave {
+  --glow-color: #ff5efc;
+}
+.theme-lunar, .theme-moon {
+  --glow-color: #aee9ff;
+}
+.theme-nebula {
+  --glow-color: #c084fc;
+}
+.theme-ocean {
+  --glow-color: #00e6d2;
+}
+/* Add more theme overrides as needed */
+
+/* === SYMPTOM BUTTON HOVER EFFECTS (Today page) === */
+/* For selected symptom button hover */
+.symptom-btn.selected:hover {
+  box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
+  transform: translateY(-1px);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+/* Regular symptom button hover */
+.symptom-btn:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+/* === SYMPTOM MODAL ITEM STYLES === */
+.symptom-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.375rem; /* rounded-md */
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  transition-property: background-color, color;
+  transition-duration: 300ms;
+  transition-timing-function: ease-in-out;
+  cursor: pointer;
+  font-size: 0.875rem; /* text-xs */
+  font-weight: 400; /* font-normal */
+  background: none;
+  color: hsl(var(--foreground));
+}
+
+.symptom-item:hover {
+  background-color: hsl(var(--accent) / 0.30);
+  color: hsl(var(--foreground));
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root .symptom-item:hover {
+  background-color: hsl(var(--accent) / 0.35);
+  color: hsl(var(--foreground));
+}
+
+.theme-pinkwhite .symptom-item:hover {
+  background-color: hsl(var(--hover-highlight));
+  color: hsl(var(--foreground));
+}
+
+.symptom-item.selected {
+  background: hsl(var(--accent), 0.88);
+  color: var(--accent-foreground, var(--foreground));
+  border: 1.5px solid hsl(var(--accent));
+  box-shadow: 0 1px 6px 0 hsl(var(--accent), 0.10);
+}
+.theme-pinkwhite .symptom-item {
+  color: var(--foreground);
+}
+.theme-pinkwhite .symptom-item:hover {
+  background: hsl(var(--muted), 0.92);
+  color: var(--accent-foreground, var(--foreground));
+}
+.theme-pinkwhite .symptom-item.selected {
+  background: hsl(var(--accent), 0.92);
+  color: var(--accent-foreground, var(--foreground));
+  border: 1.5px solid hsl(var(--accent));
+}
+.theme-starry .symptom-item:hover,
+.theme-nebula .symptom-item:hover {
+  background: hsl(var(--muted), 0.80);
+  color: var(--accent-foreground, var(--foreground));
+}
+.theme-starry .symptom-item.selected,
+.theme-nebula .symptom-item.selected {
+  background: hsl(var(--accent), 0.82);
+  color: var(--accent-foreground, var(--foreground));
+  border: 1.5px solid hsl(var(--accent));
+}
+/* Add more theme overrides as needed for new themes */
+
+.symptom-item input[type="checkbox"] {
+  accent-color: hsl(var(--accent));
+}
+
+
 /* === THEME VARIABLES === */
 :root {
   --background: 240 10% 3.9%;
@@ -91,28 +253,35 @@
 }
 
 .theme-pinkwhite {
-  --background: 330 50% 98%; /* soft white-pink */
-  --foreground: 330 40% 10%; /* much darker text for readability */
-  --muted: 330 40% 96%;
-  --muted-foreground: 330 30% 30%;
+  /* Base colors */
+  --background: 330 60% 98%; /* Very soft white-pink */
+  --foreground: 340 40% 12%; /* Very dark readable text */
+  --muted: 330 40% 96%; 
+  --muted-foreground: 340 30% 30%;
   --popover: 330 40% 97%;
-  --popover-foreground: 330 40% 10%;
+  --popover-foreground: 340 40% 12%;
   --card: 330 40% 97%;
-  --card-foreground: 330 40% 10%;
+  --card-foreground: 340 40% 12%;
   --border: 340 30% 85%;
   --input: 340 30% 85%;
-  --primary: 340 80% 60%; /* deeper pink for buttons */
-  --primary-foreground: 330 50% 98%;
-  --secondary: 340 90% 85%;
-  --secondary-foreground: 330 40% 10%;
-  --accent: 320 60% 55%; /* purple accent for contrast */
-  --accent-foreground: 330 40% 10%;
-  --destructive: 0 70% 40%;
-  --destructive-foreground: 330 50% 98%;
-  --ring: 340 80% 60%;
+  /* Primary actions */
+  --primary: 340 70% 60%; /* Warm pink for buttons */
+  --primary-foreground: 330 60% 98%; /* Light text on buttons */
+  --secondary: 340 80% 85%; /* Light rose secondary */
+  --secondary-foreground: 340 40% 20%;
+  --accent: 340 60% 55%; /* Stronger rose for hover and focus */
+  --accent-foreground: 330 60% 98%;
+  --destructive: 0 70% 50%;
+  --destructive-foreground: 330 60% 98%;
+  --ring: 340 70% 65%;
   --radius: 0.5rem;
-  --button-selected: 340 80% 70%; /* match physical symptoms */
-  --button-hover: 340 80% 70%; /* match selected cervical mucus pink */
+  /* Special hover states */
+  --button-hover: 340 60% 70% / 0.8; /* softer highlight hover */
+  /* Special for text and hover clarity */
+  --text-selected-dark: #400d0d;
+  --text-selected-light: #fff0f0;
+  /* Special for hover bars on symptoms */
+  --hover-highlight: 340 60% 90%; /* very light rose pink */
 }
 
 .theme-beach {
@@ -637,10 +806,68 @@ span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
 }
 
 /* Neon Glow Utility */
-.theme-cyberpunk .glow, .theme-synthwave .glow {
+.theme-cyberpunk .glow, .theme-synthwave .glow, .theme-lunar .glow {
   box-shadow: var(--glow);
   text-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
 }
+
+/* Period status buttons, medication, intimacy, cervical mucus, settings tabs (glow for selected/active) */
+.theme-cyberpunk .period-status-btn.selected,
+.theme-synthwave .period-status-btn.selected,
+.theme-lunar .period-status-btn.selected,
+.theme-cyberpunk .medication-btn.selected,
+.theme-synthwave .medication-btn.selected,
+.theme-lunar .medication-btn.selected,
+.theme-cyberpunk .intimate-activity-btn.selected,
+.theme-synthwave .intimate-activity-btn.selected,
+.theme-lunar .intimate-activity-btn.selected,
+.theme-cyberpunk .cervical-mucus-btn.selected,
+.theme-synthwave .cervical-mucus-btn.selected,
+.theme-lunar .cervical-mucus-btn.selected,
+.theme-cyberpunk .medication-add-btn.selected,
+.theme-synthwave .medication-add-btn.selected,
+.theme-lunar .medication-add-btn.selected,
+.theme-cyberpunk .settings-tab.selected,
+.theme-synthwave .settings-tab.selected,
+.theme-lunar .settings-tab.selected {
+  box-shadow: var(--glow);
+  transition: box-shadow 0.2s;
+}
+
+/* Also add a subtle glow on hover for buttons in those themes */
+.theme-cyberpunk .period-status-btn:hover,
+.theme-synthwave .period-status-btn:hover,
+.theme-lunar .period-status-btn:hover,
+.theme-cyberpunk .medication-btn:hover,
+.theme-synthwave .medication-btn:hover,
+.theme-lunar .medication-btn:hover,
+.theme-cyberpunk .intimate-activity-btn:hover,
+.theme-synthwave .intimate-activity-btn:hover,
+.theme-lunar .intimate-activity-btn:hover,
+.theme-cyberpunk .cervical-mucus-btn:hover,
+.theme-synthwave .cervical-mucus-btn:hover,
+.theme-lunar .cervical-mucus-btn:hover,
+.theme-cyberpunk .medication-add-btn:hover,
+.theme-synthwave .medication-add-btn:hover,
+.theme-lunar .medication-add-btn:hover,
+.theme-cyberpunk .settings-tab:hover,
+.theme-synthwave .settings-tab:hover,
+.theme-lunar .settings-tab:hover {
+  box-shadow: 0 0 4px var(--primary), 0 0 12px var(--primary);
+  transition: box-shadow 0.2s;
+}
+
+/* Chart bar and card glow for analysis page (flow intensity, etc) */
+.theme-cyberpunk .chart-bar,
+.theme-synthwave .chart-bar,
+.theme-lunar .chart-bar,
+.theme-cyberpunk .analysis-card,
+.theme-synthwave .analysis-card,
+.theme-lunar .analysis-card {
+  filter: drop-shadow(0 0 8px var(--primary)) drop-shadow(0 0 16px var(--glow-color, #fff));
+}
+
+
 
 .theme-cyberpunk .fertile-window-box {
   background-color: hsl(200, 100%, 16%) !important;

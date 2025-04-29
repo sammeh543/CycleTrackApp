@@ -1,4 +1,5 @@
 import React from 'react';
+import IntimateIcon from '@/icons/IntimateIcon';
 import { 
   startOfWeek, 
   endOfWeek, 
@@ -31,9 +32,14 @@ interface CalendarGridProps {
     date: string;
     symptomId: number;
   }>;
+  sexRecords?: Array<{
+    date: string;
+    // other fields if needed
+  }>;
   userSettings?: {
     defaultCycleLength?: number;
     defaultPeriodLength?: number;
+    showIntimateActivity?: boolean;
   };
   onSelectDate?: (date: Date) => void;
 }
@@ -43,11 +49,22 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   cycles, 
   flowRecords, 
   symptomRecords = [], 
+  sexRecords = [],
   userSettings = {},
   onSelectDate 
 }) => {
   // Get all dates for the calendar view
   const calendarStart = startOfWeek(startOfMonth(month));
+
+  // Helper to check if a date has a sex record
+  const hasSexRecord = (date: Date) => {
+    const dateKey = format(date, 'yyyy-MM-dd');
+    return sexRecords.some(record => {
+      // Always use parseISO for record.date to avoid timezone bugs
+      const recordDate = typeof record.date === 'string' ? parseISO(record.date) : record.date;
+      return format(recordDate, 'yyyy-MM-dd') === dateKey;
+    });
+  };
   const calendarEnd = endOfWeek(endOfMonth(month));
   
   const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
@@ -257,6 +274,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               </span>
               {isSymptom && <span className="symptom-indicator"></span>}
               {isSpotting && <span className="spotting-indicator"></span>}
+              {/* Intimate activity indicator */}
+              {userSettings.showIntimateActivity !== false && hasSexRecord(day) && (
+                <span className="intimate-indicator flex items-center justify-center mt-0.5">
+                  {/* Use themeable color for sex indicator */}
+                  <IntimateIcon className="w-4 h-4 text-accent" />
+                </span>
+              )}
             </div>
           );
         })}

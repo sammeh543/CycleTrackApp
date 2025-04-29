@@ -152,7 +152,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
   ];
   
   const { userSettings, getAverageCycleLength } = useCycleData({ userId });
-  const defaultCycleLength = (userSettings && userSettings.defaultCycleLength) || getAverageCycleLength() || 28;
+  const defaultCycleLength = (userSettings?.defaultCycleLength ?? getAverageCycleLength() ?? 28);
   
   // Prepare symptom chart data
   const [symptomData, setSymptomData] = useState<Array<{
@@ -450,7 +450,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
       <span className="mr-2 text-xs text-muted-foreground">Show legend</span>
       <div 
         role="button"
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none cursor-pointer ${showLegend ? selectedSwitchBg : unselectedSwitchBg}`}
+        className={`glow-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none cursor-pointer ${showLegend ? selectedSwitchBg : unselectedSwitchBg}`}
         onClick={() => setShowLegend(l => !l)}
       >
         <span className={`transition-transform inline-block h-4 w-4 rounded-full bg-background border ${showLegend ? 'translate-x-5 border-accent' : 'translate-x-1 border-gray-300'}`}></span>
@@ -465,7 +465,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
   // --- Mood button purple theme ---
   const moodButtonClass = (selected: boolean) =>
     selected
-      ? "rounded-full text-xs h-8 border bg-accent text-accent-foreground border-accent shadow-sm"
+      ? "glow-btn rounded-full text-xs h-8 border bg-accent text-accent-foreground border-accent shadow-sm"
       : `rounded-full text-xs h-8 border ${purpleTheme.border} bg-background ${purpleTheme.text} ${purpleTheme.hover}`;
 
   // --- Custom scrollbar CSS for selector areas ---
@@ -537,7 +537,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
         </div>
         {/* Select All / Deselect All */}
         <div className="flex gap-2 mb-2">
-          <Button size="sm" variant="ghost" className="text-accent hover:bg-accent-foreground" onClick={() => {
+          <Button size="sm" variant="ghost" className="text-accent hover:bg-muted hover:text-accent" onClick={() => {
             let all: string[] = [];
             if (symptomCategory === 'all') {
               all = symptoms.map(s => s.name);
@@ -546,7 +546,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
             }
             setModalSelectedSymptoms(all);
           }}>Select All</Button>
-          <Button size="sm" variant="ghost" className="text-accent hover:bg-accent-foreground" onClick={() => {
+          <Button size="sm" variant="ghost" className="text-accent hover:bg-muted hover:text-accent" onClick={() => {
             if (symptomCategory === 'all') setModalSelectedSymptoms([]);
             else setModalSelectedSymptoms(prev => prev.filter(name => !groupedSymptoms[symptomCategory].some(s => s.name === name)));
           }}>Deselect All</Button>
@@ -578,7 +578,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel className="text-gray-500">Cancel</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-accent hover:bg-accent-foreground text-accent-foreground"
+            className="bg-accent hover:bg-accent/80 text-accent-foreground"
             onClick={() => {
               setSelectedSymptoms(modalSelectedSymptoms);
               setShowSymptomModal(false);
@@ -599,7 +599,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
         setShowSymptomModal(true);
       }}
       variant="outline"
-      className="rounded-full px-3 py-1.5 text-[rgb(250,250,250)] bg-[rgb(9,9,11)] border border-[rgb(39,39,42)] text-xs font-medium shadow-sm hover:bg-accent hover:text-[rgb(250,250,250)] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] min-h-0"
+      className="glow-btn rounded-full px-3 py-1.5 text-[rgb(250,250,250)] bg-[rgb(9,9,11)] border border-[rgb(39,39,42)] text-xs font-medium shadow-sm hover:bg-accent hover:text-[rgb(250,250,250)] transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] min-h-0"
       style={{ minHeight: '1.8rem', height: '2rem', lineHeight: '1.2' }}
     >
       Select Symptoms
@@ -698,7 +698,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
             <span className="mr-2 text-xs text-muted-foreground">Show cycle phases</span>
             <div 
               role="button"
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none cursor-pointer ${showCyclePhases ? selectedSwitchBg : unselectedSwitchBg}`}
+              className={`glow-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none cursor-pointer ${showCyclePhases ? selectedSwitchBg : unselectedSwitchBg}`}
               onClick={() => setShowCyclePhases(!showCyclePhases)}
             >
               <span className={`transition-transform inline-block h-4 w-4 rounded-full bg-background border ${showCyclePhases ? 'translate-x-5 border-accent' : 'translate-x-1 border-gray-300'}`}></span>
@@ -1063,7 +1063,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
             ].map(opt => (
               <button
                 key={opt.value}
-                className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors duration-100 ${flowRange === opt.value ? 'bg-accent text-accent-foreground border-accent shadow-sm' : 'bg-background border-gray-200 text-gray-600 hover:bg-[#ede9fe]'}`}
+                className={`glow-btn px-3 py-1 rounded-full border text-xs font-medium transition-colors duration-100 ${flowRange === opt.value ? 'bg-accent text-accent-foreground border-accent' : 'bg-background border-gray-200 text-gray-600 hover:bg-[#ede9fe]'}`}
                 onClick={() => setFlowRange(opt.value as any)}
                 type="button"
               >
@@ -1099,6 +1099,7 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
                 radius={[6, 6, 0, 0]}
                 maxBarSize={24}
                 isAnimationActive={true}
+                className="glow-bar"
               />
             </BarChart>
           </ResponsiveContainer>

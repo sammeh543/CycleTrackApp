@@ -2,7 +2,7 @@ import {
   User, InsertUser, Cycle, InsertCycle, FlowRecord, InsertFlowRecord,
   MoodRecord, InsertMoodRecord, Symptom, InsertSymptom, SymptomRecord, 
   InsertSymptomRecord, DailyNote, InsertDailyNote, UserSettings, InsertUserSettings,
-  CervicalMucusRecord, InsertCervicalMucusRecord, SymptomCategory
+  CervicalMucusRecord, InsertCervicalMucusRecord, SymptomCategory, SexRecord, InsertSexRecord
 } from "@shared/schema";
 
 // Re-export all types for downstream imports
@@ -10,10 +10,37 @@ export type {
   User, InsertUser, Cycle, InsertCycle, FlowRecord, InsertFlowRecord,
   MoodRecord, InsertMoodRecord, Symptom, InsertSymptom, SymptomRecord,
   InsertSymptomRecord, DailyNote, InsertDailyNote, UserSettings, InsertUserSettings,
-  CervicalMucusRecord, InsertCervicalMucusRecord, SymptomCategory
+  CervicalMucusRecord, InsertCervicalMucusRecord, SymptomCategory,
+  SexRecord, InsertSexRecord
 } from "@shared/schema";
 
 export interface IStorage {
+  // --- Sex Record CRUD ---
+  /**
+   * Get all sex records for a user, optionally filtered by date range.
+   */
+  getSexRecords(userId: number, startDate?: Date, endDate?: Date): Promise<SexRecord[]>;
+
+  /**
+   * Get a single sex record for a user on a specific date.
+   */
+  getSexRecord(userId: number, date: Date): Promise<SexRecord | undefined>;
+
+  /**
+   * Create a new sex record for a user.
+   */
+  createSexRecord(insertRecord: InsertSexRecord): Promise<SexRecord>;
+
+  /**
+   * Update an existing sex record by id.
+   */
+  updateSexRecord(id: number, updateRecord: Partial<InsertSexRecord>): Promise<SexRecord | undefined>;
+
+  /**
+   * Delete a sex record by id.
+   */
+  deleteSexRecord(id: number): Promise<boolean>;
+
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -92,7 +119,8 @@ export class MemStorage implements IStorage {
   private dailyNotes: Map<number, DailyNote>;
   private userSettings: Map<number, UserSettings>;
   private cervicalMucusRecords: Map<number, CervicalMucusRecord> = new Map();
-  
+  private sexRecords: Map<number, SexRecord> = new Map();
+
   currentUserId: number;
   currentCycleId: number;
   currentFlowRecordId: number;
@@ -102,6 +130,7 @@ export class MemStorage implements IStorage {
   currentDailyNoteId: number;
   currentUserSettingsId: number;
   currentCervicalMucusRecordId: number = 1;
+  currentSexRecordId: number = 1;
 
   constructor() {
     // Initialize storage maps
@@ -130,6 +159,49 @@ export class MemStorage implements IStorage {
     }
     // Deduplicate symptoms after loading (by name, category, userId)
     this.deduplicateSymptoms();
+  }
+
+  // --- Sex Record CRUD ---
+  async getSexRecords(userId: number, startDate?: Date, endDate?: Date): Promise<SexRecord[]> {
+    let records = Array.from(this.sexRecords.values()).filter(record => record.userId === userId);
+    if (startDate) {
+      const startStr = startDate.toISOString().slice(0, 10);
+      records = records.filter(record => record.date >= startStr);
+    }
+    if (endDate) {
+      const endStr = endDate.toISOString().slice(0, 10);
+      records = records.filter(record => record.date <= endStr);
+    }
+    return records.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async getSexRecord(userId: number, date: Date): Promise<SexRecord | undefined> {
+    const dateStr = date.toISOString().slice(0, 10);
+    return Array.from(this.sexRecords.values()).find(record => record.userId === userId && record.date === dateStr);
+  }
+
+  async createSexRecord(insertRecord: InsertSexRecord): Promise<SexRecord> {
+    const id = this.currentSexRecordId++;
+    const dateStr = insertRecord.date.slice(0, 10);
+    const record: SexRecord = { ...insertRecord, id, date: dateStr };
+    this.sexRecords.set(id, record);
+    return record;
+  }
+
+  async updateSexRecord(id: number, updateRecord: Partial<InsertSexRecord>): Promise<SexRecord | undefined> {
+    const record = this.sexRecords.get(id);
+    if (!record) return undefined;
+    let dateStr = record.date;
+    if (updateRecord.date) {
+      dateStr = updateRecord.date.slice(0, 10);
+    }
+    const updated = { ...record, ...updateRecord, date: dateStr };
+    this.sexRecords.set(id, updated);
+    return updated;
+  }
+
+  async deleteSexRecord(id: number): Promise<boolean> {
+    return this.sexRecords.delete(id);
   }
 
   private deduplicateSymptoms() {
@@ -505,7 +577,9 @@ export class MemStorage implements IStorage {
       hiddenSymptoms: settings.hiddenSymptoms ?? [],
       medications: settings.medications ?? [],
       defaultCycleLength: settings.defaultCycleLength ?? null,
-      defaultPeriodLength: settings.defaultPeriodLength ?? null
+      defaultPeriodLength: settings.defaultPeriodLength ?? null,
+      showPmddSymptoms: typeof settings.showPmddSymptoms === 'boolean' ? settings.showPmddSymptoms : true,
+      showIntimateActivity: typeof settings.showIntimateActivity === 'boolean' ? settings.showIntimateActivity : true
     };
     this.userSettings.set(settings.id, cleanedSettings);
     return cleanedSettings;
@@ -701,7 +775,9 @@ export class MemStorage implements IStorage {
       hiddenSymptoms: [],
       medications: [],
       defaultCycleLength: 28,
-      defaultPeriodLength: 5
+      defaultPeriodLength: 5,
+      showPmddSymptoms: true,
+      showIntimateActivity: true
     });
   }
 }

@@ -1,5 +1,6 @@
 [
   {
+    "id": 1,
     "userId": 1,
     "emailNotifications": true,
     "reminderEnabled": true,
@@ -11,8 +12,6 @@
     "medications": [],
     "defaultCycleLength": 28,
     "defaultPeriodLength": 5,
-    "showPmddSymptoms": true,
-    "id": 1,
-    "showIntimateActivity": true
+    "showPmddSymptoms": true
   }
 ]

@@ -151,7 +151,9 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId, selectedD
                 <Button 
                   onClick={handleAddMedication} 
                   disabled={!newMedicationName.trim()}
-                  className="gap-1"
+                  className={
+                    `gap-1 medication-add-btn${!!newMedicationName.trim() ? ' selected' : ''}`
+                  }
                 >
                   <Plus className="h-4 w-4" />
                   <span>Add</span>
@@ -195,7 +197,7 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId, selectedD
                           variant={loggedToday ? "default" : "outline"}
                           size="sm"
                           onClick={() => handleLogMedication(medication.id)}
-                          className="h-8 gap-1"
+                          className={`h-8 gap-1 medication-btn${loggedToday ? ' selected' : ''}`}
                           title={loggedToday ? `Taken on ${formatDate(selectedDate)} (click to undo)` : `Mark as taken on ${formatDate(selectedDate)}`}
                         >
                           {loggedToday && <Check className="h-3.5 w-3.5" />}

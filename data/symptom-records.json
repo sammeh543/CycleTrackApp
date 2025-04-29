@@ -8,9 +8,58 @@
   },
   {
     "userId": 1,
-    "symptomId": 1,
+    "symptomId": 7,
     "date": "2025-04-28",
     "intensity": 1,
     "id": 2
+  },
+  {
+    "userId": 1,
+    "symptomId": 2,
+    "date": "2025-04-28",
+    "intensity": 3,
+    "id": 4
+  },
+  {
+    "userId": 1,
+    "symptomId": 33,
+    "date": "2025-04-28",
+    "intensity": 1,
+    "id": 5
+  },
+  {
+    "userId": 1,
+    "symptomId": 4,
+    "date": "2025-04-28",
+    "intensity": 1,
+    "id": 6
+  },
+  {
+    "userId": 1,
+    "symptomId": 28,
+    "date": "2025-04-28",
+    "intensity": 1,
+    "id": 10
+  },
+  {
+    "userId": 1,
+    "symptomId": 22,
+    "date": "2025-04-28",
+    "intensity": 2,
+    "id": 13
+  },
+  {
+    "userId": 1,
+    "symptomId": 3,
+    "date": "2025-04-28",
+    "intensity": 1,
+    "id": 14
+  },
+  {
+    "userId": 1,
+    "symptomId": 27,
+    "date": "2025-04-28",
+    "intensity": 1,
+    "id": 15
   }
 ]

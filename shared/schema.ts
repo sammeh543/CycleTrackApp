@@ -81,6 +81,16 @@ export const dailyNoteSchema = z.object({
 
 export const insertDailyNoteSchema = dailyNoteSchema.omit({ id: true });
 
+// Sex record schema
+export const sexRecordSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  date: z.string(), // ISO date string
+  protected: z.boolean().optional(), // Optional, for future extensibility
+});
+
+export const insertSexRecordSchema = sexRecordSchema.omit({ id: true });
+
 // User settings schema
 export const userSettingsSchema = z.object({
   id: z.number(),
@@ -96,6 +106,7 @@ export const userSettingsSchema = z.object({
   defaultCycleLength: z.number().nullable(),
   defaultPeriodLength: z.number().nullable(),
   showPmddSymptoms: z.boolean().nullable(),
+  showIntimateActivity: z.boolean().default(true),
 });
 
 export const insertUserSettingsSchema = userSettingsSchema.omit({ id: true });
@@ -136,6 +147,9 @@ export type InsertDailyNote = z.infer<typeof insertDailyNoteSchema>;
 
 export type UserSettings = z.infer<typeof userSettingsSchema>;
 export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
+
+export type SexRecord = z.infer<typeof sexRecordSchema>;
+export type InsertSexRecord = z.infer<typeof insertSexRecordSchema>;
 
 // Define common enums for use in the app
 export const FlowIntensity = {

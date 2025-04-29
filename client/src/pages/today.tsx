@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { format, isToday, parseISO, isSameDay, isBefore, isAfter } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Droplet, CheckCircle2, Circle } from 'lucide-react';
+import IntimateActivityButton from '@/components/symptoms/IntimateActivityButton';
+import { useIntimateActivity } from '@/hooks/use-intimate-activity';
 import SymptomsList from '@/components/symptoms/symptoms-list';
 import MoodSelector from '@/components/symptoms/mood-selector';
 import CervicalMucusSelector from '@/components/symptoms/cervical-mucus-selector';
@@ -68,6 +71,13 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
     recordFlow,
     refetchCycles
   } = useCycleData({ userId });
+
+  // Intimate Activity (Sex) logging
+  const {
+    isLogged: isIntimateLogged,
+    logIntimateActivity,
+    isLoading: isIntimateLoading,
+  } = useIntimateActivity({ userId, date: selectedDate });
   
   // Get cycle for the selected date
   const getCycleForSelectedDate = useCallback(() => {
@@ -102,8 +112,8 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
     refetchCycles();
   }, [selectedDate, setCycleSelectedDate, refetchCycles]);
   
-  // Fetch user settings for PMDD toggle
-  const { data: settings } = useQuery<{ showPmddSymptoms?: boolean }>({
+  // Fetch user settings for PMDD toggle and Intimacy card
+  const { data: settings } = useQuery<{ showPmddSymptoms?: boolean; showIntimacyCard?: boolean }>({
     queryKey: [`/api/user-settings/${userId}`],
     enabled: userId > 0,
   });
@@ -341,7 +351,8 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
                 </div>
               )}
             </div>
-            
+
+
             {/* Mood Tracking */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Mood</h3>
@@ -413,6 +424,27 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
               <MedicationTracker userId={userId} selectedDate={selectedDate} />
             </div>
             
+            {/* Intimacy Section */}
+            {((settings?.showIntimacyCard ?? true)) && (
+              <Card className="mb-6">
+                <CardContent className="flex items-center justify-between py-2 px-3">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">Intimacy</span>
+                    {isIntimateLogged && (
+                      <span className="block text-xs mt-0.5 text-muted-foreground">Logged</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <IntimateActivityButton
+                      active={isIntimateLogged}
+                      onClick={logIntimateActivity}
+                      disabled={isIntimateLoading}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Notes Section */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Notes</h3>

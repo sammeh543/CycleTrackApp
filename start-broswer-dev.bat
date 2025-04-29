@@ -1,7 +1,11 @@
 @echo off
-REM CycleTrack2Surf - Development Mode
-REM This script starts the server with hot reload for development.
-echo Development server starting with hot reload...
+REM CycleTrackApp - Server/Browser Dev Mode
+REM This script starts the server (network/browser version) with hot reload for development.
+echo Starting CycleTrackApp server (network/browser version, Dev Mode, Hot Reload)...
+
+REM Kill any process using port 5000 only (to avoid killing unrelated Node.js apps)
+echo Killing any lingering process using port 5000...
+for /f "tokens=5" %%a in ('netstat -aon ^| find ":5000" ^| find "LISTEN"') do taskkill /PID %%a /F
 
 REM Check Node.js
 where node >nul 2>nul
@@ -29,6 +33,10 @@ if not exist node_modules (
         exit /b 1
     )
 )
+
+REM Open the local dev server in the default web browser
+REM Change the port below if your app uses a different one
+start http://localhost:5000
 
 REM Start the dev server with hot reload
 call npm run dev

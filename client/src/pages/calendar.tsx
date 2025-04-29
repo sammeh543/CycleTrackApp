@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Heart } from 'lucide-react';
 import CalendarGrid from '@/components/calendar/calendar-grid';
+import IntimateIcon from '@/icons/IntimateIcon';
 import UpcomingEvents from '@/components/calendar/upcoming-events';
 import { useCycleData } from '@/hooks/use-cycle-data';
 import { useQuery } from '@tanstack/react-query';
@@ -52,6 +53,13 @@ const Calendar: React.FC<CalendarProps> = ({ userId }) => {
   const { data: userSettings, isLoading: userSettingsLoading } = useQuery<UserSettings>({
     queryKey: [`/api/user-settings/${userId}`],
     queryFn: () => fetch(`/api/user-settings/${userId}`).then(res => res.json()),
+    enabled: !!userId
+  });
+
+  // Fetch sex records
+  const { data: sexRecords, isLoading: sexRecordsLoading } = useQuery({
+    queryKey: ['/api/sex-records', userId],
+    queryFn: () => fetch(`/api/sex-records?userId=${userId}`).then(res => res.json()),
     enabled: !!userId
   });
   
@@ -119,6 +127,7 @@ const Calendar: React.FC<CalendarProps> = ({ userId }) => {
               cycles={Array.isArray(cycles) ? cycles : []}
               flowRecords={Array.isArray(flowRecords) ? flowRecords : []}
               symptomRecords={Array.isArray(symptomRecords) ? symptomRecords : []}
+              sexRecords={Array.isArray(sexRecords) ? sexRecords : []}
               userSettings={userSettings}
               onSelectDate={handleDateSelect}
             />
@@ -156,6 +165,10 @@ const Calendar: React.FC<CalendarProps> = ({ userId }) => {
                   <div className="absolute w-2.5 h-2.5 bg-gray-400 rounded-full bottom-[-2px] right-[-2px]"></div>
                 </div>
                 <span className="text-xs font-medium">Spotting</span>
+              </div>
+              <div className="flex items-center">
+                <IntimateIcon className="w-5 h-5 text-pink-500 dark:text-pink-400 mr-2" />
+                <span className="text-xs font-medium">Intimate Activity</span>
               </div>
             </div>
           </CardContent>

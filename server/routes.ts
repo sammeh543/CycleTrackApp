@@ -13,7 +13,8 @@ import {
   insertSymptomRecordSchema,
   insertDailyNoteSchema,
   insertUserSettingsSchema,
-  insertCervicalMucusSchema
+  insertCervicalMucusSchema,
+  insertSexRecordSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { MedicationStorage } from './medication-storage';
@@ -1021,6 +1022,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const ok = medicationStorage.delete(userId, medId);
     if (!ok) return res.status(404).json({ message: 'Medication not found' });
     res.status(204).end();
+  });
+
+  // Sex record routes
+  app.get("/api/sex-records", async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      let startDate: Date | undefined;
+      let endDate: Date | undefined;
+      if (req.query.startDate) {
+        startDate = new Date(req.query.startDate as string);
+      }
+      if (req.query.endDate) {
+        endDate = new Date(req.query.endDate as string);
+      }
+      const records = await storage.getSexRecords(userId, startDate, endDate);
+      res.json(records);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sex records" });
+    }
+  });
+
+  app.get("/api/sex-records/date", async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      if (!req.query.date) {
+        return res.status(400).json({ message: "Date is required" });
+      }
+      const date = parseISO(req.query.date as string);
+      const record = await storage.getSexRecord(userId, date);
+      if (!record) {
+        return res.status(404).json({ message: "Sex record not found" });
+      }
+      res.json(record);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sex record" });
+    }
+  });
+
+  app.post("/api/sex-records", async (req, res) => {
+    try {
+      const recordData = insertSexRecordSchema.parse(req.body);
+      // Check if record already exists for this date
+      const existing = await storage.getSexRecord(recordData.userId, parseISO(recordData.date));
+      if (existing) {
+        // Update existing record
+        const updated = await storage.updateSexRecord(existing.id, recordData);
+        return res.json(updated);
+      }
+      // Create new record
+      const record = await storage.createSexRecord(recordData);
+      res.status(201).json(record);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid sex record data", errors: error.format() });
+      }
+      res.status(500).json({ message: "Failed to create sex record" });
+    }
+  });
+
+  app.patch("/api/sex-records/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid record ID" });
+      }
+      const updated = await storage.updateSexRecord(id, req.body);
+      if (!updated) {
+        return res.status(404).json({ message: "Record not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update sex record" });
+    }
+  });
+
+  app.delete("/api/sex-records/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid record ID" });
+      }
+      const success = await storage.deleteSexRecord(id);
+      if (!success) {
+        return res.status(404).json({ message: "Record not found" });
+      }
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete sex record" });
+    }
   });
 
   // Cervical mucus record routes

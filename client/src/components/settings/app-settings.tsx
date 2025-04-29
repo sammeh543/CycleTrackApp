@@ -41,9 +41,11 @@ interface UserSettings {
   defaultCycleLength?: number;
   defaultPeriodLength?: number;
   showPmddSymptoms?: boolean;
+  showIntimacyCard?: boolean;
 }
 
 const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
+  const [showIntimacyCard, setShowIntimacyCard] = useState<boolean>(true);
   const [isPwaInstalled, setIsPwaInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showDevSettings, setShowDevSettings] = useState(false);
@@ -61,6 +63,9 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
     if (settings && typeof settings.showPmddSymptoms === 'boolean') {
       setShowPmddSymptoms(settings.showPmddSymptoms);
     }
+    if (settings && typeof settings.showIntimacyCard === 'boolean') {
+      setShowIntimacyCard(settings.showIntimacyCard);
+    }
   }, [settings]);
 
   // Update settings mutation
@@ -71,6 +76,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
       defaultCycleLength?: number;
       defaultPeriodLength?: number;
       showPmddSymptoms?: boolean;
+      showIntimacyCard?: boolean;
     }) => {
       return apiRequest('PATCH', `/api/user-settings/${userId}`, updateData);
     },
@@ -141,6 +147,11 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
   const handlePmddToggle = (checked: boolean) => {
     setShowPmddSymptoms(checked);
     updateSettingsMutation.mutate({ ...settings, showPmddSymptoms: checked });
+  };
+
+  const handleIntimacyToggle = (checked: boolean) => {
+    setShowIntimacyCard(checked);
+    updateSettingsMutation.mutate({ ...settings, showIntimacyCard: checked });
   };
 
   // Data reset mutation
@@ -352,18 +363,17 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
           {/* Export & Backup section */}
           <h3 className="text-lg font-semibold mb-3">Export & Backup</h3>
           <div className="flex flex-col gap-4">
-            <Button onClick={handleDownloadCSV} variant="outline" className="flex items-center gap-2">
+            <Button onClick={handleDownloadCSV} variant="outline" className="flex items-center gap-2 glow-btn">
               <FileSpreadsheet className="w-4 h-4" />
               Download Data as CSV
             </Button>
-            <Button onClick={handleDownloadJSON} variant="outline" className="flex items-center gap-2">
+            <Button onClick={handleDownloadJSON} variant="outline" className="flex items-center gap-2 glow-btn mb-6">
               <FileJson className="w-4 h-4" />
               Download Full Backup (JSON)
             </Button>
           </div>
 
-          {/* Existing settings UI continues below... */}
-          <div className="flex items-center mb-4">
+          <div className="flex items-center mb-4 mt-2">
             <input
               id="showDevSettings"
               type="checkbox"
@@ -381,10 +391,10 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm">Add to Home Screen</span>
                   <Button 
-                    variant="link" 
-                    className="text-primary p-0 h-auto"
-                    onClick={handleInstallPwa}
-                    disabled={isPwaInstalled}
+                  variant="link" 
+                  className="text-primary p-0 h-auto"
+                  onClick={handleInstallPwa}
+                  disabled={isPwaInstalled}
                   >
                     {isPwaInstalled ? 'Installed' : 'Install'}
                   </Button>
@@ -495,7 +505,11 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
             </div>
             <div className="flex items-center justify-between py-2">
               <span className="text-sm">Show PMDD Symptoms on Today Page</span>
-              <Switch checked={showPmddSymptoms} onCheckedChange={handlePmddToggle} />
+              <Switch checked={showPmddSymptoms} onCheckedChange={handlePmddToggle} glow />
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm">Show Intimacy Card on Today Page</span>
+              <Switch checked={showIntimacyCard} onCheckedChange={handleIntimacyToggle} glow />
             </div>
             <div className="mb-8 mt-8 border-t border-border pt-6">
               <h3 className="text-lg font-semibold mb-3 text-red-700">Danger Zone</h3>

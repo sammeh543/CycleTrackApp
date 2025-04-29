@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "userId": 1,
+    "startDate": "2025-03-25",
+    "id": 2,
+    "endDate": "2025-03-29",
+    "notes": null
+  }
+]

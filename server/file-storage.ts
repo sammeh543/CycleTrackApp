@@ -10,7 +10,8 @@ import {
   SymptomRecord, InsertSymptomRecord,
   DailyNote, InsertDailyNote,
   UserSettings, InsertUserSettings,
-  CervicalMucusRecord, InsertCervicalMucusRecord
+  CervicalMucusRecord, InsertCervicalMucusRecord,
+  SexRecord, InsertSexRecord
 } from './storage';
 import { config } from './config';
 import { format, parseISO } from 'date-fns';
@@ -38,6 +39,7 @@ export class FileStorage implements IStorage {
   private dailyNotes: Map<number, DailyNote>;
   private userSettings: Map<number, UserSettings>;
   private cervicalMucusRecords: Map<number, CervicalMucusRecord>;
+  private sexRecords: Map<number, SexRecord>;
   
   private dataPath: string;
   private backupManager: BackupManager;
@@ -52,6 +54,7 @@ export class FileStorage implements IStorage {
   private currentDailyNoteId: number;
   private currentUserSettingsId: number;
   private currentCervicalMucusRecordId: number;
+  private currentSexRecordId: number;
 
   // Default symptoms
   private defaultPhysicalSymptoms = [
@@ -89,6 +92,7 @@ export class FileStorage implements IStorage {
     this.dailyNotes = new Map();
     this.userSettings = new Map();
     this.cervicalMucusRecords = new Map();
+    this.sexRecords = new Map();
     
     // Load data from files
     this.loadData();
@@ -121,6 +125,7 @@ export class FileStorage implements IStorage {
     this.currentDailyNoteId = this.getMaxId(this.dailyNotes) + 1;
     this.currentUserSettingsId = this.getMaxId(this.userSettings) + 1;
     this.currentCervicalMucusRecordId = this.getMaxId(this.cervicalMucusRecords) + 1;
+    this.currentSexRecordId = this.getMaxId(this.sexRecords) + 1;
   }
 
   // Helper to get max ID from a map 
@@ -140,6 +145,7 @@ export class FileStorage implements IStorage {
     this.saveMapToFile(this.dailyNotes, 'daily-notes.json');
     this.saveMapToFile(this.userSettings, 'user-settings.json');
     this.saveMapToFile(this.cervicalMucusRecords, 'cervical-mucus-records.json');
+    this.saveMapToFile(this.sexRecords, 'sex-records.json');
     
     // Try to create a backup after saving data
     this.backupManager.createBackup();
@@ -156,6 +162,7 @@ export class FileStorage implements IStorage {
     this.loadMapFromFile(this.dailyNotes, 'daily-notes.json');
     this.loadMapFromFile(this.userSettings, 'user-settings.json');
     this.loadMapFromFile(this.cervicalMucusRecords, 'cervical-mucus-records.json');
+    this.loadMapFromFile(this.sexRecords, 'sex-records.json');
   }
   
   // Save a map to a JSON file
@@ -300,56 +307,42 @@ export class FileStorage implements IStorage {
     return symptom;
   }
 
-  async createUserSettings(settings: Partial<InsertUserSettings>): Promise<UserSettings> {
+  
+  async createUserSettings(insertSettings: InsertUserSettings): Promise<UserSettings> {
     const id = this.currentUserSettingsId++;
-    const userSettings: UserSettings = {
+    const settings: UserSettings = {
+      ...insertSettings,
       id,
-      userId: settings.userId!,
-      emailNotifications: settings.emailNotifications ?? false,
-      reminderEnabled: settings.reminderEnabled ?? false,
-      fertileWindowAlerts: settings.fertileWindowAlerts ?? false,
-      weeklySummary: settings.weeklySummary ?? false,
-      language: settings.language ?? 'en',
-      dataStorage: settings.dataStorage ?? 'local',
-      hiddenSymptoms: settings.hiddenSymptoms ?? [],
-      medications: settings.medications ?? [],
-      defaultCycleLength: settings.defaultCycleLength ?? 28,
-      defaultPeriodLength: settings.defaultPeriodLength ?? 5,
-      showPmddSymptoms: settings.showPmddSymptoms ?? true,
+      showPmddSymptoms: typeof insertSettings.showPmddSymptoms === 'boolean' ? insertSettings.showPmddSymptoms : true,
+      showIntimateActivity: typeof insertSettings.showIntimateActivity === 'boolean' ? insertSettings.showIntimateActivity : true
     };
-    this.userSettings.set(id, userSettings);
+    this.userSettings.set(id, settings);
     this.saveData();
-    return userSettings;
+    return settings;
   }
 
   async updateUserSettings(userId: number, partialSettings: Partial<InsertUserSettings>): Promise<UserSettings | undefined> {
     const existingSettings = await this.getUserSettings(userId);
-    
     if (!existingSettings) {
       // If no settings exist, create new ones
-      return this.createUserSettings({ userId, ...partialSettings });
+      return this.createUserSettings({ userId, ...partialSettings } as InsertUserSettings);
     }
-    
     // Update existing settings
-    const updatedSettings = { 
-      ...existingSettings, 
+    const updatedSettings: UserSettings = {
+      ...existingSettings,
       ...partialSettings,
-      showPmddSymptoms: typeof partialSettings.showPmddSymptoms === 'boolean' ? partialSettings.showPmddSymptoms : existingSettings.showPmddSymptoms ?? true,
+      showPmddSymptoms: typeof partialSettings.showPmddSymptoms === 'boolean' ? partialSettings.showPmddSymptoms : (existingSettings.showPmddSymptoms ?? true),
+      showIntimateActivity: typeof partialSettings.showIntimateActivity === 'boolean' ? partialSettings.showIntimateActivity : (existingSettings.showIntimateActivity ?? true)
     };
-    // Ensure all required fields are present and never undefined
-    updatedSettings.emailNotifications = updatedSettings.emailNotifications ?? null;
-    updatedSettings.reminderEnabled = updatedSettings.reminderEnabled ?? null;
-    updatedSettings.fertileWindowAlerts = updatedSettings.fertileWindowAlerts ?? null;
-    updatedSettings.weeklySummary = updatedSettings.weeklySummary ?? null;
-    updatedSettings.language = updatedSettings.language ?? null;
-    updatedSettings.dataStorage = updatedSettings.dataStorage ?? null;
-    updatedSettings.hiddenSymptoms = updatedSettings.hiddenSymptoms ?? [];
-    updatedSettings.medications = updatedSettings.medications ?? [];
-    updatedSettings.defaultCycleLength = updatedSettings.defaultCycleLength ?? null;
-    updatedSettings.defaultPeriodLength = updatedSettings.defaultPeriodLength ?? null;
     this.userSettings.set(existingSettings.id, updatedSettings);
     this.saveData();
     return updatedSettings;
+  }
+
+
+  // User settings
+  async getUserSettings(userId: number): Promise<UserSettings | undefined> {
+    return Array.from(this.userSettings.values()).find(settings => settings.userId === userId);
   }
 
   // User operations
@@ -358,47 +351,38 @@ export class FileStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
-  }
+  return Array.from(this.users.values()).find(user => user.username === username);
+}
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    this.saveData();
-    return user;
-  }
+  async createUser(user: InsertUser): Promise<User> {
+  const id = this.currentUserId++;
+  const newUser: User = { ...user, id };
+  this.users.set(id, newUser);
+  this.saveData();
+  return newUser;
+}
 
-  // Cycle operations
   async getCycles(userId: number): Promise<Cycle[]> {
-    return Array.from(this.cycles.values())
-      .filter(cycle => cycle.userId === userId)
-      .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
-  }
+  return Array.from(this.cycles.values())
+    .filter(cycle => cycle.userId === userId)
+    .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+}
 
   async getCycle(id: number): Promise<Cycle | undefined> {
-    return this.cycles.get(id);
-  }
+  return this.cycles.get(id);
+}
 
   async getCurrentCycle(userId: number): Promise<Cycle | undefined> {
-    // Get all cycles for the user, sorted by start date (newest first)
-    const userCycles = await this.getCycles(userId);
-    
-    // If no cycles, return undefined
-    if (userCycles.length === 0) {
-      return undefined;
-    }
-    
-    // Find the most recent cycle
-    const mostRecentCycle = userCycles[0];
-    
-    // If it has no end date, it's the current cycle
-    if (!mostRecentCycle.endDate) {
-      return mostRecentCycle;
-    }
-    
+  const userCycles = await this.getCycles(userId);
+  if (userCycles.length === 0) {
     return undefined;
   }
+  const mostRecentCycle = userCycles[0];
+  if (!mostRecentCycle.endDate) {
+    return mostRecentCycle;
+  }
+  return undefined;
+}
 
   async createCycle(insertCycle: InsertCycle): Promise<Cycle> {
     // Format the date to ensure consistency using parseISO to avoid timezone issues
@@ -786,11 +770,6 @@ export class FileStorage implements IStorage {
     return updatedNote;
   }
 
-  // User settings
-  async getUserSettings(userId: number): Promise<UserSettings | undefined> {
-    return Array.from(this.userSettings.values())
-      .find(setting => setting.userId === userId);
-  }
 
   // Cervical mucus records
   async getCervicalMucusRecords(userId: number, startDate?: Date, endDate?: Date): Promise<CervicalMucusRecord[]> {
@@ -904,6 +883,54 @@ export class FileStorage implements IStorage {
       console.log(`[FileStorage] Successfully deleted cervical mucus record id=${record.id}`);
       this.saveData();
     }
+    return deleted;
+  }
+
+  // Sex records
+  async getSexRecords(userId: number, startDate?: Date, endDate?: Date): Promise<SexRecord[]> {
+    let records = Array.from(this.sexRecords.values()).filter(record => record.userId === userId);
+    if (startDate) {
+      const startStr = format(startDate, 'yyyy-MM-dd');
+      records = records.filter(record => record.date >= startStr);
+    }
+    if (endDate) {
+      const endStr = format(endDate, 'yyyy-MM-dd');
+      records = records.filter(record => record.date <= endStr);
+    }
+    return records.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async getSexRecord(userId: number, date: Date): Promise<SexRecord | undefined> {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return Array.from(this.sexRecords.values()).find(record => record.userId === userId && record.date === dateStr);
+  }
+
+  async createSexRecord(insertRecord: InsertSexRecord): Promise<SexRecord> {
+    const id = this.currentSexRecordId++;
+    const dateObj = parseISO(insertRecord.date);
+    const dateStr = format(dateObj, 'yyyy-MM-dd');
+    const record: SexRecord = { ...insertRecord, id, date: dateStr };
+    this.sexRecords.set(id, record);
+    this.saveData();
+    return record;
+  }
+
+  async updateSexRecord(id: number, updateRecord: Partial<InsertSexRecord>): Promise<SexRecord | undefined> {
+    const record = this.sexRecords.get(id);
+    if (!record) return undefined;
+    let dateStr = record.date;
+    if (updateRecord.date) {
+      dateStr = format(new Date(updateRecord.date), 'yyyy-MM-dd');
+    }
+    const updatedRecord = { ...record, ...updateRecord, date: dateStr };
+    this.sexRecords.set(id, updatedRecord);
+    this.saveData();
+    return updatedRecord;
+  }
+
+  async deleteSexRecord(id: number): Promise<boolean> {
+    const deleted = this.sexRecords.delete(id);
+    if (deleted) this.saveData();
     return deleted;
   }
 
@@ -1024,6 +1051,12 @@ export class FileStorage implements IStorage {
 
   // Data management
   async resetUserData(userId: number): Promise<void> {
+    // Delete sex records
+    for (const [id, record] of this.sexRecords.entries()) {
+      if (record.userId === userId) {
+        this.sexRecords.delete(id);
+      }
+    }
     // Delete all user data except the user record itself
     
     // Delete cycles

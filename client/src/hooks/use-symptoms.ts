@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 interface Symptom {
   id: number;
   name: string;
-  category: 'physical' | 'emotional' | 'pmdd';
+  category: 'physical' | 'emotional' | 'pmdd' | 'activity'; // Added 'activity' for sex logs
   isDefault: boolean;
   userId: number | null;
 }
@@ -40,6 +40,14 @@ interface DailyNote {
   date: string;
   notes: string;
 }
+
+export interface SexRecord {
+  id: number;
+  userId: number;
+  date: string;
+  protected?: boolean; // Optional, for future extensibility
+}
+
 
 interface UseSymptomsProps {
   userId: number;

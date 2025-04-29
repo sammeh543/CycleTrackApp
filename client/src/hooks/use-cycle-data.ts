@@ -1,5 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+
+// --- UserSettings interface for user settings shape ---
+export interface UserSettings {
+  defaultCycleLength?: number;
+  defaultPeriodLength?: number;
+  // Add other settings as needed
+}
+
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { addDays, format, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -100,7 +108,7 @@ export function useCycleData({ userId }: UseCycleDataProps) {
   const {
     data: userSettings,
     isLoading: userSettingsLoading
-  } = useQuery({
+  } = useQuery<UserSettings>({
     queryKey: [`/api/user-settings/${userId}`],
     enabled: !!userId
   });

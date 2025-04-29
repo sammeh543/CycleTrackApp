@@ -39,16 +39,22 @@ export interface ButtonProps
   asChild?: boolean
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+const Button = React.forwardRef<HTMLButtonElement & { glow?: boolean }, ButtonProps & { glow?: boolean }>(
+  ({ className, variant, size, asChild = false, glow = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    // Check for theme on document.body
+    let theme = '';
+    if (typeof document !== 'undefined') {
+      theme = document.body.className.match(/theme-(\w+)/)?.[1] || '';
+    }
+    const shouldGlow = glow && ["cyberpunk", "synthwave", "lunar"].includes(theme);
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className }), shouldGlow && 'glow')}
         ref={ref}
         {...props}
       />
-    )
+    );
   }
 )
 Button.displayName = "Button"

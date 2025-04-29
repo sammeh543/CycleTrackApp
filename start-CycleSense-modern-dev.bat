@@ -6,7 +6,7 @@ REM Kill any lingering electron or node processes (optional, more aggressive)
 taskkill /IM electron.exe /F >nul 2>nul
 taskkill /IM node.exe /F >nul 2>nul
 
-REM CycleSense Desktop Launcher
+REM Modern CycleSense Dev: Separate Frontend/Electron
 
 where node >nul 2>nul
 if %ERRORLEVEL% neq 0 (
@@ -22,5 +22,4 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-echo Launching CycleSense desktop...
-npm run electron
+npm run dev:full

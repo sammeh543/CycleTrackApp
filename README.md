@@ -2,37 +2,94 @@
 
 A comprehensive web and desktop application for tracking menstrual cycles and PMDD symptoms, designed to help users monitor their health patterns over time.
 
-## Quick Start for New Users
+## Quick Start for All Users
 
-### Portable Desktop App (Recommended)
-- **Download:** Get the latest portable ZIP from GitHub Releases. (OR git clone below either works if clone skip to Run.)
-- **Unzip:** Unzip anywhere (Desktop, USB drive, etc.).
-- **Run:** `MakePortableExe.bat` (Will create a `Dist`)
-- **Shortcut:** Make a shortcut to `CycleSense.exe` in the root for convenience. The main executable itself is located in the `dist` folder.
-- **No installation required:** The app is fully self-contained. Delete the folder to remove all traces.
-- **All data is stored locally** in the app `data` folder (unless you change settings).
+### 1. Downloading the App
 
+#### Option A: Download ZIP from GitHub
+- **Download:** Click the green "Code" button on GitHub and select "Download ZIP".
+- **Unzip:** Extract anywhere (Desktop, USB drive, etc.).
+- **Continue with 'Install Dependencies' below.**
 
-### Web/Network Mode (Advanced/Legacy But also can use from your phone if you have the server on your PC)
-**Requirements for web/server mode:**
-- [Node.js](https://nodejs.org/) (version 14 or higher)
-1. **Clone the repository:**
-   ```
-   git clone https://github.com/sammeh543/CycleTrackApp.git
-   ```
-2. **Install dependencies:**
-   - Open a terminal in the project folder and run:
-     ```
-     npm install
-     ```
-3. **Start the app:**
-   - **Run:** `MakePortableExe.bat` (Will create a `Dist`) If you  want to run the windows app.
-   - **Windows:** Double-click `Start-CycleSense.bat` to launch the desktop app. For desktop development mode, use `Start-CycleSense-dev.bat`.
-   - **Mac/Linux:** Run `./start.sh` in the terminal -kinda unfinished in terms of matching all the bat files.
-   - **Broswer Server:** For browser-based hot reload server, use `start-broswer-dev.bat`. You will be able to access from your phone so long as your server is running on pc.
-4. **To open the app in your browser:**
-   - Go to [http://localhost:5000](http://localhost:5000) or your IP:5000
+#### Option B: Clone the Repository
+- **Install [Git](https://git-scm.com/)** if you don't have it.
+- **Open a command prompt in the desired folder and run:**
+  ```
+  git clone https://github.com/sammeh543/CycleTrackApp.git
+  ```
+- **Navigate into the folder if you haven't already:**
+  ```
+  cd CycleTrackApp
+  ```
+- **Continue with 'Install Dependencies' below.**
 
+### 2. Install Dependencies (Required for ZIP and Clone)
+- **Install [Node.js](https://nodejs.org/) (version 14 or higher)** if you don't have it.
+- **Open a command prompt in the project folder and run:**
+  ```
+  npm install
+  ```
+  This will install Electron and all required packages. You only need to do this once (or after updating dependencies).
+
+---
+
+## Running CycleSense
+
+### Port & Process Cleanup (If you see 'port in use' errors)
+If you see an error like `Error: listen EADDRINUSE: address already in use` or suspect that Electron/Node processes are stuck, you can use the included cleanup script:
+
+- **Run:** Double-click `cleanup-ports-and-processes.bat` in the project folder.
+- **What it does:** This script will automatically kill any processes using port 5000 (the dev server port) and any lingering Electron/Node processes.
+- **When to use:** Before starting the app if you see port errors, or any time you want to ensure a clean state.
+
+---
+
+### A. Run as Portable Windows App (No Network Needed)
+- **Build the EXE:**
+  - Double-click `MakePortableExe.bat` (or run `npm run build` then `npm run dist` from the command line).
+  - This will create a portable EXE in the `dist` folder.
+  - **Note:** If you delete the `dist` folder and rebuild, a new `dist` will be created. As long as `dist` is listed in your `.gitignore`, it will remain ignored by git.
+- **Run the App:**
+  - Open `dist` and double-click `CycleSense.exe`.
+  - **Shortcut:** Make a shortcut to `CycleSense.exe` in the root for convenience. Must keep exe in `dist` folder.
+  - All data is stored locally in the `data` folder (this folder is included in the project by default).
+
+### B. Run as Server/Web App (Network Mode)
+- **Start the Server:**
+  - Double-click `start-broswer-dev.bat` for browser mode with hot reload (good for development or use from other devices on your network).
+  - Or use `start-CycleSense-dev.bat` for Electron desktop with hot reload (for development/testing on your PC only).
+  - Or use `start-CycleSense.bat` for Electron desktop (production mode, no hot reload, on your PC only).
+- **Access from Browser/Network:**
+  - Only `start-broswer-dev.bat` allows access from other devices on your network (e.g., your phone). Use this for network/server mode.
+- **Note:** Running in server/web mode requires Node.js and npm to be installed and dependencies to be installed (see above).
+
+---
+
+## What Gets Installed and When
+- **You only need Node.js and npm to build or run the app from source.**
+- **You do NOT need to install Electron manually.** It's installed automatically with `npm install`.
+- **If you only use the portable EXE:** No Node.js, npm, or Electron install is needed on your PC after building.
+---
+
+## Troubleshooting & Tips
+- **If you see errors about missing Node.js or npm:** Install them from https://nodejs.org
+- **If you see errors about missing dependencies:** Run `npm install` in the project folder.
+
+---
+
+## Quick Reference
+- **Build app after making changes:** `npm run build`
+- **Run browser dev server:** `start-broswer-dev.bat`
+- **Run Electron dev (hot reload):** `start-CycleSense-dev.bat`
+- **Run Electron prod (no reload):** `start-CycleSense.bat`
+- **Build portable EXE for distribution:** `MakePortableExe.bat`
+
+---
+
+## Data Storage & Privacy
+- All data is stored locally in the `data` folder by default.
+- No data is sent to external servers.
+- You can export, backup, and restore your data at any time via the app settings.
 
 ---
 
@@ -50,7 +107,7 @@ A comprehensive web and desktop application for tracking menstrual cycles and PM
 
 ## Getting Started
 
-The application will create a `data` folder to store your health information locally. No data is sent to external servers.
+The application stores all your health information locally in the included `data` folder.
 
 ### Configuration (Web/Server Mode Only)
 
@@ -58,7 +115,7 @@ You can customize the application settings by editing the `config.json` file:
 
 ```json
 {
-  "dataPath": "./data",  // Where your data will be stored honestly can probably just leave it default just back it up
+  "dataPath": "./data",  // Where your data will be stored
   "port": 5000,          // The port the app will run on
   "logLevel": "info",    // Logging detail level
   "backupInterval": 24,  // How often backups are made (hours)
@@ -96,7 +153,6 @@ The Analysis view provides:
 - Common symptoms
 - Pattern detection
 
-
 ## PMDD Symptoms Toggle
 
 - You can now choose whether to show or hide PMDD symptoms in the "Today" view via a toggle in App Settings.
@@ -106,7 +162,7 @@ The Analysis view provides:
 
 - Go to **Settings → Export & Backup** to download your data as CSV (for Excel) or a full JSON backup.
 - To restore your data, use the **Import Backup (JSON)** option in Settings and select your backup file. 
-  - HIGHLY RECCOMENDED TO RESET DATA BEFORE IMPORT TO AVOID BUGS
+ - HIGHLY RECOMMENDED TO RESET DATA BEFORE IMPORT TO AVOID BUGS
 - All data stays on your device unless you choose to export it. No external servers are used.
 
 ## Privacy
@@ -118,7 +174,7 @@ This application values your privacy:
 
 ## Network Access & IP Whitelisting (Web/Server Mode)
 
-You can access the app from other devices (like your phone) on the same WiFi network `start-broswer-dev.bat` If you want a little security from other people on your wifi network but not much then follow the next steps:
+You can access the app from other devices (like your phone) on the same WiFi network.
 
 ### How to Find Your PC’s IP Address
 
@@ -135,9 +191,9 @@ You can access the app from other devices (like your phone) on the same WiFi net
 1. In `config.json`, set:
    ```json
    "ipWhitelistEnabled": true,
-   "ipWhitelistFile": "./ip-whitelist.txt" // This should just be in the root folder always.
+   "ipWhitelistFile": "./ip-whitelist.txt"
    ```
-2. Add each allowed device's IP address to `ip-whitelist.txt` (one per line), Just edit the txt file in the root folder:
+2. Add each allowed device's IP address to `ip-whitelist.txt` (one per line):
    ```
    127.0.0.1
    ::1
@@ -145,19 +201,15 @@ You can access the app from other devices (like your phone) on the same WiFi net
    192.168.1.99   # Phone
    ```
 3. Restart the server for changes to take effect.
-4. **On your PC:** Open your browser to `http://localhost:5000`, or `http://<your-pc-ip>:5000` (e.g., `http://192.168.1.70:5000`)
-5. **On your phone or another device:** Open your browser to `http://<your-pc-ip>:5000` (e.g., `http://192.168.1.70:5000`).
-6. If your device's IP changes, update the whitelist and restart the server.
 
 ---
 
-### Desktop Development
+## Desktop Development
 
 - **Electron Dev Mode:**
-  - Use `Start-CycleSense-dev.bat` for live reload and console output in the desktop app.
+  - Use `Start-CycleSense-dev.bat` for live reload and console output in the desktop app (for development/testing on your PC only).
 - **Classic Web Dev:**
-  - Use `start-broswer-dev.bat` for browser-based hot reload and network access.
-
+  - Use `start-broswer-dev.bat` for browser-based hot reload and network access (for development or network/server mode).
 
 ---
 
@@ -165,22 +217,14 @@ CycleSense is now available as a native Windows desktop application, powered by 
 
 ---
 
-## Features
-- All-in-one desktop experience: no server setup required
-- Splash/loading screen for smooth startup
-- Modern, themeable UI
-- All data and settings remain local to your PC
-
----
-
 ## Network Access (Web/Server Mode)
 
 If you want to access CycleSense from your phone or another device on your network:
-- Run `start-broswer-dev.bat` as appropriate (see above for usage).
+- Run `start-broswer-dev.bat` (see above for usage).
 - Open a browser on your phone to `http://<your-pc-ip>:5000` (replace `<your-pc-ip>` with your PC's IP address).
 - All original web/server features are still available when running in this mode.
 
- Otherwise just use `Start-CycleSense.bat`, `Start-CycleSense-dev.bat` for the portable version with no network access.
+Otherwise, use `Start-CycleSense.bat` or `Start-CycleSense-dev.bat` for the portable version with no network access.
 
 ---
 

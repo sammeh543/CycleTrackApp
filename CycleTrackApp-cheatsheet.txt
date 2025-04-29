@@ -1,0 +1,63 @@
+CycleTrackApp Cheat Sheet
+========================
+
+1. Making Code Changes
+----------------------
+- If you change any code (frontend, backend, UI, etc.), open a Command Prompt in your project folder and run:
+  npm run build
+- This will rebuild your app so changes show up in the browser or Electron.
+
+2. Running the App (Development)
+-------------------------------
+- To run in the browser (for testing web version):
+  Double-click start-broswer-dev.bat
+- To run in Electron with hot reload (for testing desktop version):
+  Double-click start-CycleSense-dev.bat
+- To run the Electron app in production mode (no hot reload):
+  Double-click start-CycleSense.bat
+  (Make sure to run npm run build first if you changed code!)
+
+3. Building a Portable EXE (for Distribution)
+---------------------------------------------
+- To create a new portable Windows .exe for sharing:
+  Double-click MakePortableExe.bat
+- The new EXE will be in the 'dist' folder.
+- Don't commit the 'dist' folder to git (it's already in .gitignore).
+
+4. Copying Changes from CycleTrack2
+-----------------------------------
+- You can copy code changes from CycleTrack2 (the web-only version) into this project.
+- Only copy files that are not Electron-specific (don't overwrite main.cjs or Electron config files).
+- If you add new dependencies, also add them to package.json and run npm install.
+-----------------
+- Build app after making changes:         npm run build
+- Run browser dev server:                 start-broswer-dev.bat
+- Run Electron dev (hot reload):          start-CycleSense-dev.bat
+- Run Electron prod (no reload):          start-CycleSense.bat
+- Build portable EXE for distribution:    MakePortableExe.bat
+
+5. Common Problems
+------------------
+- If you see errors about missing Node.js or npm, install them from https://nodejs.org
+- If you see errors about missing dependencies, run:
+  npm install
+
+6. Need Help?
+-------------
+- Ask your AI assistant for help with any error or question!
+
+## Copying Changes from CycleTrack2
+- You can copy code changes from CycleTrack2 (the web-only version) into this project.
+- **Do NOT overwrite Electron-specific files:**
+  - `main.js`
+  - `main.cjs`
+  - `package.json`
+  - `splash.html`
+- Only copy files that are not Electron-specific (frontend, backend, shared logic, etc.).
+- If you add new dependencies, also add them to `package.json` and run `npm install`.
+
+---
+
+(You can keep or print this file for reference.)
+
+`Main.js`, `Main.cjs`, `package.json`, `splash.html` are all Electron files.

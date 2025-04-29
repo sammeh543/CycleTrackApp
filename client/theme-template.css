@@ -1,0 +1,92 @@
+/*
+==============================================
+CycleSense Theme Template
+==============================================
+
+How to add a new theme:
+1. Copy the .theme-TEMPLATE_NAME block below.
+2. Paste it into your main CSS (index.css) or a new CSS file.
+3. Rename .theme-TEMPLATE_NAME to your theme's name, e.g. .theme-neon or .theme-moonlite
+4. Adjust the color variables to fit your theme.
+5. If you want GLOW EFFECTS (neon, synth, etc):
+   - Add a --glow-color variable to your theme (see example below).
+   - Use the same selector pattern as in index.css (e.g. .theme-yourtheme .glow-btn { ... })
+   - Only themes with --glow-color and the proper CSS will show glow!
+6. If you do NOT want glow, simply do not add --glow-color or glow utility classes for your theme.
+7. Save and reload your app to see the new theme in action.
+
+----------------------------------------------
+EXAMPLE: Theme with Glow (copy and edit)
+----------------------------------------------
+.theme-myneon {
+  --background: 250 80% 10%;
+  --foreground: 0 0% 98%;
+  --primary: 200 100% 60%;
+  /* ...other variables... */
+  --glow-color: #00fff7; /* <- enables glow for this theme */
+}
+.theme-myneon .glow-btn,
+.theme-myneon .glow-switch {
+  box-shadow: 0 0 8px 2px var(--glow-color), 0 0 16px 4px var(--glow-color);
+}
+
+----------------------------------------------
+EXAMPLE: Theme without Glow (copy and edit)
+----------------------------------------------
+.theme-mysoftpastel {
+  --background: 320 60% 98%;
+  --foreground: 320 40% 10%;
+  --primary: 340 80% 60%;
+  /* ...other variables... */
+  /* No --glow-color, so glow utilities will not show! */
+}
+
+----------------------------------------------
+
+// Full variable list for reference:
+.theme-TEMPLATE_NAME {
+  --background: 0 0% 10%;
+  --foreground: 0 0% 98%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 70%;
+  --popover: 0 0% 15%;
+  --popover-foreground: 0 0% 98%;
+  --card: 0 0% 15%;
+  --card-foreground: 0 0% 98%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --primary: 0 100% 50%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 100% 60%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 300 100% 60%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 100% 40%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 0 0% 80%;
+  --radius: 0.5rem;
+  --indigo-bar: #6366f1;
+  /* Chart colors */
+  --chart-1: 0 100% 50%;
+  --chart-2: 240 100% 60%;
+  --chart-3: 300 100% 60%;
+  --chart-4: 60 100% 60%;
+  --chart-5: 120 100% 60%;
+  /* Sidebar colors */
+  --sidebar-background: 0 0% 10%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 0 100% 50%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 300 100% 60%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-ring: 0 0% 80%;
+  /* Optional: --glow-color for neon themes */
+}
+
+/*
+Instructions:
+- For a new theme, copy the .theme-TEMPLATE_NAME block, rename it, and adjust variables.
+- Add --glow-color and .glow-* utilities only if you want glow effects.
+- See index.css for full utility class patterns.
+*/

@@ -11,8 +11,6 @@
     "medications": [],
     "defaultCycleLength": 28,
     "defaultPeriodLength": 5,
-    "showPmddSymptoms": true,
-    "id": 1,
-    "showIntimateActivity": true
+    "id": 71
   }
 ]
