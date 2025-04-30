@@ -15,7 +15,8 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Droplet, CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle } from 'lucide-react';
+import DropletIcon from '@/icons/DropletIcon';
 import IntimateActivityButton from '@/components/symptoms/IntimateActivityButton';
 import { useIntimateActivity } from '@/hooks/use-intimate-activity';
 import SymptomsList from '@/components/symptoms/symptoms-list';
@@ -313,112 +314,121 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold">Period Status</h3>
-                {/* Show period buttons on any date, not just today */}
-                {(
-                  <>
-                  {activeCycleForSelectedDate && !activeCycleForSelectedDate.endDate && (
-                    <div className="flex gap-2">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-xs border-primary text-primary"
-                          >
-                            End Period
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Confirm End Period</AlertDialogTitle>
-                          </AlertDialogHeader>
-                          <AlertDialogDescription>
-                            Are you sure you want to end your period? This will update your cycle data.
-                          </AlertDialogDescription>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => endPeriod(selectedDate, activeCycleForSelectedDate?.id)}>End Period</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="destructive" 
-                            size="sm" 
-                            className="text-xs"
-                          >
-                            Cancel Period
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Cancel Period</AlertDialogTitle>
-                          </AlertDialogHeader>
-                          <AlertDialogDescription>
-                            Are you sure you want to cancel this period? This will remove all data for this cycle.
-                          </AlertDialogDescription>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>No, Keep It</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => cancelPeriod(activeCycleForSelectedDate.id)}>Yes, Delete It</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  )}
-                  {(!activeCycleForSelectedDate || (activeCycleForSelectedDate && activeCycleForSelectedDate.endDate)) && (
-                    <Button 
-                      variant="default" 
-                      size="sm" 
-                      className="text-xs"
+                {/* Spotting and period action buttons row */}
+                {!activeCycleForSelectedDate || (activeCycleForSelectedDate && activeCycleForSelectedDate.endDate) ? (
+                  <div className="flex gap-3">
+                    <Button
+                      variant={currentFlow?.intensity === 'spotting' ? 'default' : 'outline'}
+                      size="sm"
+                      className={`text-xs flex items-center px-4 py-2 period-status-btn border-primary ${currentFlow?.intensity === 'spotting' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
+                      onClick={() => recordFlow('spotting', selectedDate)}
+                      style={{ minWidth: 110 }}
+                    >
+                      <DropletIcon className="h-5 w-5 mr-2" fillOpacity={currentFlow?.intensity === 'spotting' ? 0.3 : 0} />
+                      <span className="period-status-label">Spotting</span>
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="text-xs flex items-center px-4 py-2 period-status-btn"
                       onClick={() => {
                         startPeriod(selectedDate);
-                        // Also record flow as light by default
                         setTimeout(() => recordFlow('light', selectedDate), 300);
                       }}
+                      style={{ minWidth: 110 }}
                     >
                       Start Period
                     </Button>
-                  )}
-                  </>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs border-primary text-primary"
+                        >
+                          End Period
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirm End Period</AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <AlertDialogDescription>
+                          Are you sure you want to end your period? This will update your cycle data.
+                        </AlertDialogDescription>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => endPeriod(selectedDate, activeCycleForSelectedDate?.id)}>End Period</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="text-xs"
+                        >
+                          Cancel Period
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Cancel Period</AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <AlertDialogDescription>
+                          Are you sure you want to cancel this period? This will remove all data for this cycle.
+                        </AlertDialogDescription>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>No, Keep It</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => cancelPeriod(activeCycleForSelectedDate.id)}>Yes, Delete It</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 )}
               </div>
-              {/* Always show flow options to allow logging spotting outside of periods */}
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <Button 
-                  variant={currentFlow?.intensity === 'spotting' ? 'default' : 'outline'}
-                  className={`justify-center period-status-btn ${currentFlow?.intensity === 'spotting' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'} `}
-                  onClick={() => recordFlow('spotting', selectedDate)}
-                >
-                  <Droplet className="mr-1 h-4 w-4 period-status-label" fillOpacity={currentFlow?.intensity === 'spotting' ? 0.3 : 0} />
-                  <span className="period-status-label">Spotting</span>
-                </Button>
-                <Button 
-                  variant={currentFlow?.intensity === 'light' ? 'default' : 'outline'}
-                  className={`justify-center period-status-btn ${currentFlow?.intensity === 'light' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'} `}
-                  onClick={() => recordFlow('light', selectedDate)}
-                >
-                  <Droplet className="mr-1 h-4 w-4 period-status-label" fillOpacity={currentFlow?.intensity === 'light' ? 0.5 : 0} />
-                  <span className="period-status-label">Light</span>
-                </Button>
-                <Button 
-                  variant={currentFlow?.intensity === 'medium' ? 'default' : 'outline'}
-                  className={`justify-center period-status-btn ${currentFlow?.intensity === 'medium' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'} `}
-                  onClick={() => recordFlow('medium', selectedDate)}
-                >
-                  <Droplet className="mr-1 h-4 w-4 period-status-label" fill={currentFlow?.intensity === 'medium' ? 'currentColor' : 'none'} />
-                  <span className="period-status-label">Medium</span>
-                </Button>
-                <Button 
-                  variant={currentFlow?.intensity === 'heavy' ? 'default' : 'outline'}
-                  className={`justify-center period-status-btn ${currentFlow?.intensity === 'heavy' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'} `}
-                  onClick={() => recordFlow('heavy', selectedDate)}
-                >
-                  <Droplet className="mr-1 h-4 w-4 period-status-label" fill={currentFlow?.intensity === 'heavy' ? 'currentColor' : 'none'} />
-                  <span className="period-status-label">Heavy</span>
-                </Button>
-              </div>
+              {/* Flow intensity buttons only show during an active period */}
+              {activeCycleForSelectedDate && !activeCycleForSelectedDate.endDate && (
+                <div className="flex gap-3 mb-3 justify-center">
+                  <Button
+                    variant={currentFlow?.intensity === 'light' ? 'default' : 'outline'}
+                    className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'light' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
+                    onClick={() => recordFlow('light', selectedDate)}
+                    style={{ minWidth: 56 }}
+                  >
+                    <span className="flex gap-1 items-center justify-center">
+                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'light' ? 0.5 : 0} />
+                    </span>
+                  </Button>
+                  <Button
+                    variant={currentFlow?.intensity === 'medium' ? 'default' : 'outline'}
+                    className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'medium' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
+                    onClick={() => recordFlow('medium', selectedDate)}
+                    style={{ minWidth: 56 }}
+                  >
+                    <span className="flex gap-1 items-center justify-center">
+                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'medium' ? 0.5 : 0} />
+                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'medium' ? 0.5 : 0} />
+                    </span>
+                  </Button>
+                  <Button
+                    variant={currentFlow?.intensity === 'heavy' ? 'default' : 'outline'}
+                    className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'heavy' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
+                    onClick={() => recordFlow('heavy', selectedDate)}
+                    style={{ minWidth: 56 }}
+                  >
+                    <span className="flex gap-1 items-center justify-center">
+                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
+                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
+                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
+                    </span>
+                  </Button>
+                </div>
+              )}
               {!currentFlow && (
                 <div className="text-sm text-muted-foreground mb-3 p-2 bg-muted/20 rounded">
                   No period data for this date. Use the "Start Period" button to begin tracking.

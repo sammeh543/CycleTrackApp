@@ -1,0 +1,30 @@
+[
+  {
+    "userId": 1,
+    "date": "2025-04-30",
+    "intensity": "light",
+    "id": 1,
+    "cycleId": 1
+  },
+  {
+    "userId": 1,
+    "cycleId": 1,
+    "date": "2025-05-01",
+    "intensity": "light",
+    "id": 2
+  },
+  {
+    "userId": 1,
+    "cycleId": 1,
+    "date": "2025-05-02",
+    "intensity": "spotting",
+    "id": 3
+  },
+  {
+    "userId": 1,
+    "cycleId": 1,
+    "date": "2025-05-03",
+    "intensity": "light",
+    "id": 4
+  }
+]

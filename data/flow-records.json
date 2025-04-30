@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "userId": 1,
+    "cycleId": 1,
+    "date": "2025-04-30",
+    "intensity": "light",
+    "id": 6
+  }
+]
