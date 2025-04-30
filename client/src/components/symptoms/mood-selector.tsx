@@ -1,11 +1,9 @@
 import React from 'react';
-import { 
-  SmilePlus, 
-  Smile, 
-  Meh, 
-  Frown, 
-  Annoyed 
-} from 'lucide-react';
+import SmilePlusIcon from '@/icons/SmilePlusIcon';
+import SmileIcon from '@/icons/SmileIcon';
+import MehIcon from '@/icons/MehIcon';
+import FrownIcon from '@/icons/FrownIcon';
+import AnnoyedIcon from '@/icons/AnnoyedIcon';
 
 type MoodType = 'great' | 'good' | 'okay' | 'bad' | 'awful';
 
@@ -20,7 +18,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({ currentMood, onMoodSelect }
       <MoodButton 
         mood="great" 
         label="Great" 
-        icon={<SmilePlus className="text-2xl text-yellow-500" />} 
+        icon={<SmilePlusIcon className="text-2xl text-yellow-500" />}  
         isActive={currentMood === 'great'} 
         onClick={() => onMoodSelect('great')} 
       />
@@ -28,7 +26,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({ currentMood, onMoodSelect }
       <MoodButton 
         mood="good" 
         label="Good" 
-        icon={<Smile className="text-2xl text-green-400" />} 
+        icon={<SmileIcon className="text-2xl text-green-400" />}  
         isActive={currentMood === 'good'} 
         onClick={() => onMoodSelect('good')} 
       />
@@ -36,7 +34,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({ currentMood, onMoodSelect }
       <MoodButton 
         mood="okay" 
         label="Okay" 
-        icon={<Meh className="text-2xl text-blue-400" />} 
+        icon={<MehIcon className="text-2xl text-blue-400" />}  
         isActive={currentMood === 'okay'} 
         onClick={() => onMoodSelect('okay')} 
       />
@@ -44,7 +42,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({ currentMood, onMoodSelect }
       <MoodButton 
         mood="bad" 
         label="Bad" 
-        icon={<Frown className="text-2xl text-orange-400" />} 
+        icon={<FrownIcon className="text-2xl text-orange-400" />}  
         isActive={currentMood === 'bad'} 
         onClick={() => onMoodSelect('bad')} 
       />
@@ -52,7 +50,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({ currentMood, onMoodSelect }
       <MoodButton 
         mood="awful" 
         label="Awful" 
-        icon={<Annoyed className="text-2xl text-red-500" />} 
+        icon={<AnnoyedIcon className="text-2xl text-red-500" />}  
         isActive={currentMood === 'awful'} 
         onClick={() => onMoodSelect('awful')} 
       />

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Waves, Droplet, Cloud, Snowflake, Check } from 'lucide-react';
+import WavesIcon from '@/icons/WavesIcon';
+import DropletIcon from '@/icons/DropletIcon';
+import CloudIcon from '@/icons/CloudIcon';
+import SnowflakeIcon from '@/icons/SnowflakeIcon';
+import CheckIcon from '@/icons/CheckIcon';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
@@ -52,9 +56,9 @@ const CervicalMucusSelector: React.FC<CervicalMucusSelectorProps> = ({
           )}
           onClick={() => handleSelect('dry')}
         >
-          <Snowflake className="mr-1 h-4 w-4" />
+          <SnowflakeIcon className="mr-1 h-4 w-4" fillOpacity={isSelected('dry') ? 0.5 : 0} />
           <span>Dry</span>
-          {isSelected('dry') && <Check className="ml-1 h-3 w-3" />}
+          {isSelected('dry') && <CheckIcon className="ml-1 h-3 w-3" />}
         </Button>
         
         <Button 
@@ -66,9 +70,9 @@ const CervicalMucusSelector: React.FC<CervicalMucusSelectorProps> = ({
           )}
           onClick={() => handleSelect('sticky')}
         >
-          <Cloud className="mr-1 h-4 w-4" />
+          <CloudIcon className="mr-1 h-4 w-4" fillOpacity={isSelected('sticky') ? 0.5 : 0} />
           <span>Sticky</span>
-          {isSelected('sticky') && <Check className="ml-1 h-3 w-3" />}
+          {isSelected('sticky') && <CheckIcon className="ml-1 h-3 w-3" />}
         </Button>
         
         <Button 
@@ -80,9 +84,9 @@ const CervicalMucusSelector: React.FC<CervicalMucusSelectorProps> = ({
           )}
           onClick={() => handleSelect('creamy')}
         >
-          <Cloud className="mr-1 h-4 w-4" fill={isSelected('creamy') ? 'currentColor' : 'none'} />
+          <CloudIcon className="mr-1 h-4 w-4" fillOpacity={isSelected('creamy') ? 0.5 : 0} />
           <span>Creamy</span>
-          {isSelected('creamy') && <Check className="ml-1 h-3 w-3" />}
+          {isSelected('creamy') && <CheckIcon className="ml-1 h-3 w-3" />}
         </Button>
         
         <Button 
@@ -94,9 +98,9 @@ const CervicalMucusSelector: React.FC<CervicalMucusSelectorProps> = ({
           )}
           onClick={() => handleSelect('watery')}
         >
-          <Droplet className="mr-1 h-4 w-4" />
+          <DropletIcon className="mr-1 h-4 w-4" fillOpacity={isSelected('watery') ? 0.5 : 0} />
           <span>Watery</span>
-          {isSelected('watery') && <Check className="ml-1 h-3 w-3" />}
+          {isSelected('watery') && <CheckIcon className="ml-1 h-3 w-3" />}
         </Button>
       </div>
       
@@ -110,9 +114,9 @@ const CervicalMucusSelector: React.FC<CervicalMucusSelectorProps> = ({
           )}
           onClick={() => handleSelect('eggwhite')}
         >
-          <Waves className="mr-1 h-4 w-4" />
+          <WavesIcon className="mr-1 h-4 w-4" fillOpacity={isSelected('eggwhite') ? 0.5 : 0} />
           <span>Egg White (Fertile)</span>
-          {isSelected('eggwhite') && <Check className="ml-1 h-3 w-3" />}
+          {isSelected('eggwhite') && <CheckIcon className="ml-1 h-3 w-3" />}
         </Button>
       </div>
       
