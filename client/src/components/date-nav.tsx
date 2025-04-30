@@ -88,6 +88,7 @@ const DateNav: React.FC<DateNavProps> = ({ selectedDate, onDateChange, userId = 
             <Calendar
               mode="single"
               selected={selectedDate}
+              month={selectedDate}
               onSelect={(date) => {
                 if (date) {
                   onDateChange(date);
@@ -142,8 +143,6 @@ const DateNav: React.FC<DateNavProps> = ({ selectedDate, onDateChange, userId = 
           variant="outline"
           size="icon"
           onClick={goToNextDay}
-          disabled={isFutureDate}
-          title={isFutureDate ? "Cannot navigate to future dates" : "Next day"}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
