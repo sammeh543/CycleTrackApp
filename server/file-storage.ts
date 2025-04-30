@@ -937,24 +937,30 @@ export class FileStorage implements IStorage {
   // Analytics
   async getAverageCycleLength(userId: number): Promise<number | undefined> {
     const cycles = await this.getCycles(userId);
-    
-    // Filter to completed cycles (has both start and end date)
-    const completedCycles = cycles.filter(cycle => cycle.startDate && cycle.endDate);
-    
-    if (completedCycles.length < 2) {
-      return undefined; // Need at least 2 completed cycles
+    if (cycles.length < 2) {
+      return undefined; // Need at least 2 cycles to calculate cycle length
     }
-    
-    // Calculate durations
-    const durations = completedCycles.map(cycle => {
-      const start = new Date(cycle.startDate);
-      const end = new Date(cycle.endDate!);
-      return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)); // days
-    });
-    
-    // Calculate average
-    const totalDays = durations.reduce((sum, days) => sum + days, 0);
-    return Math.round(totalDays / durations.length);
+
+    // Sort cycles by start date ascending
+    const sortedCycles = cycles
+      .filter(cycle => cycle.startDate)
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+    const cycleLengths: number[] = [];
+    for (let i = 1; i < sortedCycles.length; i++) {
+      const prevStart = new Date(sortedCycles[i - 1].startDate);
+      const currStart = new Date(sortedCycles[i].startDate);
+      const diffDays = Math.round((currStart.getTime() - prevStart.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays > 0) {
+        cycleLengths.push(diffDays);
+      }
+    }
+    console.log("Sorted cycle start dates:", sortedCycles.map(c => c.startDate));
+    console.log("Cycle lengths (days between starts):", cycleLengths);
+    if (cycleLengths.length === 0) return undefined;
+    const total = cycleLengths.reduce((a, b) => a + b, 0);
+    console.log("Average cycle length:", total / cycleLengths.length);
+    return Math.round(total / cycleLengths.length);
   }
 
   async getAveragePeriodLength(userId: number): Promise<number | undefined> {

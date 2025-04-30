@@ -325,9 +325,18 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
         }
       }
       
-      // Initialize all symptom intensities to 0
+      // For each symptom, set to null before first log, 0 otherwise
       uniqueSymptoms.forEach(symptom => {
-        dailyData[dateStr][symptom] = 0;
+        // Find first log date for this symptom
+        const firstRecord = symptomRecords
+          .filter(record => symptomMap.get(record.symptomId) === symptom)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+        const firstDate = firstRecord ? firstRecord.date.split('T')[0] : null;
+        if (!firstDate || dateStr < firstDate) {
+          dailyData[dateStr][symptom] = null;
+        } else {
+          dailyData[dateStr][symptom] = 0;
+        }
       });
       
       // Move to next day
@@ -663,6 +672,9 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
   const legendDotClass = "inline-block w-3 h-3 rounded-full";
   const legendLabelClass = "text-xs";
 
+  // Only include symptoms that are in the current visible symptoms prop
+  const visibleSymptomNames = symptoms.map(s => s.name);
+
   return (
     <Card className="bg-card rounded-lg p-4 mb-6">
       <CardContent className="p-0">
@@ -767,27 +779,40 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
               {selectedSymptoms.map((symptomName, index) => {
                 // Use fallback color for unknowns
                 const color = symptomName.startsWith('Unknown Symptom') ? 'hsl(var(--muted-foreground))' : colors[index % colors.length];
-                
+                // --- Build SVG path that skips nulls and only starts at first actual data point ---
+                let path = '';
+                let started = false;
+                symptomData.forEach((data, i) => {
+                  const x = (i * 500) / Math.max(1, symptomData.length - 1);
+                  const val = data[symptomName];
+                  if (val === null || val === undefined) {
+                    started = false;
+                  } else {
+                    // Only start path at first non-null value
+                    const intensity = val >= 1 ? val : 1;
+                    const y = 190 - ((intensity - 1) / 3) * 180;
+                    if (!started) {
+                      path += `M${x},${y}`;
+                      started = true;
+                    } else {
+                      path += ` L${x},${y}`;
+                    }
+                  }
+                });
                 return (
                   <g key={symptomName}>
                     <path 
-                      d={symptomData.map((data, i) => {
-                        const x = (i * 500) / Math.max(1, symptomData.length - 1);
-                        // If value is missing/zero, default to 1 (Mild)
-                        const intensity = data[symptomName] && data[symptomName] >= 1 ? data[symptomName] : 1;
-                        // Scale from 1-4 to chart height (200px), but with 10px top and bottom padding
-                        const y = 190 - ((intensity - 1) / 3) * 180;
-                        return `${i === 0 ? 'M' : 'L'}${x},${y}`;
-                      }).join(' ')} 
+                      d={path}
                       stroke={color} 
                       strokeWidth="2"
                       fill="none" 
                     />
-                    
                     {/* Data points */}
                     {symptomData.map((data, i) => {
                       const x = (i * 500) / Math.max(1, symptomData.length - 1);
-                      const intensity = data[symptomName] && data[symptomName] >= 1 ? data[symptomName] : 1;
+                      const val = data[symptomName];
+                      if (val === null || val === undefined) return null;
+                      const intensity = val >= 1 ? val : 1;
                       const y = 190 - ((intensity - 1) / 3) * 180;
                       return intensity > 0 ? (
                         <circle 
@@ -842,17 +867,16 @@ const TimeSeriesCharts: React.FC<TimeSeriesChartsProps> = ({
           
           {/* Legend */}
           {showLegend && (
-            <div className="flex flex-wrap gap-x-1 gap-y-1 mt-2 mb-2">
-              {selectedSymptoms.map((symptomName, index) => {
-                const color = symptomName.startsWith('Unknown Symptom') ? 'hsl(var(--muted-foreground))' : colors[index % colors.length];
-                
-                return (
-                  <div key={symptomName} className={legendItemClass}>
-                    <span style={{ backgroundColor: color }} className={legendDotClass}></span>
-                    <span className={legendLabelClass}>{symptomName}</span>
-                  </div>
-                );
-              })}
+            <div className="flex flex-wrap items-center mb-2 mt-2">
+              {selectedSymptoms.filter(symptomName => visibleSymptomNames.includes(symptomName)).map((symptomName, index) => (
+                <div key={symptomName} className={legendItemClass}>
+                  <span
+                    className={legendDotClass}
+                    style={{ background: colors[index % colors.length] }}
+                  ></span>
+                  <span className={legendLabelClass}>{symptomName}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { format, isToday, parseISO, isSameDay, isBefore, isAfter } from 'date-fns';
+import { 
+  parseISO, 
+  isSameDay, 
+  isBefore, 
+  isAfter, 
+  format, 
+  addDays, 
+  differenceInDays, 
+  eachDayOfInterval, 
+  isToday 
+} from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
@@ -18,6 +28,8 @@ import { useSymptoms } from '@/hooks/use-symptoms';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
+import { getDataDrivenCyclePhase } from '@/lib/data-driven-cycle-phase';
+import { getBestCyclePredictionLengths, isInFertileWindow } from '@/lib/cycle-utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,9 +73,7 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
     cycles,
     currentCycle,
     cycleDay,
-    cyclePhase,
-    isInFertileWindow,
-    currentFlow,
+    flowRecords,
     isLoading: cycleLoading,
     startPeriod,
     endPeriod,
@@ -71,6 +81,70 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
     recordFlow,
     refetchCycles
   } = useCycleData({ userId });
+
+  
+  // Fetch user settings for PMDD toggle and Intimacy card
+  const { data: settings } = useQuery<{ showPmddSymptoms?: boolean; showIntimacyCard?: boolean; defaultCycleLength?: number; defaultPeriodLength?: number }>({
+    queryKey: [`/api/user-settings/${userId}`],
+    enabled: userId > 0,
+  });
+  const userSettings = settings || {};
+  // (settings is now only declared once)
+
+
+  // Compute current flow for the selected date
+  const currentFlow = (flowRecords || []).find(r => {
+    const d = typeof r.date === 'string' ? parseISO(r.date) : r.date;
+    return isSameDay(d, selectedDate);
+  });
+  // For ongoing period fill logic, you may want to calculate fillOngoingPeriodDates here if needed
+  const fillOngoingPeriodDates: string[] = [];
+  // Compute today's phase using actual data
+  // --- Predicted Period logic (match calendar) ---
+  // 1. Get period starts
+  const periodRecordsNoSpotting = (flowRecords || []).filter(r => r.intensity !== 'spotting');
+  const sortedPeriodRecordsNoSpotting = [...periodRecordsNoSpotting].sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  const periodStarts: Date[] = [];
+  for (let i = 0; i < sortedPeriodRecordsNoSpotting.length; i++) {
+    if (i === 0 || differenceInDays(parseISO(sortedPeriodRecordsNoSpotting[i].date), parseISO(sortedPeriodRecordsNoSpotting[i-1].date)) > 2) {
+      periodStarts.push(parseISO(sortedPeriodRecordsNoSpotting[i].date));
+    }
+  }
+  // 2. Predict future periods
+  const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords || [], userSettings);
+  const predictedPeriodDates: string[] = [];
+  if (periodStarts.length > 0) {
+    const lastLoggedStart = periodStarts[periodStarts.length - 1];
+    let nextStart = addDays(lastLoggedStart, avgCycleLength);
+    for (let i = 0; i < 3; i++) {
+      const periodStart = i === 0 ? nextStart : addDays(nextStart, i * avgCycleLength);
+      eachDayOfInterval({
+        start: periodStart,
+        end: addDays(periodStart, avgPeriodLength - 1)
+      }).forEach((d: Date) => {
+        predictedPeriodDates.push(format(d, 'yyyy-MM-dd'));
+      });
+    }
+  }
+  const todayKey = format(selectedDate, 'yyyy-MM-dd');
+  const isActualPeriod = periodRecordsNoSpotting.some(r => format(parseISO(r.date), 'yyyy-MM-dd') === todayKey);
+  const isPredictedPeriod = !isActualPeriod && predictedPeriodDates.includes(todayKey);
+  const todayPhase = isActualPeriod || isPredictedPeriod
+    ? 'period'
+    : getDataDrivenCyclePhase(selectedDate, flowRecords || [], userSettings, fillOngoingPeriodDates);
+
+
+  // Fertile window logic (match calendar)
+  // Find all non-spotting flow records
+  const periodRecords = (flowRecords || []).filter(r => r.intensity !== 'spotting');
+  // Find the most recent period start before or on selectedDate
+  const sortedPeriodRecords = [...periodRecords].sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+  const lastPeriodRecord = sortedPeriodRecords.find(r => parseISO(r.date) <= selectedDate);
+  let isFertileWindowDay = false;
+  if (lastPeriodRecord) {
+    const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords || [], userSettings);
+    isFertileWindowDay = isInFertileWindow(selectedDate, lastPeriodRecord.date, avgCycleLength, avgPeriodLength) && todayPhase !== 'period';
+  }
 
   // Intimate Activity (Sex) logging
   const {
@@ -112,12 +186,6 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
     refetchCycles();
   }, [selectedDate, setCycleSelectedDate, refetchCycles]);
   
-  // Fetch user settings for PMDD toggle and Intimacy card
-  const { data: settings } = useQuery<{ showPmddSymptoms?: boolean; showIntimacyCard?: boolean }>({
-    queryKey: [`/api/user-settings/${userId}`],
-    enabled: userId > 0,
-  });
-
   const { 
     physicalSymptoms,
     emotionalSymptoms,
@@ -200,37 +268,43 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
                 </div>
               )}
               {!cycleLoading && (
-                <div className={`text-sm px-3 py-1 rounded-full 
-                  ${cyclePhase === 'period' ? 'bg-red-400/90 period-status-label' : 
-                    cyclePhase === 'follicular' ? 'bg-yellow-400/90 period-status-label' : 
-                    cyclePhase === 'ovulation' ? 'bg-blue-400/90 period-status-label' : 
-                    cyclePhase === 'luteal' ? 'bg-purple-400/90 period-status-label' : 
-                    'bg-muted text-muted-foreground'}`}>
-                  {cyclePhase !== 'Unknown' ? `${cyclePhase.charAt(0).toUpperCase() + cyclePhase.slice(1)} Phase` : 'Phase Unknown'}
-                </div>
-              )}
-              {isInFertileWindow && (
-                <div className="text-sm px-3 py-1 rounded-full bg-blue-500 period-status-label flex items-center">
-                  <span className="inline-block w-2 h-2 bg-white rounded-full mr-1"></span>
-                  Fertile Window
-                </div>
+                <>
+                  <div className={`text-sm px-3 py-1 rounded-full 
+                    ${todayPhase === 'period' ? 'bg-red-400/90 period-status-label' : 
+                      todayPhase === 'follicular' ? 'bg-yellow-400/90 period-status-label' : 
+                      todayPhase === 'ovulation' ? 'bg-blue-400/90 period-status-label' : 
+                      todayPhase === 'luteal' ? 'bg-purple-400/90 period-status-label' : 
+                      'bg-muted text-muted-foreground'}`}>
+                    {isPredictedPeriod
+                      ? 'Predicted Period'
+                      : todayPhase !== 'Unknown'
+                        ? `${todayPhase.charAt(0).toUpperCase() + todayPhase.slice(1)} Phase`
+                        : 'Phase Unknown'}
+                  </div>
+                  {isFertileWindowDay && (
+                    <div className="text-sm px-3 py-1 rounded-full bg-blue-500 period-status-label flex items-center">
+                      <span className="inline-block w-2 h-2 bg-white rounded-full mr-1"></span>
+                      Fertile Window
+                    </div>
+                  )}
+                </>
               )}
             </div>
             
             {/* Phase Description */}
-            {!cycleLoading && cyclePhase !== 'Unknown' && (
+            {!cycleLoading && todayPhase !== 'Unknown' && (
               <div className="mb-4 p-3 rounded-md text-sm bg-muted/40">
-                {cyclePhase === 'period' && (
-                  <p>Menstrual phase (Days 1-5): Your period. Estrogen and progesterone levels are low.</p>
+                {todayPhase === 'period' && (
+                  <p>Menstrual phase: Your period is ongoing or logged for this day. Hormone levels are at their lowest.</p>
                 )}
-                {cyclePhase === 'follicular' && (
-                  <p>Follicular phase (Days 6-13): Estrogen levels rise as follicles grow. Your body prepares for ovulation.</p>
+                {todayPhase === 'follicular' && (
+                  <p>Follicular phase: This phase began after your last period ended and lasts until ovulation. Estrogen rises as follicles grow.</p>
                 )}
-                {cyclePhase === 'ovulation' && (
-                  <p>Ovulation phase (Day 14): An egg is released from the ovary. Fertility is at its highest.</p>
+                {todayPhase === 'ovulation' && (
+                  <p>Ovulation phase: An egg is released from the ovary. This is your most fertile time.</p>
                 )}
-                {cyclePhase === 'luteal' && (
-                  <p>Luteal phase (Days 15-28): Progesterone rises. Your body prepares for possible pregnancy or next period.</p>
+                {todayPhase === 'luteal' && (
+                  <p>Luteal phase: After ovulation, progesterone rises. Your body prepares for a possible pregnancy or your next period.</p>
                 )}
               </div>
             )}

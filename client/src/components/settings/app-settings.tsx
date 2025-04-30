@@ -58,7 +58,37 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
     queryKey: [`/api/user-settings/${userId}`],
     enabled: userId > 0
   });
-  
+
+  // Add local state for custom cycle length
+  const [cycleLengthSelectValue, setCycleLengthSelectValue] = useState<string>("28");
+  const [customCycleLength, setCustomCycleLength] = useState<string>("");
+
+  // Add local state for custom period length
+  const [periodLengthSelectValue, setPeriodLengthSelectValue] = useState<string>("5");
+  const [customPeriodLength, setCustomPeriodLength] = useState<string>("");
+
+  // Sync select/input state with backend settings
+  useEffect(() => {
+    if (settings?.defaultCycleLength) {
+      if ([21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(settings.defaultCycleLength)) {
+        setCycleLengthSelectValue(settings.defaultCycleLength.toString());
+        setCustomCycleLength("");
+      } else {
+        setCycleLengthSelectValue("custom");
+        setCustomCycleLength(settings.defaultCycleLength.toString());
+      }
+    }
+    if (settings?.defaultPeriodLength) {
+      if ([2,3,4,5,6,7,8,9,10].includes(settings.defaultPeriodLength)) {
+        setPeriodLengthSelectValue(settings.defaultPeriodLength.toString());
+        setCustomPeriodLength("");
+      } else {
+        setPeriodLengthSelectValue("custom");
+        setCustomPeriodLength(settings.defaultPeriodLength.toString());
+      }
+    }
+  }, [settings]);
+
   useEffect(() => {
     if (settings && typeof settings.showPmddSymptoms === 'boolean') {
       setShowPmddSymptoms(settings.showPmddSymptoms);
@@ -444,8 +474,14 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
               <span className="text-sm">Default Cycle Length</span>
               <div className="flex items-center gap-2">
                 <Select 
-                  defaultValue={settings?.defaultCycleLength?.toString() || "28"}
-                  onValueChange={handleCycleLengthChange}
+                  value={cycleLengthSelectValue}
+                  onValueChange={(value) => {
+                    setCycleLengthSelectValue(value);
+                    if (value !== 'custom') {
+                      setCustomCycleLength("");
+                      handleCycleLengthChange(value);
+                    }
+                  }}
                 >
                   <SelectTrigger className="w-[110px] h-8 text-sm bg-muted">
                     <SelectValue placeholder="Cycle length" />
@@ -457,21 +493,35 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
                     <SelectItem value="custom">Custom...</SelectItem>
                   </SelectContent>
                 </Select>
-                {settings?.defaultCycleLength !== 21 && 
-                 settings?.defaultCycleLength !== 22 && 
-                 settings?.defaultCycleLength !== 23 && 
-                 settings?.defaultCycleLength !== 24 && 
-                 settings?.defaultCycleLength !== 25 && 
-                 settings?.defaultCycleLength !== 26 && 
-                 settings?.defaultCycleLength !== 27 && 
-                 settings?.defaultCycleLength !== 28 && 
-                 settings?.defaultCycleLength !== 29 && 
-                 settings?.defaultCycleLength !== 30 && 
-                 settings?.defaultCycleLength !== 31 && 
-                 settings?.defaultCycleLength !== 32 && 
-                 settings?.defaultCycleLength !== 33 && 
-                 settings?.defaultCycleLength !== 34 && 
-                 settings?.defaultCycleLength !== 35 && (
+                {cycleLengthSelectValue === 'custom' && (
+                  <input
+                    type="number"
+                    min={15}
+                    max={60}
+                    className="ml-2 w-20 px-2 py-1 border rounded text-sm theme-input glow-input"
+                    placeholder="Days"
+                    value={customCycleLength}
+                    onChange={e => setCustomCycleLength(e.target.value)}
+                    onBlur={e => {
+                      const num = parseInt(e.target.value, 10);
+                      if (!isNaN(num) && num >= 15 && num <= 60) {
+                        handleCycleLengthChange(num.toString());
+                      }
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        const num = parseInt((e.target as HTMLInputElement).value, 10);
+                        if (!isNaN(num) && num >= 15 && num <= 60) {
+                          handleCycleLengthChange(num.toString());
+                        }
+                      }
+                    }}
+                  />
+                )}
+                {cycleLengthSelectValue === 'custom' && settings?.defaultCycleLength && ![21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(settings.defaultCycleLength) && (
+                  <span className="text-xs text-muted-foreground ml-2">Custom: {settings?.defaultCycleLength} days</span>
+                )}
+                {cycleLengthSelectValue !== 'custom' && settings?.defaultCycleLength && ![21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].includes(settings.defaultCycleLength) && (
                   <span className="text-xs text-muted-foreground">Custom: {settings?.defaultCycleLength} days</span>
                 )}
               </div>
@@ -480,8 +530,14 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
               <span className="text-sm">Default Period Length</span>
               <div className="flex items-center gap-2">
                 <Select 
-                  defaultValue={settings?.defaultPeriodLength?.toString() || "5"}
-                  onValueChange={handlePeriodLengthChange}
+                  value={periodLengthSelectValue}
+                  onValueChange={(value) => {
+                    setPeriodLengthSelectValue(value);
+                    if (value !== 'custom') {
+                      setCustomPeriodLength("");
+                      handlePeriodLengthChange(value);
+                    }
+                  }}
                 >
                   <SelectTrigger className="w-[110px] h-8 text-sm bg-muted">
                     <SelectValue placeholder="Period length" />
@@ -493,15 +549,35 @@ const AppSettings: React.FC<AppSettingsProps> = ({ userId }) => {
                     <SelectItem value="custom">Custom...</SelectItem>
                   </SelectContent>
                 </Select>
-                {settings?.defaultPeriodLength !== 2 &&
-                 settings?.defaultPeriodLength !== 3 &&
-                 settings?.defaultPeriodLength !== 4 &&
-                 settings?.defaultPeriodLength !== 5 &&
-                 settings?.defaultPeriodLength !== 6 &&
-                 settings?.defaultPeriodLength !== 7 &&
-                 settings?.defaultPeriodLength !== 8 &&
-                 settings?.defaultPeriodLength !== 9 &&
-                 settings?.defaultPeriodLength !== 10 && (
+                {periodLengthSelectValue === 'custom' && (
+                  <input
+                    type="number"
+                    min={1}
+                    max={15}
+                    className="ml-2 w-20 px-2 py-1 border rounded text-sm theme-input glow-input"
+                    placeholder="Days"
+                    value={customPeriodLength}
+                    onChange={e => setCustomPeriodLength(e.target.value)}
+                    onBlur={e => {
+                      const num = parseInt(e.target.value, 10);
+                      if (!isNaN(num) && num >= 1 && num <= 15) {
+                        handlePeriodLengthChange(num.toString());
+                      }
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        const num = parseInt((e.target as HTMLInputElement).value, 10);
+                        if (!isNaN(num) && num >= 1 && num <= 15) {
+                          handlePeriodLengthChange(num.toString());
+                        }
+                      }
+                    }}
+                  />
+                )}
+                {periodLengthSelectValue === 'custom' && settings?.defaultPeriodLength && ![2,3,4,5,6,7,8,9,10].includes(settings.defaultPeriodLength) && (
+                  <span className="text-xs text-muted-foreground ml-2">Custom: {settings?.defaultPeriodLength} days</span>
+                )}
+                {periodLengthSelectValue !== 'custom' && settings?.defaultPeriodLength && ![2,3,4,5,6,7,8,9,10].includes(settings.defaultPeriodLength) && (
                   <span className="text-xs text-muted-foreground">Custom: {settings?.defaultPeriodLength} days</span>
                 )}
               </div>

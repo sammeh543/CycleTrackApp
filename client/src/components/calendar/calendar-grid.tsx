@@ -15,7 +15,8 @@ import {
   isBefore,
   differenceInDays
 } from 'date-fns';
-import { getCyclePhase, isInFertileWindow, getNextExpectedPeriodDate, getExpectedPeriodDays } from '@/lib/cycle-utils';
+import { getCyclePhase, isInFertileWindow, getNextExpectedPeriodDate, getExpectedPeriodDays, getBestCyclePredictionLengths } from '@/lib/cycle-utils';
+import { getDataDrivenCyclePhase } from '@/lib/data-driven-cycle-phase';
 
 interface CalendarGridProps {
   month: Date;
@@ -77,135 +78,196 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   };
   
   // Determine period days, fertile window, and symptoms for each date
+  // Use best available cycle/period length for predictions
+  const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords, userSettings);
+  // Find the latest logged period (non-spotting flow records)
+  const nonSpotting = flowRecords.filter(r => r.intensity !== 'spotting').sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  let lastPeriodStart: Date | null = null;
+  let lastPeriodEnd: Date | null = null;
+  let isOngoingPeriod = false;
+  if (nonSpotting.length > 0) {
+    // Period clusters: gap > 2 days
+    let clusters: Date[][] = [];
+    let currentCluster: Date[] = [parseISO(nonSpotting[0].date)];
+    for (let i = 1; i < nonSpotting.length; i++) {
+      const prev = parseISO(nonSpotting[i-1].date);
+      const curr = parseISO(nonSpotting[i].date);
+      if (differenceInDays(curr, prev) > 2) {
+        clusters.push(currentCluster);
+        currentCluster = [curr];
+      } else {
+        currentCluster.push(curr);
+      }
+    }
+    clusters.push(currentCluster);
+    // Last cluster is latest period
+    const lastCluster = clusters[clusters.length - 1];
+    lastPeriodStart = lastCluster[0];
+    lastPeriodEnd = lastCluster[lastCluster.length - 1];
+    // If last period is not ended (no endDate in cycles, or last logged day is recent), treat as ongoing
+    const latestCycle = cycles && cycles.length > 0 ? cycles[cycles.length - 1] : null;
+    if (latestCycle && latestCycle.startDate && !latestCycle.endDate) {
+      isOngoingPeriod = true;
+    }
+  }
+
+  // Calculate next predicted period start (after last period)
+  let nextPredictedPeriodStart: Date | null = null;
+  if (lastPeriodStart) {
+    // Calculate from last period start
+    nextPredictedPeriodStart = addDays(lastPeriodStart, avgCycleLength);
+    // If we have a period end and the predicted start would overlap, adjust
+    if (lastPeriodEnd && nextPredictedPeriodStart <= lastPeriodEnd) {
+      nextPredictedPeriodStart = addDays(lastPeriodEnd, avgCycleLength - differenceInDays(lastPeriodEnd, lastPeriodStart));
+    }
+  }
+
+  // No autofill - only use actual logged periods
+  // This simplifies the logic and avoids confusion
+  const fillOngoingPeriodDates: string[] = [];
+
+  // --- Robust, Today-matching prediction logic ---
+  // 1. Build a sorted list of all non-spotting period starts
+  const sortedPeriodRecords = [...nonSpotting].sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  const periodStarts: Date[] = [];
+  for (let i = 0; i < sortedPeriodRecords.length; i++) {
+    if (i === 0 || differenceInDays(parseISO(sortedPeriodRecords[i].date), parseISO(sortedPeriodRecords[i-1].date)) > 2) {
+      periodStarts.push(parseISO(sortedPeriodRecords[i].date));
+    }
+  }
+
+  // 2. Predict future periods using the last logged period start and the correct average/user-set cycle/period length
+  const predictedPeriodDates: string[] = [];
+  if (periodStarts.length > 0) {
+    const lastLoggedStart = periodStarts[periodStarts.length - 1];
+    let nextStart = addDays(lastLoggedStart, avgCycleLength);
+    // If last logged period end exists and nextStart would overlap, adjust
+    if (lastPeriodEnd && nextStart <= lastPeriodEnd) {
+      nextStart = addDays(lastPeriodEnd, avgCycleLength - differenceInDays(lastPeriodEnd, lastLoggedStart));
+    }
+    for (let i = 0; i < 3; i++) {
+      const periodStart = i === 0 ? nextStart : addDays(nextStart, i * avgCycleLength);
+      // END IS periodStart + avgPeriodLength (inclusive)
+      eachDayOfInterval({
+        start: periodStart,
+        end: addDays(periodStart, avgPeriodLength - 1 + 1) // Fix -1 day issue
+      }).forEach(d => {
+        predictedPeriodDates.push(format(d, 'yyyy-MM-dd'));
+      });
+    }
+  }
+
+  // Helper to build period clusters (actual and predicted)
+  function buildPeriodClusters(periodStarts: Date[], predictedPeriodDates: string[], avgPeriodLength: number) {
+    // Actual period clusters
+    let clusters: { start: Date, end: Date, predicted: boolean }[] = [];
+    let sortedStarts = [...periodStarts].sort((a, b) => a.getTime() - b.getTime());
+    for (let i = 0; i < sortedStarts.length; i++) {
+      let start = sortedStarts[i];
+      let end = start;
+      // Expand cluster to consecutive period days
+      while (i + 1 < sortedStarts.length && differenceInDays(sortedStarts[i + 1], end) === 1) {
+        end = sortedStarts[i + 1];
+        i++;
+      }
+      clusters.push({ start, end, predicted: false });
+    }
+    // Predicted period clusters
+    let usedPredicted = new Set();
+    for (let i = 0; i < predictedPeriodDates.length; i++) {
+      if (usedPredicted.has(predictedPeriodDates[i])) continue;
+      let start = parseISO(predictedPeriodDates[i]);
+      let end = start;
+      for (let j = 1; j < avgPeriodLength; j++) {
+        let next = format(addDays(start, j), 'yyyy-MM-dd');
+        if (predictedPeriodDates.includes(next)) {
+          end = addDays(start, j);
+          usedPredicted.add(next);
+        } else {
+          break;
+        }
+      }
+      clusters.push({ start, end, predicted: true });
+      usedPredicted.add(format(start, 'yyyy-MM-dd'));
+    }
+    // Sort all clusters by start
+    return clusters.sort((a, b) => a.start.getTime() - b.start.getTime());
+  }
+
+  // Unified day status calculation that matches Today page logic
   const getDayStatus = (date: Date) => {
     const dateKey = format(date, 'yyyy-MM-dd');
     
-    // Check if this date has a flow record
-    const flowRecord = flowRecords.find(r => format(new Date(r.date), 'yyyy-MM-dd') === dateKey);
-    const hasFlowRecord = !!flowRecord;
-    const isSpotting = flowRecord?.intensity === 'spotting';
+    // 1. Determine if this is an actual logged period day (non-spotting)
+    const isActualPeriod = flowRecords.some(r =>
+      format(parseISO(r.date), 'yyyy-MM-dd') === dateKey &&
+      r.intensity !== 'spotting'
+    );
     
-    // Group flow records by month to find period clusters
-    const periodStartDates: Date[] = [];
-    const periodEndDates = new Map<string, Date>();
+    // 2. Determine if this is a predicted period day
+    const isPredictedPeriod = !isActualPeriod && predictedPeriodDates.includes(dateKey);
     
-    // Sort flow records by date (excluding spotting)
-    const sortedFlowRecords = [...flowRecords]
-      .filter(record => record.intensity !== 'spotting') // Exclude spotting
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
-    // Find period start dates and end dates
-    if (sortedFlowRecords.length > 0) {
-      let currentPeriodStart = new Date(sortedFlowRecords[0].date);
-      let currentPeriodEnd = currentPeriodStart;
-      periodStartDates.push(currentPeriodStart);
-      
-      for (let i = 1; i < sortedFlowRecords.length; i++) {
-        const currentDate = new Date(sortedFlowRecords[i].date);
-        const prevDate = new Date(sortedFlowRecords[i-1].date);
-        
-        // If this flow record is more than 2 days after the previous one,
-        // consider it the start of a new period
-        if (differenceInDays(currentDate, prevDate) > 2) {
-          // End the previous period
-          periodEndDates.set(format(currentPeriodStart, 'yyyy-MM-dd'), currentPeriodEnd);
-          
-          // Start a new period
-          currentPeriodStart = currentDate;
-          periodStartDates.push(currentPeriodStart);
-        }
-        
-        // Update the end date of the current period
-        currentPeriodEnd = currentDate;
-      }
-      
-      // Set the end date for the last period
-      periodEndDates.set(format(currentPeriodStart, 'yyyy-MM-dd'), currentPeriodEnd);
-    }
-    
-    // Find the most recent period start date for this date
-    const lastPeriodStartDate = periodStartDates
-      .filter(d => d <= date)
-      .sort((a, b) => b.getTime() - a.getTime())[0];
-    
-    let isFertileDay = false;
-    let isPeriodDay = hasFlowRecord && !isSpotting; // Only non-spotting flow records are period days
-    let isPredictedPeriod = false;
-    let cyclePhase = 'unknown';
-    
-    // Get cycle length and period length from user settings or use defaults
-    const avgCycleLength = userSettings?.defaultCycleLength || 28;
-    const avgPeriodLength = userSettings?.defaultPeriodLength || 5;
-    
-    if (lastPeriodStartDate) {
-      // Check if this date is within an actual period (based on flow records)
-      const periodStartKey = format(lastPeriodStartDate, 'yyyy-MM-dd');
-      const periodEndDate = periodEndDates.get(periodStartKey);
-      
-      // IMPORTANT: First check if we have actual flow records to determine period days
-      if (periodEndDate && date <= periodEndDate && date >= lastPeriodStartDate) {
-        if (!isSpotting) {
-          isPeriodDay = true;
-          cyclePhase = 'period';
+    // 3. Find the most recent period cluster ending before this date (Today tab logic)
+    let lastClusterEnd: Date | undefined = undefined;
+    if (nonSpotting.length > 0) {
+      // Group period days into clusters (gap > 2 days)
+      let clusters: Date[][] = [];
+      let currentCluster: Date[] = [parseISO(nonSpotting[0].date)];
+      for (let i = 1; i < nonSpotting.length; i++) {
+        const prev = parseISO(nonSpotting[i-1].date);
+        const curr = parseISO(nonSpotting[i].date);
+        if (differenceInDays(curr, prev) > 2) {
+          clusters.push(currentCluster);
+          currentCluster = [curr];
         } else {
-          // For spotting within period dates, use the calculated phase but don't mark as period day
-          cyclePhase = getCyclePhase(date, lastPeriodStartDate, avgCycleLength, avgPeriodLength);
-        }
-      } else if (hasFlowRecord && !isSpotting) {
-        // If there's a non-spotting flow record but it's not part of a recognized period cluster
-        isPeriodDay = true;
-        cyclePhase = 'period';
-      } else {
-        // If no flow records or only spotting, use the cycle phase calculation
-        cyclePhase = getCyclePhase(date, lastPeriodStartDate, avgCycleLength, avgPeriodLength);
-        
-        // For dates in the past, we can fill in missing period days based on the calculated phase
-        // Only fill in missing days if they're within avgPeriodLength days of the period start
-        const daysSincePeriodStart = differenceInDays(date, lastPeriodStartDate);
-        if (cyclePhase === 'period' && !hasFlowRecord && 
-            daysSincePeriodStart >= 0 && daysSincePeriodStart < avgPeriodLength && 
-            date <= new Date()) {
-          isPredictedPeriod = true;
+          currentCluster.push(curr);
         }
       }
-      
-      // Calculate next expected period date
-      const nextPeriodDate = getNextExpectedPeriodDate(lastPeriodStartDate, avgCycleLength);
-      
-      // Get all expected period days based on period length setting
-      const expectedPeriodDays = getExpectedPeriodDays(nextPeriodDate, avgPeriodLength);
-      
-      // Check if this date is in the expected period days
-      if (expectedPeriodDays.some(periodDay => isSameDay(date, periodDay))) {
-        isPredictedPeriod = true;
-        
-        // If the predicted day also happens to be in a period phase according to 
-        // the cycle phase calculation, we've already marked it above
-        if (cyclePhase !== 'period') {
-          cyclePhase = 'period'; // Override the phase for predicted period days
-        }
+      clusters.push(currentCluster);
+      // Find the latest cluster ending before this date
+      const lastCluster = clusters.filter(cluster => cluster[cluster.length-1] < date).slice(-1)[0];
+      if (lastCluster) {
+        lastClusterEnd = lastCluster[lastCluster.length-1];
       }
-      
-      // Check if in fertile window
-      isFertileDay = isInFertileWindow(date, lastPeriodStartDate, avgCycleLength, avgPeriodLength) && 
-        !isPeriodDay && !isPredictedPeriod;
     }
     
-    // Check for actual symptom records for this date
-    const hasSymptoms = symptomRecords.some(record => {
-      const recordDate = parseISO(record.date);
-      return isSameDay(date, recordDate);
-    });
+    // 4. Calculate phase using the same anchor logic as Today tab
+    let phase: string;
+    if (isActualPeriod || isPredictedPeriod) {
+      phase = 'period';
+    } else if (lastClusterEnd) {
+      // Use the day AFTER the last cluster end as the anchor
+      const anchor = addDays(lastClusterEnd, 1);
+      phase = getDataDrivenCyclePhase(date, flowRecords, userSettings, [], anchor);
+    } else {
+      phase = 'follicular'; // Default to follicular for blanks at the start
+    }
+    
+    // 5. Determine fertile window (using same logic as Today page)
+    const isFertile = lastPeriodEnd && 
+      isInFertileWindow(date, addDays(lastPeriodEnd, 1), avgCycleLength, avgPeriodLength) && 
+      !isActualPeriod && 
+      !isPredictedPeriod;
+    
+    // 6. Check for symptoms and spotting
+    const hasSymptoms = symptomRecords.some(r => isSameDay(date, parseISO(r.date)));
+    const isSpotting = flowRecords.some(r => 
+      format(parseISO(r.date), 'yyyy-MM-dd') === dateKey &&
+      r.intensity === 'spotting'
+    );
     
     return {
-      isPeriod: isPeriodDay,
+      isPeriod: isActualPeriod,
       isPredictedPeriod,
-      isFertile: isFertileDay,
+      isFertile,
       isSymptom: hasSymptoms,
       isSpotting,
-      phase: cyclePhase
+      phase
     };
   };
+
+
+
   
   return (
     <div>
@@ -236,18 +298,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           }
           
           // Determine the phase color
-          if (phase === 'period' || isPeriod || isPredictedPeriod) {
+          if (isPeriod) {
             phaseColor = "bg-red-400/70";
-            
-            // For predicted periods, use a soft coral/pink shade with dotted outline
-            if (isPredictedPeriod) {
-              phaseColor = "bg-red-200/80"; // Soft coral/pink shade
-              borderStyle = "border-2 border-red-400 border-dashed"; // Dotted red border
-            }
+          } else if (isPredictedPeriod) {
+            phaseColor = "bg-red-200/80"; // Soft coral/pink shade
+            borderStyle = "border-2 border-red-400 border-dashed"; // Dotted red border
+          } else if (isFertile) {
+            phaseColor = "bg-blue-400/70";
           } else if (phase === 'follicular') {
             phaseColor = "bg-yellow-400/60";
-          } else if (phase === 'ovulation' || isFertile) {
-            phaseColor = "bg-blue-400/70";
           } else if (phase === 'luteal') {
             phaseColor = "bg-purple-400/60";
           }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { parseISO, differenceInDays, format, subMonths } from 'date-fns';
+import { useCycleData } from '@/hooks/use-cycle-data';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
@@ -15,31 +16,66 @@ interface CycleStatisticsProps {
     date: string;
     intensity: string;
   }>;
+  isStatsLoading?: boolean;
 }
 
-const CycleStatistics: React.FC<CycleStatisticsProps> = ({ userId, cycles, flowRecords }) => {
+const CycleStatistics: React.FC<CycleStatisticsProps> = ({ userId, cycles, flowRecords, isStatsLoading }) => {
   const [cycleLengthData, setCycleLengthData] = useState<Array<{ month: string, days: number }>>([]);
-  
+
+  // Get user settings (for fallback)
+  // UseCycleData hook is imported from '@/hooks/use-cycle-data'
+  // This will provide userSettings, which contains defaultCycleLength and defaultPeriodLength
+  const { userSettings } = useCycleData({ userId });
+
   // Fetch analytics data
-  const { data: averageCycleLength } = useQuery({
+  const {
+    data: averageCycleLengthObj,
+    isLoading: isAverageCycleLoading
+  } = useQuery<{ averageCycleLength?: number } | undefined>({
     queryKey: [`/api/analytics/cycle-length/${userId}`],
     enabled: userId > 0,
-    select: (data) => data.averageCycleLength || 28,
+    select: (data) => (data && typeof data === 'object' && 'averageCycleLength' in data ? data as { averageCycleLength?: number } : undefined),
   });
 
-  const { data: averagePeriodLength } = useQuery({
+  const {
+    data: averagePeriodLengthObj,
+    isLoading: isAveragePeriodLoading
+  } = useQuery<{ averagePeriodLength?: number } | undefined>({
     queryKey: [`/api/analytics/period-length/${userId}`],
     enabled: userId > 0,
-    select: (data) => data.averagePeriodLength || 5,
+    select: (data) => (data && typeof data === 'object' && 'averagePeriodLength' in data ? data as { averagePeriodLength?: number } : undefined),
   });
+
+  // Extract the numbers for easier use
+  const averageCycleLength = averageCycleLengthObj?.averageCycleLength;
+  const averagePeriodLength = averagePeriodLengthObj?.averagePeriodLength;
+
 
   // Calculate tracked cycles count
   const trackedCycles = cycles.length;
 
   // Get last period start date
-  const lastPeriodDate = cycles.length > 0 
+  const lastPeriodDate = cycles.length > 0
     ? format(parseISO(cycles[0].startDate), 'MMM d')
     : 'N/A';
+
+  // Fallback logic for averages
+  // For cycle length: must have at least 2 cycles to calculate an average
+  let displayCycleLength: number = 28;
+  if (cycles.length >= 2 && typeof averageCycleLength === 'number' && !isNaN(averageCycleLength)) {
+    displayCycleLength = averageCycleLength;
+  } else if (userSettings?.defaultCycleLength) {
+    displayCycleLength = userSettings.defaultCycleLength;
+  }
+
+  // For period length: must have at least 1 cycle to calculate an average
+  let displayPeriodLength: number = 5;
+  if (cycles.length >= 1 && typeof averagePeriodLength === 'number' && !isNaN(averagePeriodLength)) {
+    displayPeriodLength = averagePeriodLength;
+  } else if (userSettings?.defaultPeriodLength) {
+    displayPeriodLength = userSettings.defaultPeriodLength;
+  }
+
 
   // Generate cycle length trend data
   useEffect(() => {
@@ -89,6 +125,20 @@ const CycleStatistics: React.FC<CycleStatisticsProps> = ({ userId, cycles, flowR
     setCycleLengthData(data.reverse());
   }, [cycles]);
 
+  if (isStatsLoading) {
+    return (
+      <Card className="mb-6">
+        <CardContent className="p-4">
+          <h3 className="text-lg font-semibold mb-3">Cycle Statistics</h3>
+          <div className="flex justify-center items-center min-h-[80px]">
+            <div className="animate-spin h-6 w-6 border-4 border-primary border-t-transparent rounded-full mr-3"></div>
+            <span className="text-muted-foreground">Loading averages...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="mb-6">
       <CardContent className="p-4">
@@ -98,13 +148,13 @@ const CycleStatistics: React.FC<CycleStatisticsProps> = ({ userId, cycles, flowR
           <div className="bg-muted bg-opacity-60 p-4 rounded-lg text-center">
             <div className="text-xs text-muted-foreground mb-1">Average Cycle</div>
             <div className="text-xl font-bold" style={{ color: 'rgb(99, 102, 241)' }}>
-              {averageCycleLength || '-'} {averageCycleLength ? 'days' : ''}
+              {displayCycleLength || '-'} {displayCycleLength ? 'days' : ''}
             </div>
           </div>
           <div className="bg-muted bg-opacity-60 p-4 rounded-lg text-center">
             <div className="text-xs text-muted-foreground mb-1">Average Period</div>
             <div className="text-xl font-bold" style={{ color: 'rgb(99, 102, 241)' }}>
-              {averagePeriodLength || '-'} {averagePeriodLength ? 'days' : ''}
+              {displayPeriodLength || '-'} {displayPeriodLength ? 'days' : ''}
             </div>
           </div>
           <div className="bg-muted bg-opacity-60 p-4 rounded-lg text-center">

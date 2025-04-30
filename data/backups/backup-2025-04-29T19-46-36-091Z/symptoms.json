@@ -1,0 +1,268 @@
+[
+  {
+    "id": 1,
+    "userId": null,
+    "name": "Acne",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 2,
+    "userId": null,
+    "name": "Bloating",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 3,
+    "userId": null,
+    "name": "Breast Tenderness",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 4,
+    "userId": null,
+    "name": "Cramps",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 5,
+    "userId": null,
+    "name": "Constipation",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 6,
+    "userId": null,
+    "name": "Diarrhea",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 7,
+    "userId": null,
+    "name": "Fatigue",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 8,
+    "userId": null,
+    "name": "Headache",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 9,
+    "userId": null,
+    "name": "Insomnia",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 10,
+    "userId": null,
+    "name": "Joint Pain",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 11,
+    "userId": null,
+    "name": "Nausea",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 12,
+    "userId": null,
+    "name": "Spotting",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 13,
+    "userId": null,
+    "name": "Swelling",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 14,
+    "userId": null,
+    "name": "Weight Gain",
+    "category": "physical",
+    "isDefault": true
+  },
+  {
+    "id": 15,
+    "userId": null,
+    "name": "Anxiety",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 16,
+    "userId": null,
+    "name": "Depression",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 17,
+    "userId": null,
+    "name": "Irritability",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 18,
+    "userId": null,
+    "name": "Mood Swings",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 19,
+    "userId": null,
+    "name": "Food Cravings",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 20,
+    "userId": null,
+    "name": "Poor Concentration",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 21,
+    "userId": null,
+    "name": "Social Withdrawal",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 22,
+    "userId": null,
+    "name": "Overwhelmed",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 23,
+    "userId": null,
+    "name": "Panic Attacks",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 24,
+    "userId": null,
+    "name": "Anger Outbursts",
+    "category": "emotional",
+    "isDefault": true
+  },
+  {
+    "id": 25,
+    "userId": null,
+    "name": "Severe Anxiety",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 26,
+    "userId": null,
+    "name": "Extreme Mood Swings",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 27,
+    "userId": null,
+    "name": "Marked Irritability",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 28,
+    "userId": null,
+    "name": "Feeling Out of Control",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 29,
+    "userId": null,
+    "name": "Difficulty Focusing",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 30,
+    "userId": null,
+    "name": "Suicidal Thoughts",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 31,
+    "userId": null,
+    "name": "Severe Depression",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 32,
+    "userId": null,
+    "name": "Extreme Fatigue",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 33,
+    "userId": null,
+    "name": "Marked Changes in Appetite",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 34,
+    "userId": null,
+    "name": "Feeling Hopeless",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 35,
+    "userId": null,
+    "name": "Severe Tension",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 36,
+    "userId": null,
+    "name": "Rejection Sensitivity",
+    "category": "pmdd",
+    "isDefault": true
+  },
+  {
+    "id": 37,
+    "userId": 1,
+    "name": "test",
+    "category": "physical",
+    "isDefault": false
+  },
+  {
+    "id": 38,
+    "userId": 1,
+    "name": "test2",
+    "category": "physical",
+    "isDefault": false
+  }
+]

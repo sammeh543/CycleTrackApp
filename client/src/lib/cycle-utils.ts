@@ -142,6 +142,72 @@ export function getExpectedPeriodDays(
   periodStartDate: Date | string,
   periodLength = 5
 ): Date[] {
+
+// --- Data-driven prediction helpers ---
+
+function computeCycleAverages(
+  flowRecords: Array<{ date: string; intensity: string }>
+): { avgCycleLength: number; avgPeriodLength: number; cyclesCount: number } {
+  const nonSpotting = flowRecords.filter(r => r.intensity !== 'spotting');
+  if (nonSpotting.length < 2) {
+    return { avgCycleLength: 28, avgPeriodLength: 5, cyclesCount: 0 };
+  }
+  const sorted = [...nonSpotting].sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  let periodStarts: Date[] = [parseISO(sorted[0].date)];
+  let prevDate = parseISO(sorted[0].date);
+  for (let i = 1; i < sorted.length; i++) {
+    const currDate = parseISO(sorted[i].date);
+    if (differenceInDays(currDate, prevDate) > 2) {
+      periodStarts.push(currDate);
+    }
+    prevDate = currDate;
+  }
+  const cycleLengths = [];
+  for (let i = 1; i < periodStarts.length; i++) {
+    cycleLengths.push(differenceInDays(periodStarts[i], periodStarts[i - 1]));
+  }
+  const periodLengths = [];
+  for (let i = 0; i < periodStarts.length; i++) {
+    const start = periodStarts[i];
+    let len = 1;
+    for (let j = 1; i + j < sorted.length; j++) {
+      const nextDate = parseISO(sorted[i + j].date);
+      if (differenceInDays(nextDate, parseISO(sorted[i + j - 1].date)) === 1) {
+        len++;
+      } else {
+        break;
+      }
+    }
+    periodLengths.push(len);
+  }
+  const avgCycleLength = cycleLengths.length > 0 ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length) : 28;
+  const avgPeriodLength = periodLengths.length > 0 ? Math.round(periodLengths.reduce((a, b) => a + b, 0) / periodLengths.length) : 5;
+  return {
+    avgCycleLength,
+    avgPeriodLength,
+    cyclesCount: periodStarts.length
+  };
+}
+
+function getBestCyclePredictionLengths(
+  flowRecords: Array<{ date: string; intensity: string }>,
+  userSettings?: { defaultCycleLength?: number; defaultPeriodLength?: number },
+  minCyclesForAverage = 3
+): { avgCycleLength: number; avgPeriodLength: number; used: 'logged' | 'user' | 'default' } {
+  const { avgCycleLength, avgPeriodLength, cyclesCount } = computeCycleAverages(flowRecords);
+  if (cyclesCount >= minCyclesForAverage) {
+    return { avgCycleLength, avgPeriodLength, used: 'logged' };
+  }
+  if (userSettings?.defaultCycleLength || userSettings?.defaultPeriodLength) {
+    return {
+      avgCycleLength: userSettings?.defaultCycleLength || 28,
+      avgPeriodLength: userSettings?.defaultPeriodLength || 5,
+      used: 'user'
+    };
+  }
+  return { avgCycleLength: 28, avgPeriodLength: 5, used: 'default' };
+}
+
   // Convert string date to Date object if needed
   const start = typeof periodStartDate === 'string'
     ? parseISO(periodStartDate)
@@ -155,4 +221,77 @@ export function getExpectedPeriodDays(
   }
   
   return periodDays;
+}
+
+// --- Data-driven prediction helpers ---
+
+export function computeCycleAverages(
+  flowRecords: Array<{ date: string; intensity: string }>
+): { avgCycleLength: number; avgPeriodLength: number; cyclesCount: number } {
+  const nonSpotting = flowRecords.filter(r => r.intensity !== 'spotting');
+  if (nonSpotting.length < 2) {
+    return { avgCycleLength: 28, avgPeriodLength: 5, cyclesCount: 0 };
+  }
+  const sorted = [...nonSpotting].sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  let periodStarts: Date[] = [parseISO(sorted[0].date)];
+  let prevDate = parseISO(sorted[0].date);
+  for (let i = 1; i < sorted.length; i++) {
+    const currDate = parseISO(sorted[i].date);
+    if (differenceInDays(currDate, prevDate) > 2) {
+      periodStarts.push(currDate);
+    }
+    prevDate = currDate;
+  }
+  const cycleLengths = [];
+  for (let i = 1; i < periodStarts.length; i++) {
+    cycleLengths.push(differenceInDays(periodStarts[i], periodStarts[i - 1]));
+  }
+  const periodLengths = [];
+  for (let i = 0; i < periodStarts.length; i++) {
+    const start = periodStarts[i];
+    let len = 1;
+    for (let j = 1; i + j < sorted.length; j++) {
+      const nextDate = parseISO(sorted[i + j].date);
+      if (differenceInDays(nextDate, parseISO(sorted[i + j - 1].date)) === 1) {
+        len++;
+      } else {
+        break;
+      }
+    }
+    periodLengths.push(len);
+  }
+  const avgCycleLength = cycleLengths.length > 0 ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length) : 28;
+  const avgPeriodLength = periodLengths.length > 0 ? Math.round(periodLengths.reduce((a, b) => a + b, 0) / periodLengths.length) : 5;
+  return {
+    avgCycleLength,
+    avgPeriodLength,
+    cyclesCount: periodStarts.length
+  };
+}
+
+export function getBestCyclePredictionLengths(
+  flowRecords: Array<{ date: string; intensity: string }>,
+  userSettings?: { defaultCycleLength?: number; defaultPeriodLength?: number },
+  minCyclesForAverage = 2
+): { avgCycleLength: number; avgPeriodLength: number; used: 'logged' | 'user' | 'default' } {
+  const { avgCycleLength, avgPeriodLength, cyclesCount } = computeCycleAverages(flowRecords);
+  if (cyclesCount >= minCyclesForAverage) {
+    return { avgCycleLength, avgPeriodLength, used: 'logged' };
+  }
+  if (cyclesCount === 1) {
+    // Use first logged period length, but user/default cycle length
+    return {
+      avgCycleLength: userSettings?.defaultCycleLength || 28,
+      avgPeriodLength,
+      used: 'logged'
+    };
+  }
+  if (userSettings?.defaultCycleLength) {
+    return {
+      avgCycleLength: userSettings.defaultCycleLength,
+      avgPeriodLength: userSettings.defaultPeriodLength || 5,
+      used: 'user'
+    };
+  }
+  return { avgCycleLength: 28, avgPeriodLength: 5, used: 'default' };
 }

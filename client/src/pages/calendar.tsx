@@ -131,44 +131,63 @@ const Calendar: React.FC<CalendarProps> = ({ userId }) => {
               userSettings={userSettings}
               onSelectDate={handleDateSelect}
             />
-            
-            {/* Calendar Legend */}
-            <div className="mt-5 flex flex-wrap justify-center gap-3 px-2">
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full bg-red-400/70 mr-2"></div>
-                <span className="text-xs font-medium">Menstrual</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full bg-red-200/80 border-2 border-red-400 border-dashed mr-2"></div>
-                <span className="text-xs font-medium">Predicted Period</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full bg-yellow-400/60 mr-2"></div>
-                <span className="text-xs font-medium">Follicular</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full bg-blue-400/70 mr-2"></div>
-                <span className="text-xs font-medium">Ovulation/Fertile</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full bg-purple-400/60 mr-2"></div>
-                <span className="text-xs font-medium">Luteal</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full bg-gray-200 border border-gray-300 mr-2 relative">
-                  <div className="absolute w-2.5 h-2.5 bg-accent rounded-full bottom-[-2px] right-[-2px]"></div>
+                        {/* Calendar Legend + Prediction Source Tooltip */}
+            <div className="mt-5 flex flex-col items-center gap-2 px-2">
+              <div className="flex flex-wrap justify-center gap-3 w-full">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-red-400/70 mr-2"></div>
+                  <span className="text-xs font-medium">Menstrual</span>
                 </div>
-                <span className="text-xs font-medium">Symptoms</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 rounded-full bg-gray-200 border border-gray-300 mr-2 relative">
-                  <div className="absolute w-2.5 h-2.5 bg-gray-400 rounded-full bottom-[-2px] right-[-2px]"></div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-red-200/80 border-2 border-red-400 border-dashed mr-2"></div>
+                  <span className="text-xs font-medium">Predicted Period</span>
                 </div>
-                <span className="text-xs font-medium">Spotting</span>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-yellow-400/60 mr-2"></div>
+                  <span className="text-xs font-medium">Follicular</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-blue-400/70 mr-2"></div>
+                  <span className="text-xs font-medium">Ovulation/Fertile</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-purple-400/60 mr-2"></div>
+                  <span className="text-xs font-medium">Luteal</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-gray-200 border border-gray-300 mr-2 relative">
+                    <div className="absolute w-2.5 h-2.5 bg-accent rounded-full bottom-[-2px] right-[-2px]"></div>
+                  </div>
+                  <span className="text-xs font-medium">Symptoms</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-gray-200 border border-gray-300 mr-2 relative">
+                    <div className="absolute w-2.5 h-2.5 bg-gray-400 rounded-full bottom-[-2px] right-[-2px]"></div>
+                  </div>
+                  <span className="text-xs font-medium">Spotting</span>
+                </div>
+                <div className="flex items-center">
+                  <IntimateIcon className="w-5 h-5 text-pink-500 dark:text-pink-400 mr-2" />
+                  <span className="text-xs font-medium">Intimate Activity</span>
+                </div>
               </div>
-              <div className="flex items-center">
-                <IntimateIcon className="w-5 h-5 text-pink-500 dark:text-pink-400 mr-2" />
-                <span className="text-xs font-medium">Intimate Activity</span>
+              {/* Prediction Source Tooltip */}
+              <div className="calendar-prediction-tooltip text-xs mt-2 text-center">
+                {(() => {
+                  if (cycles && cycles.length >= 2 && avgCycleLength) {
+                    return (
+                      <span>Predictions are based on your logged data averages.</span>
+                    );
+                  } else if (userSettings?.defaultCycleLength && userSettings?.defaultPeriodLength) {
+                    return (
+                      <span>Predictions use your custom defaults.</span>
+                    );
+                  } else {
+                    return (
+                      <span>Predictions use standard defaults (28-day cycle, 5-day period).</span>
+                    );
+                  }
+                })()}
               </div>
             </div>
           </CardContent>
@@ -185,6 +204,29 @@ const Calendar: React.FC<CalendarProps> = ({ userId }) => {
           />
         </div>
       </div>
+      {/* Disclaimer - Card for visual consistency and theming */}
+      <Card className="mt-8 mb-4 mx-auto max-w-2xl border border-primary border-l-4 border-primary bg-period-expected">
+        <CardContent className="py-3 px-4 text-center">
+          <span className="text-xs font-medium block">
+            <strong>Disclaimer:</strong> {(() => {
+              if (cycles && cycles.length >= 2 && avgCycleLength) {
+                return (
+                  <>Predictions are based on your logged data averages. </>
+                );
+              } else if (userSettings?.defaultCycleLength && userSettings?.defaultPeriodLength) {
+                return (
+                  <>Predictions use your custom defaults. </>
+                );
+              } else {
+                return (
+                  <>Predictions use standard defaults (28-day cycle, 5-day period). </>
+                );
+              }
+            })()}
+            Cycle and fertile window predictions are estimates only and may not be accurate. Do not rely on this data for medical or contraceptive decisions. Always consult a healthcare professional for guidance.
+          </span>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -2,7 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === PERIOD EXPECTED BOX & DISCLAIMER CARD BACKGROUND (Themeable) === */
+:root {
+  --card: 0 0% 100%; /* white card */
+  --card-foreground: 340 20% 20%; /* deep muted plum text */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+}
+.theme-starry,
+.theme-nebula {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+}
+.theme-pinkwhite {
+  --card: 0 0% 100%; /* pure white */
+  --card-foreground: 340 20% 20%; /* deep muted plum text */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+}
+.theme-pinkwhite .bg-period-expected {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+
+.theme-beach,
+.theme-galaxy,
+.theme-aurora,
+.theme-ocean,
+.theme-cyberpunk,
+.theme-synthwave,
+.theme-lunar,
+.theme-moon,
+.theme-dark {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+}
+.theme-dark {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+}
+.theme-cyberpunk {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+}
+.theme-synthwave {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+}
+.theme-lunar {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+}
+.bg-period-expected {
+  background-color: var(--calendar-period-expected-bg, #fde8e8) !important;
+  color: var(--calendar-period-expected-fg, #7f1d1d) !important;
+}
+
 /* === GLOW EFFECTS (theme-aware) === */
+/* === THEME INPUTS === */
+.theme-input {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1.5px solid hsl(var(--border));
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.theme-input::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 1;
+}
+
 /* === GLOW EFFECTS (theme-aware, only for specific themes) === */
 .theme-cyberpunk, .theme-synthwave, .theme-lunar, .theme-moon {
   --glow-color: #00fff7;
@@ -76,8 +145,59 @@
   --glow-color: #c084fc;
 }
 .theme-ocean {
-  --glow-color: #00e6d2;
+  /* Ocean Dark Mode: inspired by beach, but deep blue/teal, no transparency, no glows */
+  --background: 200 70% 14%; /* deep ocean blue */
+  --foreground: 190 60% 96%; /* light seafoam text */
+  --muted: 200 40% 18%;
+  --muted-foreground: 190 30% 80%;
+  --popover: 200 60% 16%;
+  --popover-foreground: 190 60% 96%;
+  --card: 200 60% 16%;
+  --card-foreground: 190 60% 96%;
+  --border: 200 40% 18%;
+  --input: 200 40% 18%;
+  --primary: 190 80% 50%; /* bright teal for highlights */
+  --primary-foreground: 190 60% 98%;
+  --secondary: 40 90% 85%; /* sand accent */
+  --secondary-foreground: 190 70% 14%;
+  --accent: 190 100% 70%; /* light teal accent */
+  --accent-foreground: 190 60% 96%;
+  --destructive: 0 70% 40%;
+  --destructive-foreground: 190 60% 98%;
+  --ring: 190 80% 50%;
+  --radius: 0.5rem;
+  --theme-text: 190 60% 96%;
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  /* No glow for ocean */
 }
+.theme-ocean .bg-period-expected,
+.theme-ocean .bg-primary.bg-period-expected,
+.theme-ocean .bg-period-expected.bg-primary,
+.theme-ocean .bg-primary.bg-opacity-10.bg-period-expected,
+.theme-ocean .bg-period-expected.bg-primary.bg-opacity-10,
+.theme-ocean .bg-period-expected.rounded-lg.text-card-foreground.shadow-sm.mt-8.mb-4.mx-auto.max-w-2xl.border.border-l-4.border-primary,
+.theme-ocean .bg-period-expected:not(.bg-primary) {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.theme-ocean .bg-period-expected,
+.theme-ocean .bg-primary.bg-period-expected,
+.theme-ocean .bg-period-expected.bg-primary,
+.theme-ocean .bg-primary.bg-opacity-10.bg-period-expected,
+.theme-ocean .bg-period-expected.bg-primary.bg-opacity-10,
+.theme-ocean .bg-period-expected.rounded-lg.text-card-foreground.shadow-sm.mt-8.mb-4.mx-auto.max-w-2xl.border.border-l-4.border-primary,
+.theme-ocean .bg-period-expected:not(.bg-primary) {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+.theme-ocean .symptom-btn.selected:hover,
+.theme-ocean .symptom-btn:hover {
+  box-shadow: none !important;
+  border: 1.5px solid hsl(var(--border)) !important;
+}
+
 /* Add more theme overrides as needed */
 
 /* === SYMPTOM BUTTON HOVER EFFECTS (Today page) === */
@@ -205,6 +325,8 @@
 }
 
 .theme-starry {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
   --background: 235 44% 12%; /* deep blue */
   --foreground: 220 16% 90%;
   --muted: 245 32% 18%;
@@ -253,6 +375,8 @@
 }
 
 .theme-pinkwhite {
+  --calendar-period-expected-bg: #fde8e8;
+  --calendar-period-expected-fg: #7f1d1d;
   /* Base colors */
   --background: 330 60% 98%; /* Very soft white-pink */
   --foreground: 340 40% 12%; /* Very dark readable text */
@@ -285,6 +409,8 @@
 }
 
 .theme-beach {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
   --background: 190 60% 95%; /* pale teal sand */
   --foreground: 190 50% 20%;
   --muted: 190 40% 90%;
@@ -311,32 +437,49 @@
 }
 
 .theme-ocean {
-  --background: 190 66% 22%; /* dark teal wide background */
-  --foreground: 190 60% 96%; /* much lighter for good contrast */
-  --muted: 190 40% 30%;
+  /* Ocean Dark Mode: inspired by beach, but deep blue/teal, no transparency, no glows */
+  --background: 200 70% 14%; /* deep ocean blue */
+  --foreground: 190 60% 96%; /* light seafoam text */
+  --muted: 200 40% 18%;
   --muted-foreground: 190 30% 80%;
-  --popover: 190 40% 27%;
+  --popover: 200 60% 16%;
   --popover-foreground: 190 60% 96%;
-  --card: 190 60% 28%; /* slightly lighter/different teal for main container */
+  --card: 200 60% 16%;
   --card-foreground: 190 60% 96%;
-  --border: 190 30% 40%;
-  --input: 190 30% 40%;
-  --primary: 190 80% 50%; /* keep beach teal for buttons */
+  --border: 200 40% 18%;
+  --input: 200 40% 18%;
+  --primary: 190 80% 50%; /* bright teal for highlights */
   --primary-foreground: 190 60% 98%;
   --secondary: 40 90% 85%; /* sand accent */
-  --secondary-foreground: 190 66% 22%;
-  --accent: 50 100% 70%;
+  --secondary-foreground: 190 70% 14%;
+  --accent: 190 100% 70%; /* light teal accent */
   --accent-foreground: 190 60% 96%;
   --destructive: 0 70% 40%;
   --destructive-foreground: 190 60% 98%;
-  --ring: 40 90% 70%;
+  --ring: 190 80% 50%;
   --radius: 0.5rem;
-  --scrollbar-thumb: 50 100% 70% / 0.35;
-  --scrollbar-thumb-hover: 50 100% 70% / 0.6;
-  --theme-text: 190 60% 96%; /* lighter for theme bubble */
+  --theme-text: 190 60% 96%;
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  /* No glow for ocean */
+}
+.theme-ocean .bg-period-expected,
+.theme-ocean .bg-primary.bg-period-expected,
+.theme-ocean .bg-period-expected.bg-primary,
+.theme-ocean .bg-primary.bg-opacity-10.bg-period-expected,
+.theme-ocean .bg-period-expected.bg-primary.bg-opacity-10,
+.theme-ocean .bg-period-expected.rounded-lg.text-card-foreground.shadow-sm.mt-8.mb-4.mx-auto.max-w-2xl.border.border-l-4.border-primary,
+.theme-ocean .bg-period-expected:not(.bg-primary) {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
 }
 
+
+
+
 .theme-galaxy {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
   --background: 260 60% 13%; /* deep space blue */
   --foreground: 230 20% 96%; /* brighter text */
   --muted: 260 40% 20%;
