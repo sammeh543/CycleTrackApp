@@ -363,38 +363,30 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     });
   }, [currentCycle, updateCycleMutation, refetchCurrentCycle, refetchCycles, queryClient, userId, flowRecords, userSettings, autoLogLightFlow, removeAutoLoggedLightAfterEnd, cycles, removeAllBetweenEndAndNextStart]);
   
-  // Helper function to record flow intensity or remove flow record if the same intensity is clicked again
-  const recordFlow = useCallback((intensity: 'spotting' | 'light' | 'medium' | 'heavy', date?: Date) => {
-    const dateToUse = date || selectedDate;
-    const formattedDate = format(dateToUse, 'yyyy-MM-dd');
-    const existingFlow = flowRecords?.find(r => r.date.split('T')[0] === formattedDate);
-    
-    // If the same intensity is clicked again, delete the flow record (toggle behavior)
-    if (existingFlow && existingFlow.intensity === intensity) {
-      deleteFlowMutation.mutate(existingFlow.id);
-    } else {
-      // Otherwise create or update the flow record
-      recordFlowMutation.mutate({ 
-        userId, 
-        cycleId: currentCycle?.id, 
-        date: formattedDate, 
-        intensity 
-      });
-    }
-  }, [recordFlowMutation, deleteFlowMutation, userId, currentCycle, selectedDate, flowRecords]);
-  
   // Helper function to cancel/delete a cycle
   const cancelPeriod = useCallback((cycleId: number) => {
     if (!cycleId) return;
 
-    // Find the cycle to get its start date
+    // Find the cycle to get its start date and end date
     const cycle = cycles?.find(c => c.id === cycleId);
     if (!cycle) return;
-    const startDate = cycle.startDate;
 
-    // Delete all flow records from the cycle's start date onward
-    const flowRecordsToDelete = (flowRecords || []).filter(record => record.cycleId === cycleId || record.date >= startDate);
-    const deletePromises = flowRecordsToDelete.map(record => apiRequest('DELETE', `/api/flow-records/${record.id}`));
+    // If the period is not ended yet (active period), delete all flow records from start date onward
+    // If the period is ended (past period), only delete flow records within this period's window
+    const flowRecordsToDelete = (flowRecords || []).filter(record => {
+      if (!cycle.endDate) {
+        // For active periods: delete all from start date onward (existing behavior)
+        return record.cycleId === cycleId || record.date >= cycle.startDate;
+      } else {
+        // For completed periods: only delete records within this period's window
+        return record.cycleId === cycleId || 
+          (record.date >= cycle.startDate && record.date <= cycle.endDate);
+      }
+    });
+
+    const deletePromises = flowRecordsToDelete.map(record => 
+      apiRequest('DELETE', `/api/flow-records/${record.id}`)
+    );
 
     Promise.all(deletePromises)
       .then(() => {
@@ -414,7 +406,9 @@ export function useCycleData({ userId }: UseCycleDataProps) {
 
         toast({ 
           title: "Period cancelled", 
-          description: "The period and all associated flow records have been removed from your records", 
+          description: cycle.endDate 
+            ? "The period and its flow records have been removed." 
+            : "The period and all following flow records have been removed.", 
           variant: "default" 
         });
       })
@@ -427,6 +421,26 @@ export function useCycleData({ userId }: UseCycleDataProps) {
         console.error(error);
       });
   }, [userId, cycles, flowRecords, refetchCycles, refetchCurrentCycle, refetchFlowRecords, queryClient, toast]);
+  
+  // Helper function to record flow intensity or remove flow record if the same intensity is clicked again
+  const recordFlow = useCallback((intensity: 'spotting' | 'light' | 'medium' | 'heavy', date?: Date) => {
+    const dateToUse = date || selectedDate;
+    const formattedDate = format(dateToUse, 'yyyy-MM-dd');
+    const existingFlow = flowRecords?.find(r => r.date.split('T')[0] === formattedDate);
+    
+    // If the same intensity is clicked again, delete the flow record (toggle behavior)
+    if (existingFlow && existingFlow.intensity === intensity) {
+      deleteFlowMutation.mutate(existingFlow.id);
+    } else {
+      // Otherwise create or update the flow record
+      recordFlowMutation.mutate({ 
+        userId, 
+        cycleId: currentCycle?.id, 
+        date: formattedDate, 
+        intensity 
+      });
+    }
+  }, [recordFlowMutation, deleteFlowMutation, userId, currentCycle, selectedDate, flowRecords]);
   
   // Calculate average cycle length
   const getAverageCycleLength = useCallback(() => {

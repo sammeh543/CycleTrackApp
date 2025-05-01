@@ -323,7 +323,7 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold">Period Status</h3>
                 {/* Spotting and period action buttons row */}
-                {!activeCycleForSelectedDate || (activeCycleForSelectedDate && activeCycleForSelectedDate.endDate) ? (
+                {!activeCycleForSelectedDate || (activeCycleForSelectedDate && activeCycleForSelectedDate.endDate && !currentFlow) ? (
                   <div className="flex gap-3">
                     <Button
                       variant={currentFlow?.intensity === 'spotting' ? 'default' : 'outline'}
@@ -350,29 +350,32 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs border-primary text-primary"
-                        >
-                          End Period
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirm End Period</AlertDialogTitle>
-                        </AlertDialogHeader>
-                        <AlertDialogDescription>
-                          Are you sure you want to end your period? This will update your cycle data.
-                        </AlertDialogDescription>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => endPeriod(selectedDate, activeCycleForSelectedDate?.id)}>End Period</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    {/* Hide End Period for completed periods, but keep Cancel Period */}
+                    {(!activeCycleForSelectedDate?.endDate) && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs border-primary text-primary"
+                          >
+                            End Period
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirm End Period</AlertDialogTitle>
+                          </AlertDialogHeader>
+                          <AlertDialogDescription>
+                            Are you sure you want to end your period? This will update your cycle data.
+                          </AlertDialogDescription>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => endPeriod(selectedDate, activeCycleForSelectedDate?.id)}>End Period</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -399,42 +402,60 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
                   </div>
                 )}
               </div>
-              {/* Flow intensity buttons only show during an active period */}
-              {activeCycleForSelectedDate && !activeCycleForSelectedDate.endDate && (
-                <div className="flex gap-3 mb-3 justify-center">
-                  <Button
-                    variant={currentFlow?.intensity === 'light' ? 'default' : 'outline'}
-                    className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'light' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
-                    onClick={() => recordFlow('light', selectedDate)}
-                    style={{ minWidth: 56 }}
-                  >
-                    <span className="flex gap-1 items-center justify-center">
-                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'light' ? 0.5 : 0} />
-                    </span>
-                  </Button>
-                  <Button
-                    variant={currentFlow?.intensity === 'medium' ? 'default' : 'outline'}
-                    className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'medium' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
-                    onClick={() => recordFlow('medium', selectedDate)}
-                    style={{ minWidth: 56 }}
-                  >
-                    <span className="flex gap-1 items-center justify-center">
-                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'medium' ? 0.5 : 0} />
-                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'medium' ? 0.5 : 0} />
-                    </span>
-                  </Button>
-                  <Button
-                    variant={currentFlow?.intensity === 'heavy' ? 'default' : 'outline'}
-                    className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'heavy' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
-                    onClick={() => recordFlow('heavy', selectedDate)}
-                    style={{ minWidth: 56 }}
-                  >
-                    <span className="flex gap-1 items-center justify-center">
-                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
-                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
-                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
-                    </span>
-                  </Button>
+              {/* Flow intensity buttons only show during an active period or for past logged flow days */}
+              {(activeCycleForSelectedDate && !activeCycleForSelectedDate.endDate || currentFlow) && (
+                <div className="flex flex-col items-center mb-3">
+                  {/* Tooltip for past log days */}
+                  {!!activeCycleForSelectedDate?.endDate && currentFlow && (
+                    <div className="mb-1 text-xs text-muted-foreground">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="underline decoration-dotted cursor-help">Logged Flow</span>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">This flow was logged for a past period. You can edit it, but cannot add new flow or start a period here.</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  )}
+                  <div className="flex gap-3 justify-center">
+                    <Button
+                      variant={currentFlow?.intensity === 'light' ? 'default' : 'outline'}
+                      className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'light' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
+                      onClick={() => recordFlow('light', selectedDate)}
+                      style={{ minWidth: 56 }}
+                      disabled={!currentFlow && !!activeCycleForSelectedDate?.endDate}
+                    >
+                      <span className="flex gap-1 items-center justify-center">
+                        <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'light' ? 0.5 : 0} />
+                      </span>
+                    </Button>
+                    <Button
+                      variant={currentFlow?.intensity === 'medium' ? 'default' : 'outline'}
+                      className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'medium' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
+                      onClick={() => recordFlow('medium', selectedDate)}
+                      style={{ minWidth: 56 }}
+                      disabled={!currentFlow && !!activeCycleForSelectedDate?.endDate}
+                    >
+                      <span className="flex gap-1 items-center justify-center">
+                        <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'medium' ? 0.5 : 0} />
+                        <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'medium' ? 0.5 : 0} />
+                      </span>
+                    </Button>
+                    <Button
+                      variant={currentFlow?.intensity === 'heavy' ? 'default' : 'outline'}
+                      className={`period-status-btn flex items-center justify-center px-4 py-2 ${currentFlow?.intensity === 'heavy' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
+                      onClick={() => recordFlow('heavy', selectedDate)}
+                      style={{ minWidth: 56 }}
+                      disabled={!currentFlow && !!activeCycleForSelectedDate?.endDate}
+                    >
+                      <span className="flex gap-1 items-center justify-center">
+                        <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
+                        <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
+                        <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'heavy' ? 0.5 : 0} />
+                      </span>
+                    </Button>
+                  </div>
                 </div>
               )}
               {!currentFlow && (
