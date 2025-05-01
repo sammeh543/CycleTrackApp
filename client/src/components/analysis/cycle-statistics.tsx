@@ -147,25 +147,25 @@ const CycleStatistics: React.FC<CycleStatisticsProps> = ({ userId, cycles, flowR
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-muted bg-opacity-60 p-4 rounded-lg text-center">
             <div className="text-xs text-muted-foreground mb-1">Average Cycle</div>
-            <div className="text-xl font-bold" style={{ color: 'rgb(99, 102, 241)' }}>
+            <div className="text-xl font-bold" style={{ color: 'hsl(var(--cycle-stats-text))' }}>
               {displayCycleLength || '-'} {displayCycleLength ? 'days' : ''}
             </div>
           </div>
           <div className="bg-muted bg-opacity-60 p-4 rounded-lg text-center">
             <div className="text-xs text-muted-foreground mb-1">Average Period</div>
-            <div className="text-xl font-bold" style={{ color: 'rgb(99, 102, 241)' }}>
+            <div className="text-xl font-bold" style={{ color: 'hsl(var(--cycle-stats-text))' }}>
               {displayPeriodLength || '-'} {displayPeriodLength ? 'days' : ''}
             </div>
           </div>
           <div className="bg-muted bg-opacity-60 p-4 rounded-lg text-center">
             <div className="text-xs text-muted-foreground mb-1">Tracked Cycles</div>
-            <div className="text-xl font-bold" style={{ color: 'rgb(99, 102, 241)' }}>
+            <div className="text-xl font-bold" style={{ color: 'hsl(var(--cycle-stats-text))' }}>
               {trackedCycles}
             </div>
           </div>
           <div className="bg-muted bg-opacity-60 p-4 rounded-lg text-center">
             <div className="text-xs text-muted-foreground mb-1">Last Period</div>
-            <div className="text-xl font-bold" style={{ color: 'rgb(99, 102, 241)' }}>
+            <div className="text-xl font-bold" style={{ color: 'hsl(var(--cycle-stats-text))' }}>
               {lastPeriodDate}
             </div>
           </div>
@@ -195,7 +195,7 @@ const CycleStatistics: React.FC<CycleStatisticsProps> = ({ userId, cycles, flowR
                   />
                   <Bar 
                     dataKey="days" 
-                    fill="rgb(49, 46, 129)"
+                    fill="hsl(var(--cycle-stats-bar))"
                     radius={[4, 4, 0, 0]}
                     barSize={20}
                     name="Cycle Length"

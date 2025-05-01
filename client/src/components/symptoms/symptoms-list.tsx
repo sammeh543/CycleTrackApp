@@ -217,7 +217,7 @@ const SymptomItem: React.FC<SymptomItemProps> = ({
       isActive && 'selected'
     )}>
       <div className={cn(
-        'bg-card hover:bg-card/70 p-3 rounded-lg border border-border',
+        'bg-card p-3 rounded-lg border border-border',
         'flex items-center justify-between ripple cursor-pointer',
         isActive ? (symptom.category === 'period' ? 'bg-primary/10 border-primary/50 period-status-btn selected' : 'bg-primary/10 border-primary/50 symptom-btn selected') : '',
         expanded ? 'rounded-b-none' : ''

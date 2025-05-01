@@ -1,299 +1,24 @@
+/* START OF REFACTORED index.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* === PERIOD EXPECTED BOX & DISCLAIMER CARD BACKGROUND (Themeable) === */
+/* =========================
+   GLOBAL & DEFAULT STYLES
+   ========================= */
+
+/* === Base Variables & Default Theme (Dark/Fallback) === */
 :root {
-  --card: 0 0% 100%; /* white card */
-  --card-foreground: 340 20% 20%; /* deep muted plum text */
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-}
-.theme-starry,
-.theme-nebula {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-}
-.theme-pinkwhite {
-  --card: 0 0% 100%; /* pure white */
-  --card-foreground: 340 20% 20%; /* deep muted plum text */
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-}
-.theme-pinkwhite .bg-period-expected {
-  background-color: hsl(var(--card)) !important;
-  color: hsl(var(--card-foreground)) !important;
-}
-
-
-.theme-beach,
-.theme-galaxy,
-.theme-aurora,
-.theme-ocean,
-.theme-cyberpunk,
-.theme-synthwave,
-.theme-lunar,
-.theme-moon,
-.theme-dark {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-}
-.theme-dark {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-}
-.theme-cyberpunk {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-}
-.theme-synthwave {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-}
-.theme-lunar {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-}
-.bg-period-expected {
-  background-color: var(--calendar-period-expected-bg, #fde8e8) !important;
-  color: var(--calendar-period-expected-fg, #7f1d1d) !important;
-}
-
-/* === GLOW EFFECTS (theme-aware) === */
-/* === THEME INPUTS === */
-.theme-input {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  border: 1.5px solid hsl(var(--border));
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-.theme-input::placeholder {
-  color: hsl(var(--muted-foreground));
-  opacity: 1;
-}
-
-/* === GLOW EFFECTS (theme-aware, only for specific themes) === */
-.theme-cyberpunk, .theme-synthwave, .theme-lunar, .theme-moon {
-  --glow-color: #00fff7;
-}
-.theme-synthwave {
-  --glow-color: #ff5efc;
-}
-.theme-lunar, .theme-moon {
-  --glow-color: #aee9ff;
-}
-
-.theme-cyberpunk .glow-btn,
-.theme-synthwave .glow-btn,
-.theme-lunar .glow-btn,
-.theme-moon .glow-btn {
-  box-shadow: 0 0 8px 2px var(--glow-color), 0 0 16px 4px var(--glow-color);
-  transition: box-shadow 0.2s, border-color 0.2s;
-}
-.theme-cyberpunk .glow-bar > rect,
-.theme-synthwave .glow-bar > rect,
-.theme-lunar .glow-bar > rect,
-.theme-moon .glow-bar > rect {
-  filter: drop-shadow(0 0 8px var(--glow-color)) drop-shadow(0 0 16px var(--glow-color));
-}
-.theme-cyberpunk .glow-switch,
-.theme-synthwave .glow-switch,
-.theme-lunar .glow-switch,
-.theme-moon .glow-switch {
-  box-shadow: 0 0 8px 2px var(--glow-color), 0 0 16px 4px var(--glow-color);
-  transition: box-shadow 0.2s, border-color 0.2s;
-}
-.theme-cyberpunk .glow-btn.selected, .theme-cyberpunk .glow-btn:focus, .theme-cyberpunk .glow-btn:active,
-.theme-synthwave .glow-btn.selected, .theme-synthwave .glow-btn:focus, .theme-synthwave .glow-btn:active,
-.theme-lunar .glow-btn.selected, .theme-lunar .glow-btn:focus, .theme-lunar .glow-btn:active,
-.theme-moon .glow-btn.selected, .theme-moon .glow-btn:focus, .theme-moon .glow-btn:active {
-  box-shadow: 0 0 16px 4px var(--glow-color), 0 0 24px 8px var(--glow-color);
-  border-color: var(--primary);
-}
-.theme-cyberpunk .glow-input,
-.theme-synthwave .glow-input,
-.theme-lunar .glow-input,
-.theme-moon .glow-input {
-  box-shadow: 0 0 6px 2px var(--glow-color);
-  transition: box-shadow 0.2s, border-color 0.2s;
-}
-.theme-cyberpunk .glow-input:focus, .theme-cyberpunk .glow-input.selected,
-.theme-synthwave .glow-input:focus, .theme-synthwave .glow-input.selected,
-.theme-lunar .glow-input:focus, .theme-lunar .glow-input.selected,
-.theme-moon .glow-input:focus, .theme-moon .glow-input.selected {
-  box-shadow: 0 0 12px 4px var(--glow-color);
-  border-color: var(--primary);
-}
-.theme-cyberpunk .glow-switch[data-state="checked"],
-.theme-synthwave .glow-switch[data-state="checked"],
-.theme-lunar .glow-switch[data-state="checked"],
-.theme-moon .glow-switch[data-state="checked"] {
-  box-shadow: 0 0 16px 4px var(--glow-color);
-}
-
-/* === THEME OVERRIDES === */
-.theme-cyberpunk {
-  --glow-color: #00fff7;
-}
-.theme-synthwave {
-  --glow-color: #ff5efc;
-}
-.theme-lunar, .theme-moon {
-  --glow-color: #aee9ff;
-}
-.theme-nebula {
-  --glow-color: #c084fc;
-}
-.theme-ocean {
-  /* Ocean Dark Mode: inspired by beach, but deep blue/teal, no transparency, no glows */
-  --background: 200 70% 14%; /* deep ocean blue */
-  --foreground: 190 60% 96%; /* light seafoam text */
-  --muted: 200 40% 18%;
-  --muted-foreground: 190 30% 80%;
-  --popover: 200 60% 16%;
-  --popover-foreground: 190 60% 96%;
-  --card: 200 60% 16%;
-  --card-foreground: 190 60% 96%;
-  --border: 200 40% 18%;
-  --input: 200 40% 18%;
-  --primary: 190 80% 50%; /* bright teal for highlights */
-  --primary-foreground: 190 60% 98%;
-  --secondary: 40 90% 85%; /* sand accent */
-  --secondary-foreground: 190 70% 14%;
-  --accent: 190 100% 70%; /* light teal accent */
-  --accent-foreground: 190 60% 96%;
-  --destructive: 0 70% 40%;
-  --destructive-foreground: 190 60% 98%;
-  --ring: 190 80% 50%;
-  --radius: 0.5rem;
-  --theme-text: 190 60% 96%;
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-  /* No glow for ocean */
-}
-.theme-ocean .bg-period-expected,
-.theme-ocean .bg-primary.bg-period-expected,
-.theme-ocean .bg-period-expected.bg-primary,
-.theme-ocean .bg-primary.bg-opacity-10.bg-period-expected,
-.theme-ocean .bg-period-expected.bg-primary.bg-opacity-10,
-.theme-ocean .bg-period-expected.rounded-lg.text-card-foreground.shadow-sm.mt-8.mb-4.mx-auto.max-w-2xl.border.border-l-4.border-primary,
-.theme-ocean .bg-period-expected:not(.bg-primary) {
-  background-color: hsl(var(--card)) !important;
-  color: hsl(var(--card-foreground)) !important;
-}
-
-.theme-ocean .bg-period-expected,
-.theme-ocean .bg-primary.bg-period-expected,
-.theme-ocean .bg-period-expected.bg-primary,
-.theme-ocean .bg-primary.bg-opacity-10.bg-period-expected,
-.theme-ocean .bg-period-expected.bg-primary.bg-opacity-10,
-.theme-ocean .bg-period-expected.rounded-lg.text-card-foreground.shadow-sm.mt-8.mb-4.mx-auto.max-w-2xl.border.border-l-4.border-primary,
-.theme-ocean .bg-period-expected:not(.bg-primary) {
-  background-color: hsl(var(--card)) !important;
-  color: hsl(var(--card-foreground)) !important;
-}
-.theme-ocean .symptom-btn.selected:hover,
-.theme-ocean .symptom-btn:hover {
-  box-shadow: none !important;
-  border: 1.5px solid hsl(var(--border)) !important;
-}
-
-/* Add more theme overrides as needed */
-
-/* === SYMPTOM BUTTON HOVER EFFECTS (Today page) === */
-/* For selected symptom button hover */
-.symptom-btn.selected:hover {
-  box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
-  transform: translateY(-1px);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
-}
-
-/* Regular symptom button hover */
-.symptom-btn:hover {
-  transform: translateY(-1px);
-  transition: transform 0.2s ease;
-}
-
-/* === SYMPTOM MODAL ITEM STYLES === */
-.symptom-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 0.375rem; /* rounded-md */
-  padding: 0.5rem 0.75rem; /* px-3 py-2 */
-  transition-property: background-color, color;
-  transition-duration: 300ms;
-  transition-timing-function: ease-in-out;
-  cursor: pointer;
-  font-size: 0.875rem; /* text-xs */
-  font-weight: 400; /* font-normal */
-  background: none;
-  color: hsl(var(--foreground));
-}
-
-.symptom-item:hover {
-  background-color: hsl(var(--accent) / 0.30);
-  color: hsl(var(--foreground));
-  font-weight: 500;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-:root .symptom-item:hover {
-  background-color: hsl(var(--accent) / 0.35);
-  color: hsl(var(--foreground));
-}
-
-.theme-pinkwhite .symptom-item:hover {
-  background-color: hsl(var(--hover-highlight));
-  color: hsl(var(--foreground));
-}
-
-.symptom-item.selected {
-  background: hsl(var(--accent), 0.88);
-  color: var(--accent-foreground, var(--foreground));
-  border: 1.5px solid hsl(var(--accent));
-  box-shadow: 0 1px 6px 0 hsl(var(--accent), 0.10);
-}
-.theme-pinkwhite .symptom-item {
-  color: var(--foreground);
-}
-.theme-pinkwhite .symptom-item:hover {
-  background: hsl(var(--muted), 0.92);
-  color: var(--accent-foreground, var(--foreground));
-}
-.theme-pinkwhite .symptom-item.selected {
-  background: hsl(var(--accent), 0.92);
-  color: var(--accent-foreground, var(--foreground));
-  border: 1.5px solid hsl(var(--accent));
-}
-.theme-starry .symptom-item:hover,
-.theme-nebula .symptom-item:hover {
-  background: hsl(var(--muted), 0.80);
-  color: var(--accent-foreground, var(--foreground));
-}
-.theme-starry .symptom-item.selected,
-.theme-nebula .symptom-item.selected {
-  background: hsl(var(--accent), 0.82);
-  color: var(--accent-foreground, var(--foreground));
-  border: 1.5px solid hsl(var(--accent));
-}
-/* Add more theme overrides as needed for new themes */
-
-.symptom-item input[type="checkbox"] {
-  accent-color: hsl(var(--accent));
-}
-
-
-/* === THEME VARIABLES === */
-:root {
+  /* --- Base Layout & Color Palette (Defaults to Dark Theme) --- */
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
   --muted: 240 3.7% 15.9%;
   --muted-foreground: 240 5% 64.9%;
   --popover: 240 10% 3.9%;
   --popover-foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%; /* Default card is dark */
+  --card-foreground: 0 0% 98%; /* Default card text is light */
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --primary: 291 47% 42%;
@@ -306,14 +31,25 @@
   --destructive-foreground: 0 0% 98%;
   --ring: 240 4.9% 83.9%;
   --radius: 0.5rem;
-  --indigo-bar: #6366f1;
-  /* Chart colors */
+
+  /* --- Component-Specific Variables (Defaults) --- */
+  /* Period Expected Box & Disclaimer Card Background */
+  /* Note: Default uses dark card. Light themes override --card which influences this */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  /* Cycle Stats */
+  --cycle-stats-text: var(--card-foreground); /* fallback for stats text */
+  --cycle-stats-bar: var(--primary); /* fallback for stats bar */
+
+  /* --- Chart colors --- */
   --chart-1: 291 47% 42%;
   --chart-2: 225 73% 57%;
   --chart-3: 273 48% 45%;
   --chart-4: 263 67% 65%;
   --chart-5: 326 100% 74%;
-  /* Additional colors specific to the app */
+
+  /* --- Other Base Variables --- */
+  --indigo-bar: #6366f1;
   --sidebar-background: 240 10% 3.9%;
   --sidebar-foreground: 0 0% 98%;
   --sidebar-primary: 291 47% 42%;
@@ -324,9 +60,266 @@
   --sidebar-ring: 240 4.9% 83.9%;
 }
 
+/* === Default Component Styles === */
+
+/* Period Expected Box Default Style */
+.bg-period-expected {
+  background-color: var(--calendar-period-expected-bg, #fde8e8) !important; /* Default fallback if variable not set */
+  color: var(--calendar-period-expected-fg, #7f1d1d) !important; /* Default fallback if variable not set */
+}
+
+/* Themeable Input Base Style */
+.theme-input {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1.5px solid hsl(var(--border));
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.theme-input::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 1;
+}
+
+/* Symptom Button Base Styles & Default Hover */
+.symptom-btn {
+  /* Inherit base styles from Tailwind bg-card, border-border etc. */
+  transition: box-shadow 0.2s, transform 0.2s, background-color 0.2s, border-color 0.2s;
+}
+.symptom-btn:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s;
+  /* Default hover has no background/shadow/border change */
+  background: none;
+  box-shadow: none;
+  border: none; /* Ensure no default border appears */
+  outline: none; /* Ensure no default outline appears */
+}
+/* Explicitly remove hover effects for UNSELECTED buttons universally */
+.symptom-btn:not(.selected):hover {
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transform: translateY(-1px); /* Keep the subtle lift */
+}
+/* Selected symptom button default hover (no glow) */
+.symptom-btn.selected:hover {
+    box-shadow: none; /* Base themes have no glow */
+    transform: translateY(-1px);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+/* Symptom label base color */
+.symptom-label {
+  /* color: inherit !important; */ /* This was commented out, keeping it that way */
+}
+/* Intensity label base color */
+.p-3.pt-2.pb-4.bg-card.border.border-t-0.border-primary\/50.rounded-b-lg .text-xs span {
+  color: inherit !important; /* Use parent color */
+}
+span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
+  color: var(--foreground) !important; /* Always use foreground color */
+}
+
+/* Symptom Modal Item Base Styles */
+.symptom-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.375rem; /* rounded-md */
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  transition-property: background-color, color, border-color, box-shadow;
+  transition-duration: 300ms;
+  transition-timing-function: ease-in-out;
+  cursor: pointer;
+  font-size: 0.875rem; /* text-xs */
+  font-weight: 400; /* font-normal */
+  background: none;
+  color: hsl(var(--foreground));
+  border: 1.5px solid transparent; /* Add transparent border to prevent layout shift on selection */
+}
+.symptom-item:hover {
+  background-color: hsl(var(--accent) / 0.30); /* Default hover uses accent */
+  color: hsl(var(--foreground));
+  font-weight: 500;
+}
+/* Base selected state */
+.symptom-item.selected {
+  background: hsl(var(--accent), 0.88);
+  color: var(--accent-foreground, var(--foreground));
+  border: 1.5px solid hsl(var(--accent));
+  box-shadow: 0 1px 6px 0 hsl(var(--accent), 0.10);
+}
+.symptom-item input[type="checkbox"] {
+  accent-color: hsl(var(--accent));
+}
+
+/* Calendar Day Base Styles */
+.calendar-day {
+  @apply aspect-square flex items-center justify-center text-sm rounded-full cursor-pointer transition-colors relative;
+}
+.calendar-day:not(.empty):hover {
+  @apply bg-muted;
+}
+.calendar-day.period {
+  @apply bg-red-400/90 border border-red-500 text-white font-medium;
+}
+.calendar-day.fertile {
+  @apply bg-blue-400/90 border border-blue-500 text-white font-medium;
+}
+.calendar-day.today {
+  @apply bg-primary text-white font-medium;
+}
+.calendar-day.empty {
+  @apply text-gray-500;
+}
+/* Ensure date number is visible */
+.date-number {
+  @apply inline-block text-foreground;
+  opacity: 1 !important;
+}
+.calendar-day:not(.period):not(.fertile):not(.today) .date-number {
+  @apply text-foreground; /* Ensure visibility on non-special days */
+}
+/* Indicators */
+.symptom-indicator {
+  @apply w-3 h-3 rounded-full bg-accent absolute bottom-0.5;
+  opacity: 0.9;
+}
+.spotting-indicator {
+  @apply w-3 h-3 rounded-full bg-gray-400 absolute bottom-0.5 right-0.5;
+  opacity: 0.9;
+}
+
+/* Phase Color Classes */
+.phase-menstrual { @apply bg-red-400/90 text-white; }
+.phase-follicular { @apply bg-yellow-400/90 text-white; }
+.phase-ovulation { @apply bg-blue-400/90 text-white; }
+.phase-luteal { @apply bg-purple-400/90 text-white; }
+
+/* Button Flash Animation */
+@keyframes flash-blue {
+  0% { background-color: rgba(59, 130, 246, 0.2); }
+  50% { background-color: rgba(59, 130, 246, 0.8); }
+  100% { background-color: rgba(59, 130, 246, 0.2); }
+}
+.animate-flash-blue {
+  animation: flash-blue 0.3s ease-in-out;
+}
+
+/* Bottom Navigation */
+.bottom-nav-btn {
+  @apply flex flex-col items-center py-3 px-5 text-muted-foreground;
+}
+.bottom-nav-btn.active {
+  @apply text-primary;
+}
+
+/* Input & Slider Styles */
+.input-container { @apply py-3; }
+.input-container label { @apply mb-2 block; }
+.slider-container { @apply w-full relative; }
+input[type="range"] {
+  @apply h-2 rounded-full appearance-none w-full bg-secondary outline-none;
+  -webkit-appearance: none;
+}
+/* Slider Thumb Styles */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
+input[type="range"]::-moz-range-thumb {
+  @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
+input[type="range"]::-ms-thumb {
+  @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
+
+/* === Tailwind Base Layer === */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Default scrollbar for webkit browsers */
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-secondary rounded-sm;
+  }
+}
+
+/* === Tailwind Utilities Layer === */
+@layer utilities {
+  .ripple {
+    @apply relative overflow-hidden;
+  }
+  .ripple:after {
+    @apply content-[''] block absolute w-full h-full top-0 left-0 pointer-events-none bg-no-repeat bg-center opacity-0 transition-all duration-300;
+    background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+    transform: scale(10, 10);
+  }
+  .ripple:active:after {
+    @apply transform scale-0 opacity-30 transition-none;
+  }
+}
+
+/* === Generic Themeable Elements === */
+
+/* Upcoming Event Boxes (Generic Styling) - Applies to all themes unless overridden */
+[class*="theme-"] .bg-primary.bg-opacity-10 {
+  background-color: hsl(var(--primary) / 0.10) !important;
+  border: 1px solid hsl(var(--primary) / 0.5) !important; /* Add a subtle border */
+  border-left: 4px solid hsl(var(--primary)) !important; /* Keep the strong left border */
+  color: var(--foreground) !important; /* Use theme's foreground text */
+}
+[class*="theme-"] .bg-primary.bg-opacity-10 .font-medium,
+[class*="theme-"] .bg-primary.bg-opacity-10 .text-sm,
+[class*="theme-"] .bg-primary.bg-opacity-10 .text-xs {
+  color: var(--foreground) !important; /* Ensure text inside inherits correctly */
+}
+/* Generic fertile window box - base style, themes override specifics */
+.fertile-window-box {
+   /* Base styles applied via Tailwind - themes primarily change bg, color, border */
+   @apply rounded-lg text-card-foreground shadow-sm mt-8 mb-4 mx-auto max-w-2xl border border-l-4 border-primary p-4;
+   /* Default uses primary color for border and primary/10 for background */
+   background-color: hsl(var(--primary) / 0.10);
+   border-color: hsl(var(--primary) / 0.5);
+   border-left-color: hsl(var(--primary));
+   color: var(--foreground);
+}
+
+/* Select Symptoms Popup Highlight (Default) */
+.select-symptoms-popup .highlighted {
+  background: hsl(var(--accent) / 0.5) !important; /* Default highlight */
+  color: hsl(var(--accent-foreground)) !important;
+}
+/* Select Symptoms Popup Text Color (Default) */
+.symptom-item:hover span,
+.symptom-item.selected span {
+  color: hsl(var(--foreground)) !important; /* Default text color */
+  background: none !important;
+}
+
+/* =========================
+   THEME-SPECIFIC STYLES
+   ========================= */
+
+/* --- Theme: Starry --- */
 .theme-starry {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  /* Variables */
   --background: 235 44% 12%; /* deep blue */
   --foreground: 220 16% 90%;
   --muted: 245 32% 18%;
@@ -348,9 +341,36 @@
   --ring: 263 67% 65%;
   --radius: 0.5rem;
   --button-hover: 235 50% 25% / 0.7; /* toned down hover */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: 270 100% 98%; /* light on-theme for starry */
+  --cycle-stats-bar: var(--primary);
+  --theme-text: 220 16% 90%; /* For theme selector */
+}
+/* Components */
+.theme-starry .symptom-item:hover {
+  background: hsl(var(--muted), 0.80);
+  color: var(--accent-foreground, var(--foreground));
+}
+.theme-starry .symptom-item.selected {
+  background: hsl(var(--accent), 0.82);
+  color: var(--accent-foreground, var(--foreground));
+  border: 1.5px solid hsl(var(--accent));
+}
+.theme-starry .symptom-btn:hover,
+.theme-starry .symptom-btn:focus {
+  background: hsl(var(--button-hover)); /* Apply specific hover background */
+}
+.theme-starry .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #d7e5ff) !important;
+}
+.theme-starry .theme-name {
+  color: hsl(240 20% 85%) !important;
 }
 
+/* --- Theme: Nebula --- */
 .theme-nebula {
+  /* Variables */
   --background: 270 70% 12%;
   --foreground: 270 30% 96%;
   --muted: 270 50% 18%;
@@ -372,23 +392,52 @@
   --ring: 290 100% 70%;
   --radius: 0.5rem;
   --button-hover: 270 50% 25% / 0.7; /* toned down hover */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: 260 100% 96%; /* light on-theme for nebula */
+  --cycle-stats-bar: var(--primary);
+  --glow-color: #c084fc; /* Added glow color */
+  --theme-text: 270 30% 96%; /* For theme selector */
+}
+/* Components */
+.theme-nebula .symptom-item:hover {
+  background: hsl(var(--muted), 0.80);
+  color: var(--accent-foreground, var(--foreground));
+}
+.theme-nebula .symptom-item.selected {
+  background: hsl(var(--accent), 0.82);
+  color: var(--accent-foreground, var(--foreground));
+  border: 1.5px solid hsl(var(--accent));
+}
+.theme-nebula .symptom-btn:hover,
+.theme-nebula .symptom-btn:focus {
+  background: hsl(var(--button-hover)); /* Apply specific hover background */
+}
+.theme-nebula .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #f5eaff) !important;
+}
+.theme-nebula .theme-name {
+  color: hsl(270 30% 96%) !important;
 }
 
+
+/* --- Theme: Pinkwhite --- */
 .theme-pinkwhite {
-  --calendar-period-expected-bg: #fde8e8;
-  --calendar-period-expected-fg: #7f1d1d;
-  /* Base colors */
+  /* Variables */
+  --card: 0 0% 100%; /* pure white */
+  --card-foreground: 340 20% 20%; /* deep muted plum text */
+  --calendar-period-expected-bg: #fde8e8; /* Specific light pink */
+  --calendar-period-expected-fg: #7f1d1d; /* Specific dark red */
   --background: 330 60% 98%; /* Very soft white-pink */
   --foreground: 340 40% 12%; /* Very dark readable text */
-  --muted: 330 40% 96%; 
+  --muted: 330 40% 96%;
   --muted-foreground: 340 30% 30%;
   --popover: 330 40% 97%;
   --popover-foreground: 340 40% 12%;
-  --card: 330 40% 97%;
-  --card-foreground: 340 40% 12%;
+  /* --card defined above */
+  /* --card-foreground defined above */
   --border: 340 30% 85%;
   --input: 340 30% 85%;
-  /* Primary actions */
   --primary: 340 70% 60%; /* Warm pink for buttons */
   --primary-foreground: 330 60% 98%; /* Light text on buttons */
   --secondary: 340 80% 85%; /* Light rose secondary */
@@ -399,45 +448,125 @@
   --destructive-foreground: 330 60% 98%;
   --ring: 340 70% 65%;
   --radius: 0.5rem;
-  /* Special hover states */
   --button-hover: 340 60% 70% / 0.8; /* softer highlight hover */
-  /* Special for text and hover clarity */
+  --button-selected: 340 70% 60%; /* Use primary for selected background */
   --text-selected-dark: #400d0d;
   --text-selected-light: #fff0f0;
-  /* Special for hover bars on symptoms */
-  --hover-highlight: 340 60% 90%; /* very light rose pink */
+  --hover-highlight: 340 60% 90%; /* very light rose pink for symptom item hover */
+  --cycle-stats-text: 340 20% 20%; /* readable dark plum for stats text */
+  --cycle-stats-bar: 340 70% 60%; /* match flow intensity pink (override default purple) */
+  --theme-text: 330 40% 10%; /* For theme selector */
+}
+/* Components */
+.theme-pinkwhite .bg-period-expected { /* Ensure override */
+  background-color: var(--calendar-period-expected-bg) !important;
+  color: var(--calendar-period-expected-fg) !important;
+}
+.theme-pinkwhite .symptom-item {
+  color: var(--foreground);
+}
+.theme-pinkwhite .symptom-item:hover {
+  background: hsl(var(--hover-highlight)); /* Use specific hover highlight */
+  color: var(--foreground); /* Keep text dark on light hover */
+}
+.theme-pinkwhite .symptom-item.selected {
+  background: hsl(var(--accent), 0.92);
+  color: var(--accent-foreground, var(--foreground)); /* Light text on accent bg */
+  border: 1.5px solid hsl(var(--accent));
+}
+.theme-pinkwhite .symptom-btn:hover,
+.theme-pinkwhite .symptom-btn:focus {
+  /* Don't apply hover background to unselected buttons (handled globally) */
+}
+.theme-pinkwhite .symptom-btn.selected {
+  background: hsl(var(--button-selected)); /* Apply selected background */
+}
+.theme-pinkwhite .symptom-btn.selected:hover {
+   background: hsl(var(--button-hover)); /* Apply specific hover for selected */
+}
+.theme-pinkwhite .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #fff) !important;
+}
+.theme-pinkwhite .theme-name,
+.theme-name[data-theme="pinkwhite"] { /* Handle direct attribute selector too */
+  color: hsl(var(--theme-text, 330 40% 10%)) !important;
+}
+.theme-pinkwhite .select-symptoms-popup .highlighted {
+  background: #e9cfa3 !important; /* sandy brown */
+  color: #2d1a05 !important; /* dark readable text */
+}
+.theme-pinkwhite .symptom-item:hover span,
+.theme-pinkwhite .symptom-item.selected span {
+  color: #2d1a05 !important; /* dark readable text */
 }
 
+
+/* --- Theme: Beach --- */
 .theme-beach {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  /* Variables */
   --background: 190 60% 95%; /* pale teal sand */
   --foreground: 190 50% 20%;
   --muted: 190 40% 90%;
   --muted-foreground: 190 30% 40%;
   --popover: 190 40% 98%;
   --popover-foreground: 190 50% 20%;
-  --card: 190 40% 98%;
-  --card-foreground: 190 50% 20%;
+  --card: 190 40% 98%; /* Light card */
+  --card-foreground: 190 50% 20%; /* Dark text */
   --border: 40 30% 80%;
   --input: 40 30% 80%;
   --primary: 190 80% 50%; /* teal */
-  --primary-foreground: 190 60% 98%;
+  --primary-foreground: 190 60% 98%; /* Light text on buttons */
   --secondary: 40 90% 85%; /* sand */
   --secondary-foreground: 190 50% 20%;
-  --accent: 50 100% 70%;
-  --accent-foreground: 190 50% 20%;
+  --accent: 50 100% 70%; /* yellow */
+  --accent-foreground: 190 50% 20%; /* Dark text on accent */
   --destructive: 0 70% 40%;
   --destructive-foreground: 190 60% 98%;
   --ring: 40 90% 70%;
   --radius: 0.5rem;
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: 190 50% 20%; /* readable blue for stats text */
+  --cycle-stats-bar: var(--primary); /* match flow intensity bar */
   --scrollbar-thumb: 50 100% 70% / 0.35; /* faded yellow */
   --scrollbar-thumb-hover: 50 100% 70% / 0.6;
   --theme-text: 190 50% 20%; /* darker text for theme bubble */
 }
+/* Components */
+.theme-beach ::-webkit-scrollbar-thumb {
+  background: hsla(var(--scrollbar-thumb));
+}
+.theme-beach ::-webkit-scrollbar-thumb:hover {
+  background: hsla(var(--scrollbar-thumb-hover));
+}
+.theme-beach .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #fff) !important;
+}
+.theme-beach .theme-name,
+.theme-name[data-theme="beach"] { /* Handle direct attribute selector too */
+  color: #17404e !important; /* dark teal for beach */
+}
+.theme-beach .symptom-btn:focus { /* Special focus style for beach */
+  background: rgb(251, 228, 182) !important; /* sandy yellow focus */
+  color: #2d1a05 !important; /* dark text on focus */
+   /* Keep transform if needed */
+  transform: translateY(-1px);
+  box-shadow: 0 0 5px 1px rgb(251 228 182 / 0.7); /* Subtle focus shadow */
+  outline: 1px solid #e9cfa3;
+  border: 1px solid transparent; /* Override potential global border */
+}
+.theme-beach .select-symptoms-popup .highlighted {
+  background: #e9cfa3 !important; /* sandy brown */
+  color: #2d1a05 !important; /* dark readable text */
+}
+.theme-beach .symptom-item:hover span,
+.theme-beach .symptom-item.selected span {
+  color: #2d1a05 !important; /* dark readable text */
+}
 
+/* --- Theme: Ocean --- */
 .theme-ocean {
-  /* Ocean Dark Mode: inspired by beach, but deep blue/teal, no transparency, no glows */
+  /* Variables */
   --background: 200 70% 14%; /* deep ocean blue */
   --foreground: 190 60% 96%; /* light seafoam text */
   --muted: 200 40% 18%;
@@ -458,13 +587,19 @@
   --destructive-foreground: 190 60% 98%;
   --ring: 190 80% 50%;
   --radius: 0.5rem;
-  --theme-text: 190 60% 96%;
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: var(--primary-foreground);
+  --cycle-stats-bar: var(--primary);
+  --theme-text: 190 60% 96%;
   /* No glow for ocean */
+  --glow: none;
+  --glow-color: transparent;
 }
+/* Components */
+/* Period Expected Box Override for Ocean (ensure dark card style) */
 .theme-ocean .bg-period-expected,
-.theme-ocean .bg-primary.bg-period-expected,
+.theme-ocean .bg-primary.bg-period-expected, /* Catch various combinations */
 .theme-ocean .bg-period-expected.bg-primary,
 .theme-ocean .bg-primary.bg-opacity-10.bg-period-expected,
 .theme-ocean .bg-period-expected.bg-primary.bg-opacity-10,
@@ -473,13 +608,42 @@
   background-color: hsl(var(--card)) !important;
   color: hsl(var(--card-foreground)) !important;
 }
+/* Symptom button hover state override (no shadow/border) */
+.theme-ocean .symptom-btn:hover,
+.theme-ocean .symptom-btn.selected:hover {
+  box-shadow: none !important;
+  border: 1.5px solid hsl(var(--border)) !important; /* Maintain consistent border */
+  background: hsl(var(--muted)) !important; /* Add subtle hover background */
+}
+.theme-ocean .symptom-btn .symptom-label {
+  color: var(--foreground, #f1f8fa) !important;
+}
+.theme-ocean .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #fff) !important;
+}
+/* Upcoming Event Box Override for Ocean */
+.theme-ocean .bg-primary.bg-opacity-10 {
+  background-color: hsl(var(--primary) / 0.10) !important;
+  border-color: hsl(var(--primary)) !important;
+  color: var(--foreground, #f1f8fa) !important;
+}
+.theme-ocean .upcoming-box, /* Assuming .upcoming-box uses the bg-primary/10 style */
+.theme-ocean .bg-primary.bg-opacity-10 .font-medium,
+.theme-ocean .bg-primary.bg-opacity-10 .text-sm,
+.theme-ocean .bg-primary.bg-opacity-10 .text-xs {
+  color: var(--foreground, #f1f8fa) !important;
+}
+/* Fertile Window Box Override for Ocean */
+.theme-ocean .fertile-window-box {
+  background-color: hsl(190, 66%, 18%) !important; /* Darker teal bg */
+  color: hsl(190, 60%, 96%) !important; /* Use foreground text */
+  border: 1px solid hsl(190, 80%, 30%) !important;
+  border-left: 4px solid hsl(190, 80%, 50%) !important; /* Primary teal left border */
+}
 
-
-
-
+/* --- Theme: Galaxy --- */
 .theme-galaxy {
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  /* Variables */
   --background: 260 60% 13%; /* deep space blue */
   --foreground: 230 20% 96%; /* brighter text */
   --muted: 260 40% 20%;
@@ -501,10 +665,35 @@
   --ring: 290 100% 70%;
   --radius: 0.5rem;
   --button-hover: 260 50% 25% / 0.7;
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: var(--primary-foreground);
+  --cycle-stats-bar: var(--primary);
   --theme-text: 230 20% 96%;
 }
+/* Components */
+.theme-galaxy .symptom-btn:hover,
+.theme-galaxy .symptom-btn:focus {
+  background: hsl(var(--button-hover)); /* Apply specific hover background */
+}
+.theme-galaxy .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #fff) !important;
+}
+.theme-galaxy .theme-name {
+  color: hsl(var(--theme-text)) !important;
+}
+/* Fertile Window Box Override for Galaxy */
+.theme-galaxy .fertile-window-box {
+  background-color: hsl(200, 100%, 18%) !important; /* Secondary blue bg */
+  color: hsl(230, 20%, 96%) !important; /* Foreground text */
+  border: 1px solid hsl(200, 100%, 40%) !important;
+  border-left: 4px solid hsl(200, 100%, 70%) !important; /* Secondary blue left border */
+}
 
+
+/* --- Theme: Aurora --- */
 .theme-aurora {
+  /* Variables */
   --background: 160 60% 15%; /* aurora green */
   --foreground: 120 20% 98%; /* brighter text */
   --muted: 160 40% 23%;
@@ -526,10 +715,34 @@
   --ring: 190 100% 70%;
   --radius: 0.5rem;
   --button-hover: 210 100% 30% / 0.7;
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: var(--primary-foreground);
+  --cycle-stats-bar: var(--primary);
   --theme-text: 120 20% 98%;
 }
+/* Components */
+.theme-aurora .symptom-btn:hover,
+.theme-aurora .symptom-btn:focus {
+  background: hsl(var(--button-hover)); /* Apply specific hover background */
+}
+.theme-aurora .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #fff) !important;
+}
+.theme-aurora .theme-name {
+  color: hsl(var(--theme-text)) !important;
+}
+/* Fertile Window Box Override for Aurora */
+.theme-aurora .fertile-window-box {
+  background-color: hsl(160, 60%, 22%) !important; /* Muted green bg */
+  color: hsl(120, 20%, 98%) !important; /* Foreground text */
+  border: 1px solid hsl(160, 40%, 40%) !important;
+  border-left: 4px solid hsl(160, 100%, 70%) !important; /* Lighter green left border */
+}
 
+/* --- Theme: Cyberpunk --- */
 .theme-cyberpunk {
+  /* Variables */
   --background: 280 100% 8%; /* deep violet/blue */
   --foreground: 160 100% 70%; /* neon green/cyan */
   --muted: 280 80% 18%;
@@ -539,47 +752,95 @@
   --card: 280 100% 12%;
   --card-foreground: 160 100% 70%;
   --border: 200 100% 60%; /* neon blue border */
-  --input: 160 100% 70%;
+  --input: 160 100% 70%; /* Text color for input */
+  --input-bg: 280 90% 15%; /* Slightly different input background */
   --primary: 200 100% 60%; /* neon blue */
-  --primary-foreground: 280 100% 8%;
+  --primary-foreground: 280 100% 8%; /* Dark text on primary */
   --secondary: 160 100% 70%; /* neon green/cyan */
-  --secondary-foreground: 160 100% 10%;
+  --secondary-foreground: 160 100% 10%; /* Dark text on secondary */
   --accent: 200 100% 70%; /* blue accent */
-  --accent-foreground: 160 100% 70%;
+  --accent-foreground: 160 100% 70%; /* Neon text on accent */
   --destructive: 0 100% 60%;
   --destructive-foreground: 160 100% 70%;
   --ring: 200 100% 60%;
   --radius: 0.5rem;
-  --glow: 0 0 12px #00fff7, 0 0 32px #0099ff;
+  --glow-color: #00fff7; /* Specific glow color */
+  --glow: 0 0 8px var(--glow-color), 0 0 16px var(--glow-color), 0 0 24px var(--glow-color); /* Combined glow */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: 190 100% 98%; /* light cyan for cyberpunk */
+  --cycle-stats-bar: var(--primary);
   --theme-text: 160 100% 70%;
 }
+/* Components */
+.theme-cyberpunk .symptom-btn.selected:hover { /* Glow on selected hover */
+    box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
+    transform: translateY(-1px);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.theme-cyberpunk .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #00fff7) !important; /* Use the adjusted foreground from variable block */
+  text-shadow: 0 0 4px var(--glow-color), 0 0 8px var(--glow-color); /* Add text shadow */
+}
+/* Fertile Window Box Override for Cyberpunk */
+.theme-cyberpunk .fertile-window-box {
+  background-color: hsl(200, 100%, 16%) !important; /* Primary blue bg */
+  color: #00fff7 !important; /* Neon cyan text */
+  border: 1px solid hsl(200, 100%, 40%) !important;
+  border-left: 4px solid #00fff7 !important; /* Neon cyan left border */
+  box-shadow: 0 0 8px 1px #00fff7 inset, 0 0 12px 2px #0099ff; /* Inner and outer glow */
+}
+/* Apply glow effects (see multi-theme glow section below) */
 
+
+/* --- Theme: Synthwave --- */
 .theme-synthwave {
+  /* Variables */
   --background: 260 90% 12%; /* deep blue/purple */
   --foreground: 52 100% 70%; /* neon yellow */
   --muted: 260 70% 22%;
-  --muted-foreground: 320 100% 70%;
+  --muted-foreground: 320 100% 70%; /* neon magenta */
   --popover: 260 90% 16%;
   --popover-foreground: 52 100% 70%;
   --card: 260 90% 16%;
   --card-foreground: 52 100% 70%;
   --border: 320 100% 70%; /* neon magenta border */
-  --input: 52 100% 70%;
+  --input: 52 100% 70%; /* Text color for input */
+  --input-bg: 260 80% 18%; /* Slightly different input background */
   --primary: 320 100% 70%; /* neon magenta */
-  --primary-foreground: 260 90% 12%;
+  --primary-foreground: 260 90% 12%; /* Dark text on primary */
   --secondary: 200 100% 60%; /* neon blue */
-  --secondary-foreground: 52 100% 70%;
+  --secondary-foreground: 52 100% 70%; /* Neon text on secondary */
   --accent: 52 100% 70%; /* neon yellow accent */
-  --accent-foreground: 320 100% 70%;
+  --accent-foreground: 320 100% 70%; /* Neon magenta text on accent */
   --destructive: 0 100% 60%;
   --destructive-foreground: 52 100% 70%;
   --ring: 320 100% 70%;
   --radius: 0.5rem;
-  --glow: 0 0 8px #ffe600, 0 0 16px #ff00ea;
+  --glow-color: #ff5efc; /* Specific glow color */
+  --glow: 0 0 8px var(--glow-color), 0 0 16px var(--glow-color), 0 0 24px var(--glow-color); /* Combined glow */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: 320 100% 98%; /* light magenta for synthwave */
+  --cycle-stats-bar: var(--primary);
   --theme-text: 52 100% 70%;
 }
+/* Components */
+.theme-synthwave .symptom-btn.selected:hover { /* Glow on selected hover */
+    box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
+    transform: translateY(-1px);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.theme-synthwave .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #ffe600) !important; /* Use the adjusted foreground */
+  text-shadow: 0 0 4px var(--glow-color), 0 0 8px var(--glow-color); /* Add text shadow */
+}
+/* Apply glow effects (see multi-theme glow section below) */
 
+
+/* --- Theme: Lunar --- */
 .theme-lunar {
+  /* Variables */
   --background: 220 18% 16%;   /* deep midnight blue */
   --foreground: 220 30% 96%;   /* moonlit white */
   --muted: 220 16% 22%;
@@ -591,7 +852,7 @@
   --border: 220 10% 40%;
   --input: 220 10% 40%;
   --primary: 60 30% 90%;   /* pale moon yellow */
-  --primary-foreground: 220 18% 16%;
+  --primary-foreground: 220 18% 16%; /* Dark text on primary */
   --secondary: 220 18% 36%; /* moon shadow blue */
   --secondary-foreground: 220 30% 96%;
   --accent: 240 60% 80%;   /* soft blue accent */
@@ -600,23 +861,42 @@
   --destructive-foreground: 220 30% 96%;
   --ring: 60 30% 90%;
   --radius: 0.5rem;
-  --glow: 0 0 8px #eae6c4, 0 0 16px #b3c7f7;
+  --glow-color: #aee9ff; /* Specific glow color */
+  --glow: 0 0 6px var(--glow-color), 0 0 12px var(--glow-color), 0 0 18px #eae6c4; /* Subtle glow */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: 240 60% 80%; /* lighter purple for lunar stats text */
+  --cycle-stats-bar: var(--primary);
   --theme-text: 220 30% 96%;
 }
+/* Components */
+.theme-lunar .symptom-btn.selected:hover { /* Glow on selected hover */
+    box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
+    transform: translateY(-1px);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.theme-lunar .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground, #eae6c4) !important; /* Use adjusted foreground */
+  text-shadow: 0 0 4px var(--glow-color), 0 0 8px #eae6c4; /* Add text shadow */
+}
+/* Apply glow effects (see multi-theme glow section below) */
 
+
+/* --- Theme: Moon --- */
 .theme-moon {
+  /* Variables */
   --background: 220 18% 16%;   /* deep midnight blue */
   --foreground: 220 30% 96%;   /* moonlit white */
   --muted: 220 16% 22%;
   --muted-foreground: 220 18% 80%;
   --popover: 220 20% 18%;
   --popover-foreground: 220 30% 96%;
-  --card: 220 18% 18%;
+  --card: 220 18% 18%; /* Slightly different card */
   --card-foreground: 220 30% 96%;
-  --border: 220 18% 22%;
+  --border: 220 18% 22%; /* Softer border */
   --input: 220 18% 22%;
   --primary: 60 30% 90%;   /* pale moon yellow */
-  --primary-foreground: 220 18% 16%;
+  --primary-foreground: 220 18% 16%; /* Dark text on primary */
   --secondary: 220 18% 36%; /* moon shadow blue */
   --secondary-foreground: 220 30% 96%;
   --accent: 240 60% 80%;   /* soft blue accent */
@@ -625,263 +905,51 @@
   --destructive-foreground: 220 30% 96%;
   --ring: 60 30% 90%;
   --radius: 0.5rem;
-  --glow: none;
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: 240 60% 80%; /* lighter purple for moon stats text */
+  --cycle-stats-bar: var(--primary);
   --theme-text: 220 30% 96%;
-  --text-selected-dark: #23263a;
-  --text-selected-light: #eae6c4;
-  --button-hover-border: rgba(234, 230, 196, 0.5);
+  --text-selected-dark: #23263a; /* Specific dark text for selected elements */
+  --text-selected-light: #eae6c4; /* Specific light text (matches primary?) */
+  --button-hover-border: rgba(234, 230, 196, 0.5); /* Pale yellow border for hover */
+  /* No glow for moon */
+  --glow: none;
+  --glow-color: transparent;
 }
-
-/* === THEME-SPECIFIC COMPONENT STYLES === */
-/* Symptom button, label, and period status overrides per theme */
-.theme-moon .symptom-btn .symptom-label { color: hsl(220deg 11.07% 69.18%) !important; }
-.theme-moon .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #eae6c4) !important; }
-.theme-starry .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #d7e5ff) !important; }
-.theme-nebula .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #f5eaff) !important; }
-.theme-pinkwhite .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
-.theme-beach .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
-.theme-ocean .symptom-btn .symptom-label { color: var(--foreground, #f1f8fa) !important; }
-.theme-ocean .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
-.theme-galaxy .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
-.theme-aurora .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
-.theme-lunar .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #eae6c4) !important; text-shadow: 0 0 8px #eae6c4, 0 0 16px #b3c7f7; }
-.theme-cyberpunk .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #00fff7) !important; text-shadow: 0 0 8px #00fff7, 0 0 16px #0099ff; }
-.theme-synthwave .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #ffe600) !important; text-shadow: 0 0 8px #ffe600, 0 0 16px #ff00ea; }
-
-/* Period status and cervical mucus themeable selectors (only moon overrides, others default) */
-.theme-moon .period-status-btn.selected .symptom-label { color: var(--text-selected-dark, #23263a) !important; }
-.theme-moon .cervical-mucus-btn.selected, .theme-moon .cervical-mucus-btn.selected span { color: #23263a !important; }
-
-/* Upcoming event boxes (calendar tab) */
-.theme-ocean .bg-primary, .theme-ocean .bg-primary.bg-opacity-10, .theme-ocean .border-primary { background-color: hsl(var(--primary) / 0.10) !important; border-color: hsl(var(--primary)) !important; }
-.theme-ocean .upcoming-box, .theme-ocean .bg-primary.bg-opacity-10 { color: var(--foreground, #f1f8fa) !important; }
-.theme-ocean .upcoming-box .font-medium, .theme-ocean .upcoming-box .text-sm, .theme-ocean .upcoming-box .text-xs, .theme-ocean .bg-primary.bg-opacity-10 .font-medium, .theme-ocean .bg-primary.bg-opacity-10 .text-sm, .theme-ocean .bg-primary.bg-opacity-10 .text-xs { color: var(--foreground, #f1f8fa) !important; }
-[class*="theme-"] .bg-primary.bg-opacity-10 { background-color: hsl(var(--primary) / 0.10) !important; border-color: hsl(var(--primary)) !important; }
-[class*="theme-"] .bg-primary.bg-opacity-10, [class*="theme-"] .bg-primary.bg-opacity-10 .font-medium, [class*="theme-"] .bg-primary.bg-opacity-10 .text-sm, [class*="theme-"] .bg-primary.bg-opacity-10 .text-xs { color: var(--foreground, #fff) !important; }
-
-/* === BASE STYLES === */
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply font-sans antialiased bg-background text-foreground;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Custom scrollbar for webkit browsers */
-  ::-webkit-scrollbar {
-    @apply w-1.5 h-1.5;
-  }
-  
-  ::-webkit-scrollbar-track {
-    @apply bg-background;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    @apply bg-secondary rounded-sm;
-  }
-
-  /* WebKit browsers */
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
-    border: 2px solid white;
-    box-shadow: 0 0 2px rgba(0,0,0,0.2);
-  }
-
-  /* Firefox */
-  input[type="range"]::-moz-range-thumb {
-    @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
-    border: 2px solid white;
-    box-shadow: 0 0 2px rgba(0,0,0,0.2);
-  }
-
-  /* Edge & IE */
-  input[type="range"]::-ms-thumb {
-    @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
-    border: 2px solid white;
-    box-shadow: 0 0 2px rgba(0,0,0,0.2);
-  }
-}
-
-/* === UTILITIES === */
-@layer utilities {
-  .ripple {
-    @apply relative overflow-hidden;
-  }
-
-  .ripple:after {
-    @apply content-[''] block absolute w-full h-full top-0 left-0 pointer-events-none bg-no-repeat bg-center opacity-0 transition-all duration-300;
-    background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
-    transform: scale(10, 10);
-  }
-
-  .ripple:active:after {
-    @apply transform scale-0 opacity-30 transition-none;
-  }
-}
-
-/* === APP-SPECIFIC STYLES === */
-.calendar-day {
-  @apply aspect-square flex items-center justify-center text-sm rounded-full cursor-pointer transition-colors relative;
-}
-
-.calendar-day:not(.empty):hover {
-  @apply bg-muted;
-}
-
-.calendar-day.period {
-  @apply bg-red-400/90 border border-red-500 text-white font-medium;
-}
-
-.calendar-day.fertile {
-  @apply bg-blue-400/90 border border-blue-500 text-white font-medium;
-}
-
-.symptom-indicator {
-  @apply w-3 h-3 rounded-full bg-accent absolute bottom-0.5;
-  opacity: 0.9;
-}
-
-.spotting-indicator {
-  @apply w-3 h-3 rounded-full bg-gray-400 absolute bottom-0.5 right-0.5;
-  opacity: 0.9;
-}
-
-.date-number {
-  @apply inline-block text-foreground;
-  opacity: 1 !important;
-}
-
-/* Every calendar day shows the number clearly in white, regardless of hover state */
-.calendar-day:not(.period):not(.fertile):not(.today) .date-number {
-  @apply text-foreground;
-}
-
-.calendar-day.today {
-  @apply bg-primary text-white font-medium;
-}
-
-.calendar-day.empty {
-  @apply text-gray-500;
-}
-
-/* Phase colors */
-.phase-menstrual {
-  @apply bg-red-400/90 text-white;
-}
-
-.phase-follicular {
-  @apply bg-yellow-400/90 text-white;
-}
-
-.phase-ovulation {
-  @apply bg-blue-400/90 text-white;
-}
-
-.phase-luteal {
-  @apply bg-purple-400/90 text-white;
-}
-
-/* Animation for button flash */
-@keyframes flash-blue {
-  0% { background-color: rgba(59, 130, 246, 0.2); }
-  50% { background-color: rgba(59, 130, 246, 0.8); }
-  100% { background-color: rgba(59, 130, 246, 0.2); }
-}
-
-.animate-flash-blue {
-  animation: flash-blue 0.3s ease-in-out;
-}
-
-.bottom-nav-btn {
-  @apply flex flex-col items-center py-3 px-5 text-muted-foreground;
-}
-
-.bottom-nav-btn.active {
-  @apply text-primary;
-}
-
-/* Apply touch-friendly padding for inputs on mobile */
-.input-container {
-  @apply py-3;
-}
-
-.input-container label {
-  @apply mb-2 block;
-}
-
-/* Slider styles */
-.slider-container {
-  @apply w-full relative;
-}
-
-input[type="range"] {
-  @apply h-2 rounded-full appearance-none w-full bg-secondary outline-none;
-  -webkit-appearance: none;
-}
-
-/* Custom scrollbar for beach theme */
-.theme-beach ::-webkit-scrollbar-thumb {
-  background: hsla(var(--scrollbar-thumb));
-}
-.theme-beach ::-webkit-scrollbar-thumb:hover {
-  background: hsla(var(--scrollbar-thumb-hover));
-}
-
-/* Theme selector text color override */
-.theme-name[data-theme="pinkwhite"],
-.theme-name[data-theme="beach"] {
-  color: #3a2323 !important; /* very dark readable brown */
-}
-
-.theme-beach .theme-name,
-.theme-name[data-theme="beach"] {
-  color: #17404e !important; /* dark teal for beach */
-}
-
-/* Select Symptoms Popup (analysis page) - symptom item hover/selected text color */
-.symptom-item:hover span,
-.symptom-item.selected span,
-.theme-pinkwhite .symptom-item:hover span,
-.theme-pinkwhite .symptom-item.selected span,
-.theme-beach .symptom-item:hover span,
-.theme-beach .symptom-item.selected span {
-  color: #2d1a05 !important; /* dark readable text */
-  background: none !important;
-}
-
-/* Remove any yellow color from all generic .symptom-label, only apply to selected symptom button */
-.symptom-label {
-  /* color: inherit !important; */
-}
-
+/* Components */
 .theme-moon .symptom-btn .symptom-label {
-  color: hsl(220deg 11.07% 69.18%) !important;
+  color: hsl(220deg 11.07% 69.18%) !important; /* Specific muted color for unselected labels */
 }
-
+.theme-moon .symptom-btn.selected {
+  /* Base selected styles apply, primary background */
+  color: var(--text-selected-light, #eae6c4) !important; /* Ensure container text is light */
+}
 .theme-moon .symptom-btn.selected .symptom-label {
-  color: var(--primary-foreground, #eae6c4) !important;
+  color: var(--primary-foreground, #23263a) !important; /* Dark text on primary background */
 }
-
-.theme-moon .period-status-btn.selected .symptom-label {
+/* Special text color overrides for Moon */
+.theme-moon .period-status-btn.selected .symptom-label,
+.theme-moon .period-status-btn.selected .period-status-label { /* Catch both possibilities */
   color: var(--text-selected-dark, #23263a) !important;
 }
-
-/* Remove any color from intensity labels */
-.p-3.pt-2.pb-4.bg-card.border.border-t-0.border-primary\/50.rounded-b-lg .text-xs span {
-  color: inherit !important;
+.theme-moon .cervical-mucus-btn.selected,
+.theme-moon .cervical-mucus-btn.selected span {
+  color: var(--text-selected-dark, #23263a) !important;
 }
-
-/* Intensity labels should always use normal foreground color */
-span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
-  color: var(--foreground, #eae6c4) !important;
+/* Unselected button hover outline */
+.theme-moon .symptom-btn:not(.selected):hover {
+  /* Override the global no-border/no-bg hover for unselected */
+  outline: 2px solid var(--button-hover-border) !important;
+  outline-offset: -2px;
+  background: none !important; /* Keep background transparent */
+  border: none !important; /* Keep border none */
+  box-shadow: none !important; /* Keep shadow none */
+  transform: translateY(-1px); /* Keep lift */
 }
-
+/* Intensity label SVG color fix */
 .theme-moon .symptom-intensity-label svg,
-.theme-moon svg.symptom-intensity-label {
+.theme-moon svg.symptom-intensity-label { /* Target SVG specifically */
   background: none !important;
   color: var(--foreground, #eae6c4) !important;
   fill: none !important;
@@ -889,72 +957,99 @@ span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
   padding: 0 !important;
   box-shadow: none !important;
 }
-
-/* Theme selector text color override */
-.theme-pinkwhite .theme-name,
-.theme-beach .theme-name {
-  color: hsl(var(--theme-text, 330 40% 10%)) !important;
-}
-.theme-starry .theme-name {
-  color: hsl(240 20% 85%) !important;
-}
-.theme-nebula .theme-name {
-  color: hsl(270 30% 96%) !important;
-}
-.theme-galaxy .theme-name {
-  color: hsl(var(--theme-text)) !important;
-}
-.theme-aurora .theme-name {
-  color: hsl(var(--theme-text)) !important;
+/* Selected state cleanup (ensure no unwanted color inheritance) */
+.theme-moon .selected,
+.theme-moon .button-selected,
+.theme-moon .btn-selected,
+.theme-moon .period-status.selected,
+.theme-moon .cervical-mucus.selected {
+  /* This block seems intended to *prevent* color application on the container itself */
+  /* color: inherit !important; */ /* Maybe? Or just leave empty */
 }
 
-/* Button hover/selected for all themes */
-.theme-pinkwhite .symptom-btn:hover,
-.theme-pinkwhite .symptom-btn:focus {
-  background: hsl(var(--button-hover));
-}
-.theme-pinkwhite .symptom-btn.selected {
-  background: hsl(var(--button-selected));
-}
-.theme-starry .symptom-btn:hover,
-.theme-starry .symptom-btn:focus {
-  background: hsl(var(--button-hover));
-}
-.theme-nebula .symptom-btn:hover,
-.theme-nebula .symptom-btn:focus {
-  background: hsl(var(--button-hover));
-}
-.theme-galaxy .symptom-btn:hover,
-.theme-galaxy .symptom-btn:focus {
-  background: hsl(var(--button-hover));
-}
-.theme-aurora .symptom-btn:hover,
-.theme-aurora .symptom-btn:focus {
-  background: hsl(var(--button-hover));
+/* --- Theme: Dark (Legacy/Fallback) --- */
+/* This theme mostly relies on the :root defaults */
+.theme-dark {
+  /* Explicitly set Period Expected box to use card variables if needed */
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  /* Potentially add other minor overrides if defaults aren't quite right */
 }
 
-/* Beach theme: Show More/View All Symptoms hover color */
-.theme-beach .symptom-btn:hover,
-.theme-beach .symptom-btn:focus {
-  background: rgb(251, 228, 182) !important;
-  color: #2d1a05 !important;
-}
+/* ===============================================
+   MULTI-THEME STYLES (e.g., Glow Effects)
+   =============================================== */
 
-/* Highlight color override for Select Symptoms popup */
-.select-symptoms-popup .highlighted,
-.theme-pinkwhite .select-symptoms-popup .highlighted,
-.theme-beach .select-symptoms-popup .highlighted {
-  background: #e9cfa3 !important; /* sandy brown */
-  color: #2d1a05 !important; /* dark readable text */
-}
+/* === Glow Effects (applied via classes like .glow-btn, .glow-input) === */
+/* Apply only to themes that should glow */
 
-/* Neon Glow Utility */
-.theme-cyberpunk .glow, .theme-synthwave .glow, .theme-lunar .glow {
+/* Glow effect base utility class (add to elements that should glow in relevant themes) */
+.theme-cyberpunk .glow,
+.theme-synthwave .glow,
+.theme-lunar .glow {
   box-shadow: var(--glow);
-  text-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+  /* Optional: add text shadow if desired on text elements with .glow */
+  /* text-shadow: 0 0 4px var(--glow-color), 0 0 8px var(--glow-color); */
 }
 
-/* Period status buttons, medication, intimacy, cervical mucus, settings tabs (glow for selected/active) */
+/* Glow on Specific Components */
+.theme-cyberpunk .glow-btn,
+.theme-synthwave .glow-btn,
+.theme-lunar .glow-btn,
+.theme-moon .glow-btn { /* Included moon here based on original, but Moon theme vars disable glow */
+  box-shadow: 0 0 6px 1px var(--glow-color), 0 0 12px 2px var(--glow-color);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.theme-cyberpunk .glow-bar > rect, /* For SVG bars like cycle stats */
+.theme-synthwave .glow-bar > rect,
+.theme-lunar .glow-bar > rect,
+.theme-moon .glow-bar > rect {
+  filter: drop-shadow(0 0 6px var(--glow-color)) drop-shadow(0 0 12px var(--glow-color));
+}
+
+.theme-cyberpunk .glow-switch, /* For ShadCN Switch or similar */
+.theme-synthwave .glow-switch,
+.theme-lunar .glow-switch,
+.theme-moon .glow-switch {
+  box-shadow: 0 0 6px 1px var(--glow-color), 0 0 12px 2px var(--glow-color);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.theme-cyberpunk .glow-input, /* For input fields */
+.theme-synthwave .glow-input,
+.theme-lunar .glow-input,
+.theme-moon .glow-input {
+  box-shadow: 0 0 4px 1px var(--glow-color);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  border-color: hsl(var(--primary) / 0.7); /* Add subtle border color */
+}
+
+/* Enhanced Glow on Interaction/Selection */
+.theme-cyberpunk .glow-btn.selected, .theme-cyberpunk .glow-btn:focus, .theme-cyberpunk .glow-btn:active,
+.theme-synthwave .glow-btn.selected, .theme-synthwave .glow-btn:focus, .theme-synthwave .glow-btn:active,
+.theme-lunar .glow-btn.selected, .theme-lunar .glow-btn:focus, .theme-lunar .glow-btn:active,
+.theme-moon .glow-btn.selected, .theme-moon .glow-btn:focus, .theme-moon .glow-btn:active {
+  box-shadow: 0 0 12px 3px var(--glow-color), 0 0 20px 6px var(--glow-color);
+  border-color: var(--primary); /* Use primary color for border on interaction */
+}
+
+.theme-cyberpunk .glow-input:focus, .theme-cyberpunk .glow-input.selected,
+.theme-synthwave .glow-input:focus, .theme-synthwave .glow-input.selected,
+.theme-lunar .glow-input:focus, .theme-lunar .glow-input.selected,
+.theme-moon .glow-input:focus, .theme-moon .glow-input.selected {
+  box-shadow: 0 0 10px 3px var(--glow-color);
+  border-color: var(--primary);
+}
+
+.theme-cyberpunk .glow-switch[data-state="checked"],
+.theme-synthwave .glow-switch[data-state="checked"],
+.theme-lunar .glow-switch[data-state="checked"],
+.theme-moon .glow-switch[data-state="checked"] {
+  box-shadow: 0 0 12px 3px var(--glow-color);
+}
+
+/* Apply glow to specific buttons/elements in glow themes */
 .theme-cyberpunk .period-status-btn.selected,
 .theme-synthwave .period-status-btn.selected,
 .theme-lunar .period-status-btn.selected,
@@ -967,17 +1062,17 @@ span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
 .theme-cyberpunk .cervical-mucus-btn.selected,
 .theme-synthwave .cervical-mucus-btn.selected,
 .theme-lunar .cervical-mucus-btn.selected,
-.theme-cyberpunk .medication-add-btn.selected,
+.theme-cyberpunk .medication-add-btn.selected, /* Assuming .selected adds glow */
 .theme-synthwave .medication-add-btn.selected,
 .theme-lunar .medication-add-btn.selected,
-.theme-cyberpunk .settings-tab.selected,
+.theme-cyberpunk .settings-tab.selected, /* Assuming .selected or similar state */
 .theme-synthwave .settings-tab.selected,
 .theme-lunar .settings-tab.selected {
-  box-shadow: var(--glow);
+  box-shadow: var(--glow); /* Apply the main glow */
   transition: box-shadow 0.2s;
 }
 
-/* Also add a subtle glow on hover for buttons in those themes */
+/* Subtle hover glow for buttons in glow themes */
 .theme-cyberpunk .period-status-btn:hover,
 .theme-synthwave .period-status-btn:hover,
 .theme-lunar .period-status-btn:hover,
@@ -996,134 +1091,22 @@ span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
 .theme-cyberpunk .settings-tab:hover,
 .theme-synthwave .settings-tab:hover,
 .theme-lunar .settings-tab:hover {
-  box-shadow: 0 0 4px var(--primary), 0 0 12px var(--primary);
+  box-shadow: 0 0 4px 1px var(--primary), 0 0 8px 2px var(--glow-color); /* Combine primary and glow color */
   transition: box-shadow 0.2s;
 }
 
 /* Chart bar and card glow for analysis page (flow intensity, etc) */
 .theme-cyberpunk .chart-bar,
 .theme-synthwave .chart-bar,
-.theme-lunar .chart-bar,
-.theme-cyberpunk .analysis-card,
+.theme-lunar .chart-bar {
+  filter: drop-shadow(0 0 4px var(--primary)) drop-shadow(0 0 8px var(--glow-color));
+}
+.theme-cyberpunk .analysis-card, /* Apply to cards on analysis page if desired */
 .theme-synthwave .analysis-card,
 .theme-lunar .analysis-card {
-  filter: drop-shadow(0 0 8px var(--primary)) drop-shadow(0 0 16px var(--glow-color, #fff));
+   box-shadow: 0 0 8px 1px hsl(var(--primary) / 0.5), 0 0 12px 2px var(--glow-color);
+   border: 1px solid hsl(var(--primary) / 0.3);
 }
 
 
-
-.theme-cyberpunk .fertile-window-box {
-  background-color: hsl(200, 100%, 16%) !important;
-  color: #00fff7 !important;
-  border-left: 4px solid #00fff7 !important;
-}
-.theme-galaxy .fertile-window-box {
-  background-color: hsl(200, 100%, 18%) !important;
-  color: hsl(230, 20%, 96%) !important;
-  border-left: 4px solid hsl(200, 100%, 70%) !important;
-}
-.theme-aurora .fertile-window-box {
-  background-color: hsl(160, 60%, 22%) !important;
-  color: hsl(120, 20%, 98%) !important;
-  border-left: 4px solid hsl(160, 100%, 70%) !important;
-}
-.theme-ocean .fertile-window-box {
-  background-color: hsl(190, 66%, 28%) !important;
-  color: hsl(190, 50%, 20%) !important;
-  border-left: 4px solid hsl(190, 80%, 50%) !important;
-}
-
-.theme-moon .selected,
-.theme-moon .button-selected,
-.theme-moon .btn-selected,
-.theme-moon .period-status.selected,
-.theme-moon .cervical-mucus.selected {
-  /* No color here! */
-}
-
-.theme-moon .symptom-btn.selected {
-  color: var(--text-selected-light, #eae6c4) !important;
-}
-
-.theme-moon .period-status-btn.selected .period-status-label {
-  color: #23263a !important;
-}
-
-.theme-moon .cervical-mucus-btn.selected,
-.theme-moon .cervical-mucus-btn.selected span {
-  color: #23263a !important;
-}
-
-.theme-moon .symptom-btn:not(.selected):hover {
-  outline: 2px solid var(--button-hover-border);
-  outline-offset: -2px;
-}
-
-/* Remove any yellow color from all generic .symptom-label, only apply to selected symptom button */
-.symptom-label {
-  /* color: inherit !important; */
-}
-
-.theme-moon .symptom-btn .symptom-label {
-  color: hsl(220deg 11.07% 69.18%) !important;
-}
-
-.theme-moon .symptom-btn.selected .symptom-label {
-  color: var(--primary-foreground, #eae6c4) !important;
-}
-
-.theme-moon .period-status-btn.selected .symptom-label {
-  color: var(--text-selected-dark, #23263a) !important;
-}
-
-/* Remove any color from intensity labels */
-.p-3.pt-2.pb-4.bg-card.border.border-t-0.border-primary\/50.rounded-b-lg .text-xs span {
-  color: inherit !important;
-}
-
-/* Intensity labels should always use normal foreground color */
-span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
-  color: var(--foreground, #eae6c4) !important;
-}
-
-.theme-moon .symptom-intensity-label svg,
-.theme-moon svg.symptom-intensity-label {
-  background: none !important;
-  color: var(--foreground, #eae6c4) !important;
-  fill: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-}
-
-/* Themeable upcoming event boxes for calendar tab */
-.theme-ocean .bg-primary,
-.theme-ocean .bg-primary.bg-opacity-10,
-.theme-ocean .border-primary {
-  background-color: hsl(var(--primary) / 0.10) !important;
-  border-color: hsl(var(--primary)) !important;
-}
-.theme-ocean .upcoming-box,
-.theme-ocean .bg-primary.bg-opacity-10 {
-  color: var(--foreground, #f1f8fa) !important;
-}
-.theme-ocean .upcoming-box .font-medium,
-.theme-ocean .upcoming-box .text-sm,
-.theme-ocean .upcoming-box .text-xs,
-.theme-ocean .bg-primary.bg-opacity-10 .font-medium,
-.theme-ocean .bg-primary.bg-opacity-10 .text-sm,
-.theme-ocean .bg-primary.bg-opacity-10 .text-xs {
-  color: var(--foreground, #f1f8fa) !important;
-}
-
-/* General: make sure all .bg-primary.bg-opacity-10 boxes are themeable */
-[class*="theme-"] .bg-primary.bg-opacity-10 {
-  background-color: hsl(var(--primary) / 0.10) !important;
-  border-color: hsl(var(--primary)) !important;
-}
-[class*="theme-"] .bg-primary.bg-opacity-10,
-[class*="theme-"] .bg-primary.bg-opacity-10 .font-medium,
-[class*="theme-"] .bg-primary.bg-opacity-10 .text-sm,
-[class*="theme-"] .bg-primary.bg-opacity-10 .text-xs {
-  color: var(--foreground, #fff) !important;
-}
+/* END OF REFACTORED index.css */

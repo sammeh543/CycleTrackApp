@@ -10,8 +10,11 @@ How to add a new theme:
 4. Adjust the color variables to fit your theme.
 5. If you want GLOW EFFECTS (neon, synth, etc):
    - Add a --glow-color variable to your theme (see example below).
+   - Optionally add a --glow variable for more custom glow (see below).
    - Use the same selector pattern as in index.css (e.g. .theme-yourtheme .glow-btn { ... })
+   - For symptom buttons: add a selector like .theme-yourtheme .symptom-btn.selected:hover { box-shadow: ... }
    - Only themes with --glow-color and the proper CSS will show glow!
+   - Glow is fully themeable and can be extended to any element (see below).
 6. If you do NOT want glow, simply do not add --glow-color or glow utility classes for your theme.
 7. Save and reload your app to see the new theme in action.
 
@@ -24,11 +27,41 @@ EXAMPLE: Theme with Glow (copy and edit)
   --primary: 200 100% 60%;
   /* ...other variables... */
   --glow-color: #00fff7; /* <- enables glow for this theme */
+  --glow: 0 0 8px #00fff7, 0 0 16px #0099ff; /* optional: custom multi-color glow */
 }
 .theme-myneon .glow-btn,
 .theme-myneon .glow-switch {
   box-shadow: 0 0 8px 2px var(--glow-color), 0 0 16px 4px var(--glow-color);
 }
+.theme-myneon .symptom-btn.selected:hover {
+  box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
+  transform: translateY(-1px);
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+
+----------------------------------------------
+GLOW THEME CHECKLIST
+----------------------------------------------
+- [ ] Add --glow-color and (optionally) --glow to your theme root.
+- [ ] Add .theme-yourtheme .glow-btn, .glow-switch, etc. for glowing buttons.
+- [ ] Add .theme-yourtheme .symptom-btn.selected:hover for glowing symptom buttons.
+- [ ] Avoid using transparency in backgrounds unless you want layering effects.
+- [ ] If using Tailwind utility classes, override them with !important or theme selectors to avoid bleed-through.
+- [ ] Test with both selected and unselected states, and with utility classes like bg-primary, border, etc.
+- [ ] Check for theme bleed-through by toggling themes and hovering all interactive elements.
+- [ ] Use high specificity for theme selectors to prevent accidental global overrides.
+- [ ] Use CSS variables for all theme colors and glows for consistency.
+
+----------------------------------------------
+TIPS FOR ROBUST THEMES
+----------------------------------------------
+- Always scope your theme using .theme-yourtheme selectors.
+- Avoid transparency unless you want it. Use solid backgrounds for cards and buttons.
+- When overriding Tailwind or utility classes, use !important or theme selectors.
+- Use a border or box-shadow only for selected/active states if you want to avoid flex/outline jumps.
+- Test your theme with all interactive states (hover, focus, selected, disabled).
+- For glow, use box-shadow or filter: drop-shadow with your --glow-color or --glow variable.
+- To extend glow to new elements, just add the selector and use your theme's --glow-color or --glow.
 
 ----------------------------------------------
 EXAMPLE: Theme without Glow (copy and edit)
@@ -242,3 +275,31 @@ Instructions:
 - Add --glow-color and .glow-* utilities only if you want glow effects.
 - See index.css for full utility class patterns.
 */
+/*
+Why You're Having Problems
+Multiple Definitions: You have both early and late definitions of --cycle-stats-text for some themes (e.g., .theme-lunar appears twice, with different values).
+CSS Cascade: The last definition in the file for a given selector wins. If you set --cycle-stats-text in .theme-lunar at line 65 and again at line 98, only the later one (line 98) actually applies, unless you use a more specific selector or !important.
+Root Fallback: If a theme is missing --cycle-stats-text, it falls back to :root (which is var(--card-foreground) = a dark plum). If your theme background is light, this can look white or nearly white.
+Hex vs HSL: You have some values as HSL and some as hex. If your component uses hsl(var(--cycle-stats-text)) but the variable is #b3c7f7, it won't work—CSS will ignore it and fall back to the next available value.
+How to Clean Up and Fix Your Theme Variables
+1. Only One Definition Per Theme
+For each theme, only define --cycle-stats-text and --cycle-stats-bar once, in the main theme block.
+
+2. Consistent Format
+Always use HSL for variables that are injected with hsl(var(--cycle-stats-text)). If you want to use a hex color, convert it to HSL.
+
+3. Remove Duplicates and Conflicts
+Go through your file and:
+
+Remove any duplicated theme blocks.
+Remove any extra or conflicting --cycle-stats-text/--cycle-stats-bar lines for the same theme.
+Make sure every theme you want to support has a single, correct definition.
+Example: Cleaned Up Theme Block
+```
+.theme-lunar {
+  --calendar-period-expected-bg: hsl(var(--card));
+  --calendar-period-expected-fg: hsl(var(--card-foreground));
+  --cycle-stats-text: 220 80% 85%; /* pastel blue in HSL */
+  --cycle-stats-bar: var(--primary);
+}
+```
