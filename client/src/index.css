@@ -33,13 +33,10 @@
   --radius: 0.5rem;
 
   /* --- Component-Specific Variables (Defaults) --- */
-  /* Period Expected Box & Disclaimer Card Background */
-  /* Note: Default uses dark card. Light themes override --card which influences this */
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
-  /* Cycle Stats */
-  --cycle-stats-text: var(--card-foreground); /* fallback for stats text */
-  --cycle-stats-bar: var(--primary); /* fallback for stats bar */
+  --cycle-stats-text: var(--card-foreground);
+  --cycle-stats-bar: var(--primary);
 
   /* --- Chart colors --- */
   --chart-1: 291 47% 42%;
@@ -64,8 +61,8 @@
 
 /* Period Expected Box Default Style */
 .bg-period-expected {
-  background-color: var(--calendar-period-expected-bg, #fde8e8) !important; /* Default fallback if variable not set */
-  color: var(--calendar-period-expected-fg, #7f1d1d) !important; /* Default fallback if variable not set */
+  background-color: var(--calendar-period-expected-bg, #fde8e8) !important;
+  color: var(--calendar-period-expected-fg, #7f1d1d) !important;
 }
 
 /* Themeable Input Base Style */
@@ -81,43 +78,66 @@
 }
 
 /* Symptom Button Base Styles & Default Hover */
+/* NOTE: .symptom-btn often refers to the INNER card/button element */
 .symptom-btn {
-  /* Inherit base styles from Tailwind bg-card, border-border etc. */
   transition: box-shadow 0.2s, transform 0.2s, background-color 0.2s, border-color 0.2s;
+  border-radius: var(--radius, 0.5rem);
+  border: 1.5px solid transparent; /* Base transparent border for layout consistency */
 }
+/* Base hover for the inner card */
 .symptom-btn:hover {
   transform: translateY(-1px);
   transition: transform 0.2s;
-  /* Default hover has no background/shadow/border change */
+  /* Default hover has no background/shadow/border change - theme specific overrides */
   background: none;
   box-shadow: none;
-  border: none; /* Ensure no default border appears */
-  outline: none; /* Ensure no default outline appears */
+  border-color: transparent; /* Keep transparent unless theme overrides */
+  outline: none;
 }
-/* Explicitly remove hover effects for UNSELECTED buttons universally */
+/* Explicitly remove hover effects for UNSELECTED buttons universally (inner card) */
+/* This ensures themes MUST define unselected hover if they want one */
 .symptom-btn:not(.selected):hover {
   background: none !important;
-  border: none !important;
+  border-color: transparent !important; /* Ensure no border unless specified by theme hover */
   outline: none !important;
   box-shadow: none !important;
   transform: translateY(-1px); /* Keep the subtle lift */
 }
-/* Selected symptom button default hover (no glow) */
-.symptom-btn.selected:hover {
-    box-shadow: none; /* Base themes have no glow */
-    transform: translateY(-1px);
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
+/* Default selected symptom button state (inner card) */
+.symptom-btn.selected {
+  /* Base themes define background, border, shadow */
+  border-radius: var(--radius, 0.5rem) !important; /* Ensure radius */
 }
+/* Default selected symptom button hover (inner card) */
+.symptom-btn.selected:hover {
+    box-shadow: none; /* Base themes have no glow/shadow */
+    transform: translateY(-1px);
+    transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.2s, border-color 0.2s;
+    /* Theme specific background/border overrides this */
+}
+
+/* Outer Button Container Reset (Generic - Applies to all themes) */
+/* This removes styles from the wrapper (e.g., .flex-1) */
+[class*="theme-"] .symptom-btn.flex-1.selected, /* Adjust .flex-1 if outer container class differs */
+[class*="theme-"] .symptom-btn.flex-1.selected:hover,
+[class*="theme-"] .symptom-btn.flex-1.selected:focus {
+  outline: none !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+
 /* Symptom label base color */
 .symptom-label {
-  /* color: inherit !important; */ /* This was commented out, keeping it that way */
+  /* color: inherit !important; */
 }
 /* Intensity label base color */
 .p-3.pt-2.pb-4.bg-card.border.border-t-0.border-primary\/50.rounded-b-lg .text-xs span {
-  color: inherit !important; /* Use parent color */
+  color: inherit !important;
 }
 span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
-  color: var(--foreground) !important; /* Always use foreground color */
+  color: var(--foreground) !important;
 }
 
 /* Symptom Modal Item Base Styles */
@@ -135,10 +155,10 @@ span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
   font-weight: 400; /* font-normal */
   background: none;
   color: hsl(var(--foreground));
-  border: 1.5px solid transparent; /* Add transparent border to prevent layout shift on selection */
+  border: 1.5px solid transparent;
 }
 .symptom-item:hover {
-  background-color: hsl(var(--accent) / 0.30); /* Default hover uses accent */
+  background-color: hsl(var(--accent) / 0.30);
   color: hsl(var(--foreground));
   font-weight: 500;
 }
@@ -172,15 +192,13 @@ span.text-xs.mr-2.px-1\.5.py-0\.5.bg-primary\/20.rounded {
 .calendar-day.empty {
   @apply text-gray-500;
 }
-/* Ensure date number is visible */
 .date-number {
   @apply inline-block text-foreground;
   opacity: 1 !important;
 }
 .calendar-day:not(.period):not(.fertile):not(.today) .date-number {
-  @apply text-foreground; /* Ensure visibility on non-special days */
+  @apply text-foreground;
 }
-/* Indicators */
 .symptom-indicator {
   @apply w-3 h-3 rounded-full bg-accent absolute bottom-0.5;
   opacity: 0.9;
@@ -222,7 +240,6 @@ input[type="range"] {
   @apply h-2 rounded-full appearance-none w-full bg-secondary outline-none;
   -webkit-appearance: none;
 }
-/* Slider Thumb Styles */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   @apply w-5 h-5 appearance-none bg-primary rounded-full cursor-pointer;
@@ -249,7 +266,6 @@ input[type="range"]::-ms-thumb {
     @apply font-sans antialiased bg-background text-foreground;
     -webkit-tap-highlight-color: transparent;
   }
-  /* Default scrollbar for webkit browsers */
   ::-webkit-scrollbar {
     @apply w-1.5 h-1.5;
   }
@@ -278,23 +294,21 @@ input[type="range"]::-ms-thumb {
 
 /* === Generic Themeable Elements === */
 
-/* Upcoming Event Boxes (Generic Styling) - Applies to all themes unless overridden */
+/* Upcoming Event Boxes */
 [class*="theme-"] .bg-primary.bg-opacity-10 {
   background-color: hsl(var(--primary) / 0.10) !important;
-  border: 1px solid hsl(var(--primary) / 0.5) !important; /* Add a subtle border */
-  border-left: 4px solid hsl(var(--primary)) !important; /* Keep the strong left border */
-  color: var(--foreground) !important; /* Use theme's foreground text */
+  border: 1px solid hsl(var(--primary) / 0.5) !important;
+  border-left: 4px solid hsl(var(--primary)) !important;
+  color: var(--foreground) !important;
 }
 [class*="theme-"] .bg-primary.bg-opacity-10 .font-medium,
 [class*="theme-"] .bg-primary.bg-opacity-10 .text-sm,
 [class*="theme-"] .bg-primary.bg-opacity-10 .text-xs {
-  color: var(--foreground) !important; /* Ensure text inside inherits correctly */
+  color: var(--foreground) !important;
 }
-/* Generic fertile window box - base style, themes override specifics */
+/* Fertile window box */
 .fertile-window-box {
-   /* Base styles applied via Tailwind - themes primarily change bg, color, border */
    @apply rounded-lg text-card-foreground shadow-sm mt-8 mb-4 mx-auto max-w-2xl border border-l-4 border-primary p-4;
-   /* Default uses primary color for border and primary/10 for background */
    background-color: hsl(var(--primary) / 0.10);
    border-color: hsl(var(--primary) / 0.5);
    border-left-color: hsl(var(--primary));
@@ -303,13 +317,13 @@ input[type="range"]::-ms-thumb {
 
 /* Select Symptoms Popup Highlight (Default) */
 .select-symptoms-popup .highlighted {
-  background: hsl(var(--accent) / 0.5) !important; /* Default highlight */
+  background: hsl(var(--accent) / 0.5) !important;
   color: hsl(var(--accent-foreground)) !important;
 }
 /* Select Symptoms Popup Text Color (Default) */
 .symptom-item:hover span,
 .symptom-item.selected span {
-  color: hsl(var(--foreground)) !important; /* Default text color */
+  color: hsl(var(--foreground)) !important;
   background: none !important;
 }
 
@@ -320,7 +334,7 @@ input[type="range"]::-ms-thumb {
 /* --- Theme: Starry --- */
 .theme-starry {
   /* Variables */
-  --background: 235 44% 12%; /* deep blue */
+  --background: 235 44% 12%;
   --foreground: 220 16% 90%;
   --muted: 245 32% 18%;
   --muted-foreground: 220 12% 70%;
@@ -330,43 +344,60 @@ input[type="range"]::-ms-thumb {
   --card-foreground: 220 16% 90%;
   --border: 245 32% 18%;
   --input: 245 32% 18%;
-  --primary: 263 67% 65%; /* nebula purple */
+  --primary: 263 67% 65%;
   --primary-foreground: 220 16% 90%;
   --secondary: 225 73% 57%;
   --secondary-foreground: 220 16% 90%;
-  --accent: 326 100% 74%; /* nebula pink */
+  --accent: 326 100% 74%;
   --accent-foreground: 220 16% 90%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 220 16% 90%;
   --ring: 263 67% 65%;
   --radius: 0.5rem;
-  --button-hover: 235 50% 25% / 0.7; /* toned down hover */
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
-  --cycle-stats-text: 270 100% 98%; /* light on-theme for starry */
+  --cycle-stats-text: 270 100% 98%;
   --cycle-stats-bar: var(--primary);
-  --theme-text: 220 16% 90%; /* For theme selector */
+  --theme-text: 220 16% 90%;
+  /* Button Specific Vars */
+  --button-selected-bg: hsl(var(--card));
+  --button-selected-border: 1.5px solid hsl(var(--primary));
+  --button-hover-bg: hsl(var(--muted) / 0.7); /* Use muted for hover */
+  --button-hover-border-color: hsl(var(--primary) / 0.8);
 }
 /* Components */
-.theme-starry .symptom-item:hover {
-  background: hsl(var(--muted), 0.80);
-  color: var(--accent-foreground, var(--foreground));
+.theme-starry .symptom-item:hover { background: hsl(var(--muted), 0.80); color: var(--accent-foreground, var(--foreground)); }
+.theme-starry .symptom-item.selected { background: hsl(var(--accent), 0.82); color: var(--accent-foreground, var(--foreground)); border: 1.5px solid hsl(var(--accent)); }
+/* --- Symptom Button Styling (Inner Card) --- */
+/* Unselected symptom button hover (inner card) */
+.theme-starry .symptom-btn:not(.selected):hover,
+.theme-starry .symptom-btn:not(.selected):focus {
+  background: var(--button-hover-bg) !important;
+  border-color: hsl(var(--border)) !important; /* Show border on hover */
+  box-shadow: none !important;
+  outline: none !important;
 }
-.theme-starry .symptom-item.selected {
-  background: hsl(var(--accent), 0.82);
-  color: var(--accent-foreground, var(--foreground));
-  border: 1.5px solid hsl(var(--accent));
+/* Selected symptom button styles (inner card) */
+.theme-starry .symptom-btn.selected {
+    background: var(--button-selected-bg) !important;
+    border: var(--button-selected-border) !important;
+    box-shadow: none !important;
 }
-.theme-starry .symptom-btn:hover,
-.theme-starry .symptom-btn:focus {
-  background: hsl(var(--button-hover)); /* Apply specific hover background */
+/* Selected symptom button hover/focus (inner card) */
+.theme-starry .symptom-btn.selected:hover,
+.theme-starry .symptom-btn.selected:focus {
+  background: var(--button-hover-bg) !important;
+  box-shadow: none !important;
+  border-color: var(--button-hover-border-color) !important;
+  transform: translateY(-1px);
 }
+/* Selected symptom label color */
 .theme-starry .symptom-btn.selected .symptom-label {
   color: var(--primary-foreground, #d7e5ff) !important;
 }
-.theme-starry .theme-name {
-  color: hsl(240 20% 85%) !important;
-}
+/* Theme name */
+.theme-starry .theme-name { color: hsl(240 20% 85%) !important; }
+
 
 /* --- Theme: Nebula --- */
 .theme-nebula {
@@ -391,184 +422,203 @@ input[type="range"]::-ms-thumb {
   --destructive-foreground: 270 30% 96%;
   --ring: 290 100% 70%;
   --radius: 0.5rem;
-  --button-hover: 270 50% 25% / 0.7; /* toned down hover */
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
-  --cycle-stats-text: 260 100% 96%; /* light on-theme for nebula */
+  --cycle-stats-text: 260 100% 96%;
   --cycle-stats-bar: var(--primary);
-  --glow-color: #c084fc; /* Added glow color */
-  --theme-text: 270 30% 96%; /* For theme selector */
+  --theme-text: 270 30% 96%;
+  /* Button Specific Vars */
+  --button-selected-bg: hsl(var(--card));
+  --button-selected-border: 1.5px solid hsl(var(--primary));
+  --button-hover-bg: hsl(var(--muted) / 0.7);
+  --button-hover-border-color: hsl(var(--primary) / 0.8);
 }
 /* Components */
-.theme-nebula .symptom-item:hover {
-  background: hsl(var(--muted), 0.80);
-  color: var(--accent-foreground, var(--foreground));
+.theme-nebula .symptom-item:hover { background: hsl(var(--muted), 0.80); color: var(--accent-foreground, var(--foreground)); }
+.theme-nebula .symptom-item.selected { background: hsl(var(--accent), 0.82); color: var(--accent-foreground, var(--foreground)); border: 1.5px solid hsl(var(--accent)); }
+/* --- Symptom Button Styling (Inner Card) --- */
+/* Unselected symptom button hover (inner card) */
+.theme-nebula .symptom-btn:not(.selected):hover,
+.theme-nebula .symptom-btn:not(.selected):focus {
+  background: var(--button-hover-bg) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
-.theme-nebula .symptom-item.selected {
-  background: hsl(var(--accent), 0.82);
-  color: var(--accent-foreground, var(--foreground));
-  border: 1.5px solid hsl(var(--accent));
+/* Selected symptom button styles (inner card) */
+.theme-nebula .symptom-btn.selected {
+    background: var(--button-selected-bg) !important;
+    border: var(--button-selected-border) !important;
+    box-shadow: none !important;
 }
-.theme-nebula .symptom-btn:hover,
-.theme-nebula .symptom-btn:focus {
-  background: hsl(var(--button-hover)); /* Apply specific hover background */
+/* Selected symptom button hover (inner card) */
+.theme-nebula .symptom-btn.selected:hover,
+.theme-nebula .symptom-btn.selected:focus {
+  background: var(--button-hover-bg) !important;
+  box-shadow: none !important;
+  border-color: var(--button-hover-border-color) !important;
+  transform: translateY(-1px);
 }
+/* Selected symptom label color */
 .theme-nebula .symptom-btn.selected .symptom-label {
   color: var(--primary-foreground, #f5eaff) !important;
 }
-.theme-nebula .theme-name {
-  color: hsl(270 30% 96%) !important;
-}
+/* Theme name */
+.theme-nebula .theme-name { color: hsl(270 30% 96%) !important; }
 
 
 /* --- Theme: Pinkwhite --- */
 .theme-pinkwhite {
   /* Variables */
-  --card: 0 0% 100%; /* pure white */
-  --card-foreground: 340 20% 20%; /* deep muted plum text */
-  --calendar-period-expected-bg: #fde8e8; /* Specific light pink */
-  --calendar-period-expected-fg: #7f1d1d; /* Specific dark red */
-  --background: 330 60% 98%; /* Very soft white-pink */
-  --foreground: 340 40% 12%; /* Very dark readable text */
+  --card: 0 0% 100%;
+  --card-foreground: 340 20% 20%;
+  --calendar-period-expected-bg: #fde8e8;
+  --calendar-period-expected-fg: #7f1d1d;
+  --background: 330 60% 98%;
+  --foreground: 340 40% 12%;
   --muted: 330 40% 96%;
   --muted-foreground: 340 30% 30%;
   --popover: 330 40% 97%;
   --popover-foreground: 340 40% 12%;
-  /* --card defined above */
-  /* --card-foreground defined above */
   --border: 340 30% 85%;
   --input: 340 30% 85%;
-  --primary: 340 70% 60%; /* Warm pink for buttons */
-  --primary-foreground: 330 60% 98%; /* Light text on buttons */
-  --secondary: 340 80% 85%; /* Light rose secondary */
+  --primary: 340 70% 60%; /* H S L */
+  --primary-foreground: 330 60% 98%;
+  --secondary: 340 80% 85%;
   --secondary-foreground: 340 40% 20%;
-  --accent: 340 60% 55%; /* Stronger rose for hover and focus */
+  --accent: 340 60% 55%;
   --accent-foreground: 330 60% 98%;
   --destructive: 0 70% 50%;
   --destructive-foreground: 330 60% 98%;
   --ring: 340 70% 65%;
   --radius: 0.5rem;
-  --button-hover: 340 60% 70% / 0.8; /* softer highlight hover */
-  --button-selected: 340 70% 60%; /* Use primary for selected background */
-  --text-selected-dark: #400d0d;
-  --text-selected-light: #fff0f0;
-  --hover-highlight: 340 60% 90%; /* very light rose pink for symptom item hover */
-  --cycle-stats-text: 340 20% 20%; /* readable dark plum for stats text */
-  --cycle-stats-bar: 340 70% 60%; /* match flow intensity pink (override default purple) */
-  --theme-text: 330 40% 10%; /* For theme selector */
+  --cycle-stats-text: 340 20% 20%;
+  --cycle-stats-bar: 340 70% 60%;
+  --theme-text: 330 40% 10%;
+  /* Button Specific Vars */
+  --button-selected-border: 1.5px solid hsl(var(--primary) / 0.8);
+  --button-hover-bg: hsl(var(--primary) / 0.8); /* Lighter primary for hover */
+  --button-hover-border-color: hsl(var(--primary));
+  --button-unselected-hover-bg: hsl(var(--muted)); /* Subtle grey-pink */
+  --button-unselected-hover-border: 1.5px solid hsl(var(--border));
 }
 /* Components */
-.theme-pinkwhite .bg-period-expected { /* Ensure override */
-  background-color: var(--calendar-period-expected-bg) !important;
-  color: var(--calendar-period-expected-fg) !important;
-}
-.theme-pinkwhite .symptom-item {
-  color: var(--foreground);
-}
-.theme-pinkwhite .symptom-item:hover {
-  background: hsl(var(--hover-highlight)); /* Use specific hover highlight */
-  color: var(--foreground); /* Keep text dark on light hover */
-}
-.theme-pinkwhite .symptom-item.selected {
-  background: hsl(var(--accent), 0.92);
-  color: var(--accent-foreground, var(--foreground)); /* Light text on accent bg */
-  border: 1.5px solid hsl(var(--accent));
-}
-.theme-pinkwhite .symptom-btn:hover,
-.theme-pinkwhite .symptom-btn:focus {
-  /* Don't apply hover background to unselected buttons (handled globally) */
+.theme-pinkwhite .bg-period-expected { background-color: var(--calendar-period-expected-bg) !important; color: var(--calendar-period-expected-fg) !important; }
+.theme-pinkwhite .symptom-item { color: var(--foreground); }
+.theme-pinkwhite .symptom-item:hover { background: hsl(340 60% 90%); color: var(--foreground); }
+.theme-pinkwhite .symptom-item.selected { background: hsl(var(--accent), 0.92); color: var(--accent-foreground, var(--foreground)); border: 1.5px solid hsl(var(--accent)); }
+/* --- Symptom Button Styling (Inner Card) --- */
+.theme-pinkwhite .symptom-btn:not(.selected):hover,
+.theme-pinkwhite .symptom-btn:not(.selected):focus {
+  background: var(--button-unselected-hover-bg) !important;
+  border: var(--button-unselected-hover-border) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 .theme-pinkwhite .symptom-btn.selected {
-  background: hsl(var(--button-selected)); /* Apply selected background */
+  /* MODIFICATION: Removed explicit background-color rule based on testing */
+  /* background-color: hsla(var(--primary), 0.9) !important; */ /* <-- REMOVED */
+  border: var(--button-selected-border) !important; /* Border for selected state */
+  box-shadow: none !important;
+  /* Text color likely inherited or set by label rule below */
 }
-.theme-pinkwhite .symptom-btn.selected:hover {
-   background: hsl(var(--button-hover)); /* Apply specific hover for selected */
+.theme-pinkwhite .symptom-btn.selected:hover,
+.theme-pinkwhite .symptom-btn.selected:focus {
+   background: var(--button-hover-bg) !important; /* Hover uses its specific background */
+   border-color: var(--button-hover-border-color) !important;
+   box-shadow: none !important;
+   transform: translateY(-1px);
 }
 .theme-pinkwhite .symptom-btn.selected .symptom-label {
+  /* This rule becomes more important now for text color */
   color: var(--primary-foreground, #fff) !important;
 }
-.theme-pinkwhite .theme-name,
-.theme-name[data-theme="pinkwhite"] { /* Handle direct attribute selector too */
-  color: hsl(var(--theme-text, 330 40% 10%)) !important;
-}
-.theme-pinkwhite .select-symptoms-popup .highlighted {
-  background: #e9cfa3 !important; /* sandy brown */
-  color: #2d1a05 !important; /* dark readable text */
-}
-.theme-pinkwhite .symptom-item:hover span,
-.theme-pinkwhite .symptom-item.selected span {
-  color: #2d1a05 !important; /* dark readable text */
-}
-
+/* ... (rest of Pinkwhite theme styles remain the same) ... */
+.theme-pinkwhite .theme-name, .theme-name[data-theme="pinkwhite"] { color: hsl(var(--theme-text, 330 40% 10%)) !important; }
+.theme-pinkwhite .select-symptoms-popup .highlighted { background: #e9cfa3 !important; color: #2d1a05 !important; }
+.theme-pinkwhite .symptom-item:hover span, .theme-pinkwhite .symptom-item.selected span { color: #2d1a05 !important; }
 
 /* --- Theme: Beach --- */
 .theme-beach {
   /* Variables */
-  --background: 190 60% 95%; /* pale teal sand */
+  --background: 190 60% 95%;
   --foreground: 190 50% 20%;
   --muted: 190 40% 90%;
   --muted-foreground: 190 30% 40%;
   --popover: 190 40% 98%;
   --popover-foreground: 190 50% 20%;
-  --card: 190 40% 98%; /* Light card */
-  --card-foreground: 190 50% 20%; /* Dark text */
+  --card: 190 40% 98%;
+  --card-foreground: 190 50% 20%;
   --border: 40 30% 80%;
   --input: 40 30% 80%;
-  --primary: 190 80% 50%; /* teal */
-  --primary-foreground: 190 60% 98%; /* Light text on buttons */
-  --secondary: 40 90% 85%; /* sand */
+  --primary: 190 80% 50%; /* H S L */
+  --primary-foreground: 190 60% 98%;
+  --secondary: 40 90% 85%;
   --secondary-foreground: 190 50% 20%;
-  --accent: 50 100% 70%; /* yellow */
-  --accent-foreground: 190 50% 20%; /* Dark text on accent */
+  --accent: 50 100% 70%;
+  --accent-foreground: 190 50% 20%;
   --destructive: 0 70% 40%;
   --destructive-foreground: 190 60% 98%;
   --ring: 40 90% 70%;
   --radius: 0.5rem;
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
-  --cycle-stats-text: 190 50% 20%; /* readable blue for stats text */
-  --cycle-stats-bar: var(--primary); /* match flow intensity bar */
-  --scrollbar-thumb: 50 100% 70% / 0.35; /* faded yellow */
+  --cycle-stats-text: 190 50% 20%;
+  --cycle-stats-bar: var(--primary);
+  --scrollbar-thumb: 50 100% 70% / 0.35;
   --scrollbar-thumb-hover: 50 100% 70% / 0.6;
-  --theme-text: 190 50% 20%; /* darker text for theme bubble */
+  --theme-text: 190 50% 20%;
+  /* Button Specific Vars */
+  --button-focus-bg: rgb(251, 228, 182);
+  --button-focus-text: #2d1a05;
+  --button-focus-shadow: 0 0 5px 1px rgb(251 228 182 / 0.7);
+  --button-focus-outline: 1.5px solid #e9cfa3;
+  /* Removed --button-selected-bg */
+  --button-selected-border: 1.5px solid hsl(var(--primary) / 0.8);
+  --button-hover-bg: hsl(var(--primary) / 0.9);
+  --button-hover-border-color: hsl(var(--primary));
 }
 /* Components */
-.theme-beach ::-webkit-scrollbar-thumb {
-  background: hsla(var(--scrollbar-thumb));
+.theme-beach ::-webkit-scrollbar-thumb { background: hsla(var(--scrollbar-thumb)); }
+.theme-beach ::-webkit-scrollbar-thumb:hover { background: hsla(var(--scrollbar-thumb-hover)); }
+/* --- Symptom Button Styling (Inner Card) --- */
+.theme-beach .symptom-btn:not(.selected):hover,
+.theme-beach .symptom-btn:not(.selected):focus {
+  background: var(--button-focus-bg) !important;
+  color: var(--button-focus-text) !important;
+  border: var(--button-focus-outline) !important;
+  box-shadow: var(--button-focus-shadow) !important;
+  outline: none !important;
 }
-.theme-beach ::-webkit-scrollbar-thumb:hover {
-  background: hsla(var(--scrollbar-thumb-hover));
+.theme-beach .symptom-btn.selected {
+  /* MODIFICATION: Removed explicit background-color rule based on testing */
+  /* background-color: hsla(var(--primary), 0.9) !important; */ /* <-- REMOVED / COMMENTED */
+  border: var(--button-selected-border) !important; /* Border for selected state */
+  box-shadow: none !important;
+  /* Text color likely inherited or set by label rule */
+}
+.theme-beach .symptom-btn.selected:hover,
+.theme-beach .symptom-btn.selected:focus {
+  background: var(--button-hover-bg) !important; /* Hover stays fully opaque or slightly lighter opaque */
+  border-color: var(--button-hover-border-color) !important;
+  box-shadow: var(--button-focus-shadow) !important;
+  border: var(--button-focus-outline) !important;
+  transform: translateY(-1px);
+  outline: none !important;
 }
 .theme-beach .symptom-btn.selected .symptom-label {
   color: var(--primary-foreground, #fff) !important;
 }
-.theme-beach .theme-name,
-.theme-name[data-theme="beach"] { /* Handle direct attribute selector too */
-  color: #17404e !important; /* dark teal for beach */
-}
-.theme-beach .symptom-btn:focus { /* Special focus style for beach */
-  background: rgb(251, 228, 182) !important; /* sandy yellow focus */
-  color: #2d1a05 !important; /* dark text on focus */
-   /* Keep transform if needed */
-  transform: translateY(-1px);
-  box-shadow: 0 0 5px 1px rgb(251 228 182 / 0.7); /* Subtle focus shadow */
-  outline: 1px solid #e9cfa3;
-  border: 1px solid transparent; /* Override potential global border */
-}
-.theme-beach .select-symptoms-popup .highlighted {
-  background: #e9cfa3 !important; /* sandy brown */
-  color: #2d1a05 !important; /* dark readable text */
-}
-.theme-beach .symptom-item:hover span,
-.theme-beach .symptom-item.selected span {
-  color: #2d1a05 !important; /* dark readable text */
-}
+.theme-beach .theme-name, .theme-name[data-theme="beach"] { color: #17404e !important; }
+.theme-beach .select-symptoms-popup .highlighted { background: #e9cfa3 !important; color: #2d1a05 !important; }
+.theme-beach .symptom-item:hover span, .theme-beach .symptom-item.selected span { color: #2d1a05 !important; }
+
 
 /* --- Theme: Ocean --- */
 .theme-ocean {
   /* Variables */
-  --background: 200 70% 14%; /* deep ocean blue */
-  --foreground: 190 60% 96%; /* light seafoam text */
+  --background: 200 70% 14%;
+  --foreground: 190 60% 96%;
   --muted: 200 40% 18%;
   --muted-foreground: 190 30% 80%;
   --popover: 200 60% 16%;
@@ -577,11 +627,11 @@ input[type="range"]::-ms-thumb {
   --card-foreground: 190 60% 96%;
   --border: 200 40% 18%;
   --input: 200 40% 18%;
-  --primary: 190 80% 50%; /* bright teal for highlights */
+  --primary: 190 80% 50%; /* H S L */
   --primary-foreground: 190 60% 98%;
-  --secondary: 40 90% 85%; /* sand accent */
+  --secondary: 40 90% 85%;
   --secondary-foreground: 190 70% 14%;
-  --accent: 190 100% 70%; /* light teal accent */
+  --accent: 190 100% 70%;
   --accent-foreground: 190 60% 96%;
   --destructive: 0 70% 40%;
   --destructive-foreground: 190 60% 98%;
@@ -592,110 +642,121 @@ input[type="range"]::-ms-thumb {
   --cycle-stats-text: var(--primary-foreground);
   --cycle-stats-bar: var(--primary);
   --theme-text: 190 60% 96%;
-  /* No glow for ocean */
+  /* Button Specific Vars */
+  /* Removed --button-selected-bg */
+  --button-selected-border: 1.5px solid hsl(var(--primary) / 0.8);
+  --button-hover-bg: hsl(var(--primary) / 0.9);
+  --button-hover-border-color: hsl(var(--primary));
+  --button-unselected-hover-bg: hsl(var(--muted) / 0.7);
+  --button-unselected-hover-border: 1.5px solid hsl(var(--border));
   --glow: none;
   --glow-color: transparent;
 }
 /* Components */
-/* Period Expected Box Override for Ocean (ensure dark card style) */
-.theme-ocean .bg-period-expected,
-.theme-ocean .bg-primary.bg-period-expected, /* Catch various combinations */
-.theme-ocean .bg-period-expected.bg-primary,
-.theme-ocean .bg-primary.bg-opacity-10.bg-period-expected,
-.theme-ocean .bg-period-expected.bg-primary.bg-opacity-10,
-.theme-ocean .bg-period-expected.rounded-lg.text-card-foreground.shadow-sm.mt-8.mb-4.mx-auto.max-w-2xl.border.border-l-4.border-primary,
-.theme-ocean .bg-period-expected:not(.bg-primary) {
-  background-color: hsl(var(--card)) !important;
-  color: hsl(var(--card-foreground)) !important;
-}
-/* Symptom button hover state override (no shadow/border) */
-.theme-ocean .symptom-btn:hover,
-.theme-ocean .symptom-btn.selected:hover {
+.theme-ocean .bg-period-expected, .theme-ocean [class*="bg-period-expected"] { background-color: hsl(var(--card)) !important; color: hsl(var(--card-foreground)) !important; }
+/* --- Symptom Button Styling (Inner Card) --- */
+.theme-ocean .symptom-btn:not(.selected):hover,
+.theme-ocean .symptom-btn:not(.selected):focus {
+  background: var(--button-unselected-hover-bg) !important;
+  border: var(--button-unselected-hover-border) !important;
   box-shadow: none !important;
-  border: 1.5px solid hsl(var(--border)) !important; /* Maintain consistent border */
-  background: hsl(var(--muted)) !important; /* Add subtle hover background */
+  outline: none !important;
 }
-.theme-ocean .symptom-btn .symptom-label {
-  color: var(--foreground, #f1f8fa) !important;
+.theme-ocean .symptom-btn.selected {
+  /* MODIFICATION: Removed explicit background-color rule based on testing */
+  /* background-color: hsla(var(--primary), 0.9) !important; */ /* <-- REMOVED / COMMENTED */
+  border: var(--button-selected-border) !important; /* Border for selected state */
+  box-shadow: none !important;
+  /* Text color likely inherited or set by label rule */
 }
-.theme-ocean .symptom-btn.selected .symptom-label {
-  color: var(--primary-foreground, #fff) !important;
+.theme-ocean .symptom-btn.selected:hover,
+.theme-ocean .symptom-btn.selected:focus {
+  background: var(--button-hover-bg) !important; /* Hover stays fully opaque or slightly lighter opaque */
+  border-color: var(--button-hover-border-color) !important;
+  box-shadow: none !important;
+  transform: translateY(-1px);
 }
-/* Upcoming Event Box Override for Ocean */
-.theme-ocean .bg-primary.bg-opacity-10 {
-  background-color: hsl(var(--primary) / 0.10) !important;
-  border-color: hsl(var(--primary)) !important;
-  color: var(--foreground, #f1f8fa) !important;
-}
-.theme-ocean .upcoming-box, /* Assuming .upcoming-box uses the bg-primary/10 style */
-.theme-ocean .bg-primary.bg-opacity-10 .font-medium,
-.theme-ocean .bg-primary.bg-opacity-10 .text-sm,
-.theme-ocean .bg-primary.bg-opacity-10 .text-xs {
-  color: var(--foreground, #f1f8fa) !important;
-}
-/* Fertile Window Box Override for Ocean */
-.theme-ocean .fertile-window-box {
-  background-color: hsl(190, 66%, 18%) !important; /* Darker teal bg */
-  color: hsl(190, 60%, 96%) !important; /* Use foreground text */
-  border: 1px solid hsl(190, 80%, 30%) !important;
-  border-left: 4px solid hsl(190, 80%, 50%) !important; /* Primary teal left border */
-}
+.theme-ocean .symptom-btn .symptom-label { color: var(--foreground, #f1f8fa) !important; }
+.theme-ocean .symptom-btn.selected .symptom-label { color: var(--primary-foreground, #fff) !important; }
+.theme-ocean .bg-primary.bg-opacity-10 { background-color: hsl(var(--primary) / 0.10) !important; border-color: hsl(var(--primary)) !important; color: var(--foreground, #f1f8fa) !important; }
+.theme-ocean .upcoming-box, .theme-ocean .bg-primary.bg-opacity-10 * { color: var(--foreground, #f1f8fa) !important; }
+.theme-ocean .fertile-window-box { background-color: hsl(190, 66%, 18%) !important; color: hsl(190, 60%, 96%) !important; border: 1px solid hsl(190, 80%, 30%) !important; border-left: 4px solid hsl(190, 80%, 50%) !important; }
+
+
 
 /* --- Theme: Galaxy --- */
 .theme-galaxy {
   /* Variables */
-  --background: 260 60% 13%; /* deep space blue */
-  --foreground: 230 20% 96%; /* brighter text */
+  --background: 260 60% 13%;
+  --foreground: 230 20% 96%;
   --muted: 260 40% 20%;
-  --muted-foreground: 230 12% 85%; /* lighter muted text */
+  --muted-foreground: 230 12% 85%;
   --popover: 260 50% 17%;
   --popover-foreground: 230 20% 96%;
   --card: 260 50% 17%;
   --card-foreground: 230 20% 96%;
   --border: 260 40% 20%;
   --input: 260 40% 20%;
-  --primary: 290 100% 70%; /* magenta */
+  --primary: 290 100% 70%;
   --primary-foreground: 230 20% 96%;
-  --secondary: 200 100% 70%; /* blue */
+  --secondary: 200 100% 70%;
   --secondary-foreground: 230 20% 96%;
-  --accent: 320 100% 70%; /* pink */
+  --accent: 320 100% 70%;
   --accent-foreground: 230 20% 96%;
   --destructive: 0 70% 60%;
   --destructive-foreground: 230 20% 96%;
   --ring: 290 100% 70%;
   --radius: 0.5rem;
-  --button-hover: 260 50% 25% / 0.7;
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
   --cycle-stats-text: var(--primary-foreground);
   --cycle-stats-bar: var(--primary);
   --theme-text: 230 20% 96%;
+  /* Button Specific Vars */
+  --button-selected-bg: hsl(var(--card));
+  --button-selected-border: 1.5px solid hsl(var(--primary));
+  --button-hover-bg: hsl(var(--muted) / 0.7);
+  --button-hover-border-color: hsl(var(--primary) / 0.8);
 }
 /* Components */
-.theme-galaxy .symptom-btn:hover,
-.theme-galaxy .symptom-btn:focus {
-  background: hsl(var(--button-hover)); /* Apply specific hover background */
+/* --- Symptom Button Styling (Inner Card) --- */
+/* Unselected symptom button hover (inner card) */
+.theme-galaxy .symptom-btn:not(.selected):hover,
+.theme-galaxy .symptom-btn:not(.selected):focus {
+  background: var(--button-hover-bg) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
+/* Selected symptom button styles (inner card) */
+.theme-galaxy .symptom-btn.selected {
+    background: var(--button-selected-bg) !important;
+    border: var(--button-selected-border) !important;
+    box-shadow: none !important;
+}
+/* Selected symptom button hover (inner card) */
+.theme-galaxy .symptom-btn.selected:hover,
+.theme-galaxy .symptom-btn.selected:focus {
+  background: var(--button-hover-bg) !important;
+  box-shadow: none !important;
+  border-color: var(--button-hover-border-color) !important;
+  transform: translateY(-1px);
+}
+/* Selected symptom label color */
 .theme-galaxy .symptom-btn.selected .symptom-label {
   color: var(--primary-foreground, #fff) !important;
 }
-.theme-galaxy .theme-name {
-  color: hsl(var(--theme-text)) !important;
-}
-/* Fertile Window Box Override for Galaxy */
-.theme-galaxy .fertile-window-box {
-  background-color: hsl(200, 100%, 18%) !important; /* Secondary blue bg */
-  color: hsl(230, 20%, 96%) !important; /* Foreground text */
-  border: 1px solid hsl(200, 100%, 40%) !important;
-  border-left: 4px solid hsl(200, 100%, 70%) !important; /* Secondary blue left border */
-}
+/* Theme name */
+.theme-galaxy .theme-name { color: hsl(var(--theme-text)) !important; }
+/* Fertile Window Box Override */
+.theme-galaxy .fertile-window-box { background-color: hsl(200, 100%, 18%) !important; color: hsl(230, 20%, 96%) !important; border: 1px solid hsl(200, 100%, 40%) !important; border-left: 4px solid hsl(200, 100%, 70%) !important; }
 
 
 /* --- Theme: Aurora --- */
 .theme-aurora {
   /* Variables */
-  --background: 160 60% 15%; /* aurora green */
-  --foreground: 120 20% 98%; /* brighter text */
+  --background: 160 60% 15%;
+  --foreground: 120 20% 98%;
   --muted: 160 40% 23%;
   --muted-foreground: 120 12% 85%;
   --popover: 160 50% 18%;
@@ -704,43 +765,63 @@ input[type="range"]::-ms-thumb {
   --card-foreground: 120 20% 98%;
   --border: 160 40% 23%;
   --input: 160 40% 23%;
-  --primary: 190 100% 70%; /* teal */
+  --primary: 190 100% 70%;
   --primary-foreground: 120 20% 98%;
-  --secondary: 300 100% 70%; /* purple */
+  --secondary: 300 100% 70%;
   --secondary-foreground: 120 20% 98%;
-  --accent: 210 100% 70%; /* blue accent for hover */
+  --accent: 210 100% 70%;
   --accent-foreground: 120 20% 98%;
   --destructive: 0 70% 60%;
   --destructive-foreground: 120 20% 98%;
   --ring: 190 100% 70%;
   --radius: 0.5rem;
-  --button-hover: 210 100% 30% / 0.7;
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
   --cycle-stats-text: var(--primary-foreground);
   --cycle-stats-bar: var(--primary);
   --theme-text: 120 20% 98%;
+  /* Button Specific Vars */
+  --button-selected-bg: hsl(var(--card));
+  --button-selected-border: 1.5px solid hsl(var(--primary));
+  --button-hover-bg: hsl(var(--accent) / 0.7); /* Use accent for hover */
+  --button-hover-border-color: hsl(var(--primary) / 0.8);
 }
 /* Components */
-.theme-aurora .symptom-btn:hover,
-.theme-aurora .symptom-btn:focus {
-  background: hsl(var(--button-hover)); /* Apply specific hover background */
+/* --- Symptom Button Styling (Inner Card) --- */
+/* Unselected symptom button hover (inner card) */
+.theme-aurora .symptom-btn:not(.selected):hover,
+.theme-aurora .symptom-btn:not(.selected):focus {
+  background: var(--button-hover-bg) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
+/* Selected symptom button styles (inner card) */
+.theme-aurora .symptom-btn.selected {
+    background: var(--button-selected-bg) !important;
+    border: var(--button-selected-border) !important;
+    box-shadow: none !important;
+}
+/* Selected symptom button hover (inner card) */
+.theme-aurora .symptom-btn.selected:hover,
+.theme-aurora .symptom-btn.selected:focus {
+  background: var(--button-hover-bg) !important;
+  box-shadow: none !important;
+  border-color: var(--button-hover-border-color) !important;
+  transform: translateY(-1px);
+}
+/* Selected symptom label color */
 .theme-aurora .symptom-btn.selected .symptom-label {
   color: var(--primary-foreground, #fff) !important;
 }
-.theme-aurora .theme-name {
-  color: hsl(var(--theme-text)) !important;
-}
-/* Fertile Window Box Override for Aurora */
-.theme-aurora .fertile-window-box {
-  background-color: hsl(160, 60%, 22%) !important; /* Muted green bg */
-  color: hsl(120, 20%, 98%) !important; /* Foreground text */
-  border: 1px solid hsl(160, 40%, 40%) !important;
-  border-left: 4px solid hsl(160, 100%, 70%) !important; /* Lighter green left border */
-}
+/* Theme name */
+.theme-aurora .theme-name { color: hsl(var(--theme-text)) !important; }
+/* Fertile Window Box Override */
+.theme-aurora .fertile-window-box { background-color: hsl(160, 60%, 22%) !important; color: hsl(120, 20%, 98%) !important; border: 1px solid hsl(160, 40%, 40%) !important; border-left: 4px solid hsl(160, 100%, 70%) !important; }
+
 
 /* --- Theme: Cyberpunk --- */
+/* ... (Keep Cyberpunk as it was, it's a glow theme) ... */
 .theme-cyberpunk {
   /* Variables */
   --background: 280 100% 8%; /* deep violet/blue */
@@ -766,34 +847,48 @@ input[type="range"]::-ms-thumb {
   --radius: 0.5rem;
   --glow-color: #00fff7; /* Specific glow color */
   --glow: 0 0 8px var(--glow-color), 0 0 16px var(--glow-color), 0 0 24px var(--glow-color); /* Combined glow */
+  --glow-hover: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6), 0 0 8px 1px var(--glow-color); /* Adjusted hover glow */
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
   --cycle-stats-text: 190 100% 98%; /* light cyan for cyberpunk */
   --cycle-stats-bar: var(--primary);
   --theme-text: 160 100% 70%;
+  /* Button Specific Vars */
+  --button-selected-bg: hsl(var(--card)); /* Selected background is card */
+  --button-selected-border: 1.5px solid hsl(var(--accent));
+  --button-hover-bg: hsl(var(--muted) / 0.5);
+  --button-hover-border-color: hsl(var(--primary));
 }
 /* Components */
-.theme-cyberpunk .symptom-btn.selected:hover { /* Glow on selected hover */
-    box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
-    transform: translateY(-1px);
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
+/* Unselected symptom button hover/focus (inner card) - Keep default (no bg/border/shadow) */
+/* Selected symptom button styles (inner card) */
+.theme-cyberpunk .symptom-btn.selected {
+  background: var(--button-selected-bg) !important;
+  border: var(--button-selected-border) !important;
+  box-shadow: var(--glow) !important; /* Apply glow */
+  overflow: hidden !important; /* Contain glow */
 }
+/* Selected symptom button hover/focus (inner card) */
+.theme-cyberpunk .symptom-btn.selected:hover,
+.theme-cyberpunk .symptom-btn.selected:focus {
+    background: var(--button-hover-bg) !important;
+    box-shadow: var(--glow-hover) !important; /* Apply hover glow */
+    border-color: var(--button-hover-border-color) !important;
+    transform: translateY(-1px);
+    transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.2s, border-color 0.2s;
+    overflow: hidden !important;
+}
+/* Selected symptom label color and glow */
 .theme-cyberpunk .symptom-btn.selected .symptom-label {
-  color: var(--primary-foreground, #00fff7) !important; /* Use the adjusted foreground from variable block */
+  color: var(--foreground, #00fff7) !important; /* Use theme foreground */
   text-shadow: 0 0 4px var(--glow-color), 0 0 8px var(--glow-color); /* Add text shadow */
 }
 /* Fertile Window Box Override for Cyberpunk */
-.theme-cyberpunk .fertile-window-box {
-  background-color: hsl(200, 100%, 16%) !important; /* Primary blue bg */
-  color: #00fff7 !important; /* Neon cyan text */
-  border: 1px solid hsl(200, 100%, 40%) !important;
-  border-left: 4px solid #00fff7 !important; /* Neon cyan left border */
-  box-shadow: 0 0 8px 1px #00fff7 inset, 0 0 12px 2px #0099ff; /* Inner and outer glow */
-}
-/* Apply glow effects (see multi-theme glow section below) */
+.theme-cyberpunk .fertile-window-box { background-color: hsl(200, 100%, 16%) !important; color: #00fff7 !important; border: 1px solid hsl(200, 100%, 40%) !important; border-left: 4px solid #00fff7 !important; box-shadow: 0 0 8px 1px #00fff7 inset, 0 0 12px 2px #0099ff; }
 
 
 /* --- Theme: Synthwave --- */
+/* ... (Keep Synthwave as it was, it's a glow theme) ... */
 .theme-synthwave {
   /* Variables */
   --background: 260 90% 12%; /* deep blue/purple */
@@ -817,28 +912,48 @@ input[type="range"]::-ms-thumb {
   --destructive-foreground: 52 100% 70%;
   --ring: 320 100% 70%;
   --radius: 0.5rem;
-  --glow-color: #ff5efc; /* Specific glow color */
+  --glow-color: #ff5efc; /* Specific glow color (magenta) */
   --glow: 0 0 8px var(--glow-color), 0 0 16px var(--glow-color), 0 0 24px var(--glow-color); /* Combined glow */
+  --glow-hover: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6), 0 0 8px 1px var(--glow-color); /* Adjusted hover glow */
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
   --cycle-stats-text: 320 100% 98%; /* light magenta for synthwave */
   --cycle-stats-bar: var(--primary);
   --theme-text: 52 100% 70%;
+  /* Button Specific Vars */
+  --button-selected-bg: hsl(var(--card)); /* Selected background is card */
+  --button-selected-border: 1.5px solid hsl(var(--accent)); /* Accent border */
+  --button-hover-bg: hsl(var(--muted) / 0.5);
+  --button-hover-border-color: hsl(var(--primary)); /* Primary border on hover */
 }
 /* Components */
-.theme-synthwave .symptom-btn.selected:hover { /* Glow on selected hover */
-    box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
-    transform: translateY(-1px);
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
+/* Unselected symptom button hover/focus (inner card) - Keep default (no bg/border/shadow) */
+/* Selected symptom button styles (inner card) */
+.theme-synthwave .symptom-btn.selected {
+  background: var(--button-selected-bg) !important;
+  border: var(--button-selected-border) !important;
+  box-shadow: var(--glow) !important; /* Apply glow */
+  overflow: hidden !important; /* Contain glow */
 }
+/* Selected symptom button hover/focus (inner card) */
+.theme-synthwave .symptom-btn.selected:hover,
+.theme-synthwave .symptom-btn.selected:focus {
+    background: var(--button-hover-bg) !important;
+    box-shadow: var(--glow-hover) !important; /* Apply hover glow */
+    border-color: var(--button-hover-border-color) !important;
+    transform: translateY(-1px);
+    transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.2s, border-color 0.2s;
+    overflow: hidden !important;
+}
+/* Selected symptom label color and glow */
 .theme-synthwave .symptom-btn.selected .symptom-label {
-  color: var(--primary-foreground, #ffe600) !important; /* Use the adjusted foreground */
+  color: var(--foreground, #ffe600) !important; /* Use theme foreground */
   text-shadow: 0 0 4px var(--glow-color), 0 0 8px var(--glow-color); /* Add text shadow */
 }
-/* Apply glow effects (see multi-theme glow section below) */
 
 
 /* --- Theme: Lunar --- */
+/* ... (Keep Lunar as it was, it's a glow theme) ... */
 .theme-lunar {
   /* Variables */
   --background: 220 18% 16%;   /* deep midnight blue */
@@ -861,45 +976,68 @@ input[type="range"]::-ms-thumb {
   --destructive-foreground: 220 30% 96%;
   --ring: 60 30% 90%;
   --radius: 0.5rem;
-  --glow-color: #aee9ff; /* Specific glow color */
-  --glow: 0 0 6px var(--glow-color), 0 0 12px var(--glow-color), 0 0 18px #eae6c4; /* Subtle glow */
+  --glow-color: #aee9ff; /* Specific glow color (soft blue) */
+  --glow-secondary: #eae6c4; /* Secondary pale yellow glow */
+  --glow: 0 0 6px var(--glow-color), 0 0 12px var(--glow-color), 0 0 18px var(--glow-secondary); /* Subtle glow */
+  --glow-hover: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6), 0 0 8px 1px var(--glow-color); /* Adjusted hover glow */
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
   --cycle-stats-text: 240 60% 80%; /* lighter purple for lunar stats text */
   --cycle-stats-bar: var(--primary);
   --theme-text: 220 30% 96%;
+  /* Button Specific Vars */
+  --button-selected-bg: hsl(var(--card)); /* Selected background is card */
+  --button-selected-border: 1.5px solid hsl(var(--accent)); /* Accent border */
+  --button-hover-bg: hsl(var(--muted) / 0.5);
+  --button-hover-border-color: hsl(var(--primary)); /* Primary border on hover */
 }
 /* Components */
-.theme-lunar .symptom-btn.selected:hover { /* Glow on selected hover */
-    box-shadow: 0 0 4px hsl(var(--accent)), 0 0 8px hsl(var(--accent) / 0.6);
+/* Unselected symptom button hover/focus (inner card) - Keep default (no bg/border/shadow) */
+/* Selected symptom button styles (inner card) */
+.theme-lunar .symptom-btn.selected {
+  background: var(--button-selected-bg) !important;
+  border: var(--button-selected-border) !important;
+  box-shadow: var(--glow) !important; /* Apply glow */
+  overflow: hidden !important; /* Contain glow */
+}
+/* Selected symptom button hover/focus (inner card) */
+.theme-lunar .symptom-btn.selected:hover,
+.theme-lunar .symptom-btn.selected:focus {
+    background: var(--button-hover-bg) !important;
+    box-shadow: var(--glow-hover) !important; /* Apply hover glow */
+    border-color: var(--button-hover-border-color) !important;
     transform: translateY(-1px);
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
+    transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.2s, border-color 0.2s;
+    overflow: hidden !important;
 }
+/* Selected symptom label color and glow */
 .theme-lunar .symptom-btn.selected .symptom-label {
-  color: var(--primary-foreground, #eae6c4) !important; /* Use adjusted foreground */
-  text-shadow: 0 0 4px var(--glow-color), 0 0 8px #eae6c4; /* Add text shadow */
+  color: var(--foreground, #eae6c4) !important; /* Use theme foreground */
+  text-shadow: 0 0 4px var(--glow-color), 0 0 8px var(--glow-secondary); /* Add text shadow */
 }
-/* Apply glow effects (see multi-theme glow section below) */
-
+.theme-lunar .period-status-label {
+  /* color: hsl(var(--foreground)) !important; */
+  color: #41473c !important; /* Hardcoded dark color for testing */
+}
 
 /* --- Theme: Moon --- */
 .theme-moon {
   /* Variables */
-  --background: 220 18% 16%;   /* deep midnight blue */
-  --foreground: 220 30% 96%;   /* moonlit white */
+  --background: 220 18% 16%;
+  --foreground: 220 30% 96%;
   --muted: 220 16% 22%;
   --muted-foreground: 220 18% 80%;
   --popover: 220 20% 18%;
   --popover-foreground: 220 30% 96%;
-  --card: 220 18% 18%; /* Slightly different card */
+  --card: 220 18% 18%;
   --card-foreground: 220 30% 96%;
-  --border: 220 18% 22%; /* Softer border */
+  --border: 220 18% 22%;
   --input: 220 18% 22%;
-  --primary: 60 30% 90%;   /* pale moon yellow */
-  --primary-foreground: 220 18% 16%; /* Dark text on primary */
-  --secondary: 220 18% 36%; /* moon shadow blue */
+  --primary: 60 30% 90%; /* H S L */
+  --primary-foreground: 220 18% 16%;
+  --secondary: 220 18% 36%;
   --secondary-foreground: 220 30% 96%;
-  --accent: 240 60% 80%;   /* soft blue accent */
+  --accent: 240 60% 80%;
   --accent-foreground: 220 30% 96%;
   --destructive: 0 70% 60%;
   --destructive-foreground: 220 30% 96%;
@@ -907,201 +1045,168 @@ input[type="range"]::-ms-thumb {
   --radius: 0.5rem;
   --calendar-period-expected-bg: hsl(var(--card));
   --calendar-period-expected-fg: hsl(var(--card-foreground));
-  --cycle-stats-text: 240 60% 80%; /* lighter purple for moon stats text */
+  --cycle-stats-text: 240 60% 80%;
   --cycle-stats-bar: var(--primary);
   --theme-text: 220 30% 96%;
-  --text-selected-dark: #23263a; /* Specific dark text for selected elements */
-  --text-selected-light: #eae6c4; /* Specific light text (matches primary?) */
-  --button-hover-border: rgba(234, 230, 196, 0.5); /* Pale yellow border for hover */
-  /* No glow for moon */
+  /* Button Specific Vars */
+  --button-selected-border: 1.5px solid hsl(var(--primary) / 0.8);
+  --button-hover-bg: hsl(var(--primary) / 0.9); /* Background for selected hover */
+  --button-hover-border-color: hsl(var(--primary));
+  --text-selected-dark: #23263a;
+  --unselected-label-color: hsl(220deg 11.07% 69.18%);
   --glow: none;
   --glow-color: transparent;
 }
 /* Components */
-.theme-moon .symptom-btn .symptom-label {
-  color: hsl(220deg 11.07% 69.18%) !important; /* Specific muted color for unselected labels */
+/* --- Symptom Button Styling (Inner Card) --- */
+.theme-moon .symptom-btn:not(.selected) .symptom-label {
+  color: var(--unselected-label-color) !important;
+}
+.theme-moon .symptom-btn:not(.selected):hover,
+.theme-moon .symptom-btn:not(.selected):focus {
+   /* Optional: Add subtle border on hover */
+   /* border-color: rgba(234, 230, 196, 0.5) !important; */
 }
 .theme-moon .symptom-btn.selected {
-  /* Base selected styles apply, primary background */
-  color: var(--text-selected-light, #eae6c4) !important; /* Ensure container text is light */
+  /* MODIFICATION: Removed explicit background-color rule based on testing */
+  /* background-color: hsla(var(--primary), 0.9) !important; */ /* <-- REMOVED */
+  color: var(--text-selected-dark) !important; /* Text color for selected state */
+  border: var(--button-selected-border) !important; /* Border for selected state */
+  box-shadow: none !important;
+}
+.theme-moon .symptom-btn.selected:hover,
+.theme-moon .symptom-btn.selected:focus {
+  background: var(--button-hover-bg) !important; /* Hover uses its specific background */
+  border-color: var(--button-hover-border-color) !important;
+  box-shadow: none !important;
+  transform: translateY(-1px);
 }
 .theme-moon .symptom-btn.selected .symptom-label {
-  color: var(--primary-foreground, #23263a) !important; /* Dark text on primary background */
+  color: var(--primary-foreground, var(--text-selected-dark)) !important;
 }
-/* Special text color overrides for Moon */
+/* ... (rest of Moon theme styles remain the same) ... */
 .theme-moon .period-status-btn.selected .symptom-label,
-.theme-moon .period-status-btn.selected .period-status-label { /* Catch both possibilities */
-  color: var(--text-selected-dark, #23263a) !important;
+.theme-moon .period-status-btn.selected .period-status-label {
+  color: var(--text-selected-dark) !important;
 }
 .theme-moon .cervical-mucus-btn.selected,
 .theme-moon .cervical-mucus-btn.selected span {
-  color: var(--text-selected-dark, #23263a) !important;
+  color: var(--text-selected-dark) !important;
 }
-/* Unselected button hover outline */
-.theme-moon .symptom-btn:not(.selected):hover {
-  /* Override the global no-border/no-bg hover for unselected */
-  outline: 2px solid var(--button-hover-border) !important;
-  outline-offset: -2px;
-  background: none !important; /* Keep background transparent */
-  border: none !important; /* Keep border none */
-  box-shadow: none !important; /* Keep shadow none */
-  transform: translateY(-1px); /* Keep lift */
-}
-/* Intensity label SVG color fix */
 .theme-moon .symptom-intensity-label svg,
-.theme-moon svg.symptom-intensity-label { /* Target SVG specifically */
-  background: none !important;
-  color: var(--foreground, #eae6c4) !important;
-  fill: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  box-shadow: none !important;
+.theme-moon svg.symptom-intensity-label {
+  background: none !important; color: var(--foreground, #eae6c4) !important; fill: none !important; border-radius: 0 !important; padding: 0 !important; box-shadow: none !important;
 }
-/* Selected state cleanup (ensure no unwanted color inheritance) */
-.theme-moon .selected,
-.theme-moon .button-selected,
-.theme-moon .btn-selected,
-.theme-moon .period-status.selected,
-.theme-moon .cervical-mucus.selected {
-  /* This block seems intended to *prevent* color application on the container itself */
-  /* color: inherit !important; */ /* Maybe? Or just leave empty */
+/* Inside .theme-moon block */
+.theme-moon .period-status-label {
+/* color: var(--primary-foreground) !important; */
+  color: #41473c !important; /* Hardcoded dark color for testing */
 }
 
 /* --- Theme: Dark (Legacy/Fallback) --- */
-/* This theme mostly relies on the :root defaults */
+/* Relies on :root defaults and global styles */
 .theme-dark {
-  /* Explicitly set Period Expected box to use card variables if needed */
-  --calendar-period-expected-bg: hsl(var(--card));
-  --calendar-period-expected-fg: hsl(var(--card-foreground));
-  /* Potentially add other minor overrides if defaults aren't quite right */
+  /* Define button vars if needed to override :root defaults */
+  --button-selected-bg: hsl(var(--card));
+  --button-selected-border: 1.5px solid hsl(var(--primary));
+  --button-hover-bg: hsl(var(--muted) / 0.7);
+  --button-hover-border-color: hsl(var(--primary) / 0.8);
+  --button-unselected-hover-bg: hsl(var(--muted) / 0.5);
+  --button-unselected-hover-border: 1.5px solid hsl(var(--border));
+}
+/* --- Symptom Button Styling (Inner Card) --- */
+/* Unselected symptom button hover (inner card) */
+.theme-dark .symptom-btn:not(.selected):hover,
+.theme-dark .symptom-btn:not(.selected):focus {
+  background: var(--button-unselected-hover-bg) !important;
+  border: var(--button-unselected-hover-border) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+/* Selected symptom button styles (inner card) */
+.theme-dark .symptom-btn.selected {
+    background: var(--button-selected-bg) !important;
+    border: var(--button-selected-border) !important;
+    box-shadow: none !important;
+}
+/* Selected symptom button hover (inner card) */
+.theme-dark .symptom-btn.selected:hover,
+.theme-dark .symptom-btn.selected:focus {
+  background: var(--button-hover-bg) !important;
+  box-shadow: none !important;
+  border-color: var(--button-hover-border-color) !important;
+  transform: translateY(-1px);
+}
+/* Selected symptom label color */
+.theme-dark .symptom-btn.selected .symptom-label {
+  color: var(--primary-foreground) !important; /* Use default primary fg */
 }
 
+
 /* ===============================================
-   MULTI-THEME STYLES (e.g., Glow Effects)
+   MULTI-THEME UTILITIES (e.g., Glow Effects)
    =============================================== */
+/* These can be used for *additional* elements if needed */
 
-/* === Glow Effects (applied via classes like .glow-btn, .glow-input) === */
-/* Apply only to themes that should glow */
-
-/* Glow effect base utility class (add to elements that should glow in relevant themes) */
+/* Glow effect base utility class */
 .theme-cyberpunk .glow,
 .theme-synthwave .glow,
 .theme-lunar .glow {
   box-shadow: var(--glow);
-  /* Optional: add text shadow if desired on text elements with .glow */
-  /* text-shadow: 0 0 4px var(--glow-color), 0 0 8px var(--glow-color); */
 }
 
-/* Glow on Specific Components */
+/* Glow on Specific Components (Examples) */
 .theme-cyberpunk .glow-btn,
 .theme-synthwave .glow-btn,
-.theme-lunar .glow-btn,
-.theme-moon .glow-btn { /* Included moon here based on original, but Moon theme vars disable glow */
+.theme-lunar .glow-btn {
   box-shadow: 0 0 6px 1px var(--glow-color), 0 0 12px 2px var(--glow-color);
   transition: box-shadow 0.2s, border-color 0.2s;
 }
-
-.theme-cyberpunk .glow-bar > rect, /* For SVG bars like cycle stats */
+.theme-cyberpunk .glow-bar > rect,
 .theme-synthwave .glow-bar > rect,
-.theme-lunar .glow-bar > rect,
-.theme-moon .glow-bar > rect {
+.theme-lunar .glow-bar > rect {
   filter: drop-shadow(0 0 6px var(--glow-color)) drop-shadow(0 0 12px var(--glow-color));
 }
-
-.theme-cyberpunk .glow-switch, /* For ShadCN Switch or similar */
+.theme-cyberpunk .glow-switch,
 .theme-synthwave .glow-switch,
-.theme-lunar .glow-switch,
-.theme-moon .glow-switch {
+.theme-lunar .glow-switch {
   box-shadow: 0 0 6px 1px var(--glow-color), 0 0 12px 2px var(--glow-color);
   transition: box-shadow 0.2s, border-color 0.2s;
 }
-
-.theme-cyberpunk .glow-input, /* For input fields */
+.theme-cyberpunk .glow-input,
 .theme-synthwave .glow-input,
-.theme-lunar .glow-input,
-.theme-moon .glow-input {
+.theme-lunar .glow-input {
   box-shadow: 0 0 4px 1px var(--glow-color);
   transition: box-shadow 0.2s, border-color 0.2s;
-  border-color: hsl(var(--primary) / 0.7); /* Add subtle border color */
+  border-color: hsl(var(--primary) / 0.7);
 }
 
 /* Enhanced Glow on Interaction/Selection */
 .theme-cyberpunk .glow-btn.selected, .theme-cyberpunk .glow-btn:focus, .theme-cyberpunk .glow-btn:active,
 .theme-synthwave .glow-btn.selected, .theme-synthwave .glow-btn:focus, .theme-synthwave .glow-btn:active,
-.theme-lunar .glow-btn.selected, .theme-lunar .glow-btn:focus, .theme-lunar .glow-btn:active,
-.theme-moon .glow-btn.selected, .theme-moon .glow-btn:focus, .theme-moon .glow-btn:active {
+.theme-lunar .glow-btn.selected, .theme-lunar .glow-btn:focus, .theme-lunar .glow-btn:active {
   box-shadow: 0 0 12px 3px var(--glow-color), 0 0 20px 6px var(--glow-color);
-  border-color: var(--primary); /* Use primary color for border on interaction */
+  border-color: var(--primary);
 }
-
 .theme-cyberpunk .glow-input:focus, .theme-cyberpunk .glow-input.selected,
 .theme-synthwave .glow-input:focus, .theme-synthwave .glow-input.selected,
-.theme-lunar .glow-input:focus, .theme-lunar .glow-input.selected,
-.theme-moon .glow-input:focus, .theme-moon .glow-input.selected {
+.theme-lunar .glow-input:focus, .theme-lunar .glow-input.selected {
   box-shadow: 0 0 10px 3px var(--glow-color);
   border-color: var(--primary);
 }
-
 .theme-cyberpunk .glow-switch[data-state="checked"],
 .theme-synthwave .glow-switch[data-state="checked"],
-.theme-lunar .glow-switch[data-state="checked"],
-.theme-moon .glow-switch[data-state="checked"] {
+.theme-lunar .glow-switch[data-state="checked"] {
   box-shadow: 0 0 12px 3px var(--glow-color);
 }
 
-/* Apply glow to specific buttons/elements in glow themes */
-.theme-cyberpunk .period-status-btn.selected,
-.theme-synthwave .period-status-btn.selected,
-.theme-lunar .period-status-btn.selected,
-.theme-cyberpunk .medication-btn.selected,
-.theme-synthwave .medication-btn.selected,
-.theme-lunar .medication-btn.selected,
-.theme-cyberpunk .intimate-activity-btn.selected,
-.theme-synthwave .intimate-activity-btn.selected,
-.theme-lunar .intimate-activity-btn.selected,
-.theme-cyberpunk .cervical-mucus-btn.selected,
-.theme-synthwave .cervical-mucus-btn.selected,
-.theme-lunar .cervical-mucus-btn.selected,
-.theme-cyberpunk .medication-add-btn.selected, /* Assuming .selected adds glow */
-.theme-synthwave .medication-add-btn.selected,
-.theme-lunar .medication-add-btn.selected,
-.theme-cyberpunk .settings-tab.selected, /* Assuming .selected or similar state */
-.theme-synthwave .settings-tab.selected,
-.theme-lunar .settings-tab.selected {
-  box-shadow: var(--glow); /* Apply the main glow */
-  transition: box-shadow 0.2s;
-}
-
-/* Subtle hover glow for buttons in glow themes */
-.theme-cyberpunk .period-status-btn:hover,
-.theme-synthwave .period-status-btn:hover,
-.theme-lunar .period-status-btn:hover,
-.theme-cyberpunk .medication-btn:hover,
-.theme-synthwave .medication-btn:hover,
-.theme-lunar .medication-btn:hover,
-.theme-cyberpunk .intimate-activity-btn:hover,
-.theme-synthwave .intimate-activity-btn:hover,
-.theme-lunar .intimate-activity-btn:hover,
-.theme-cyberpunk .cervical-mucus-btn:hover,
-.theme-synthwave .cervical-mucus-btn:hover,
-.theme-lunar .cervical-mucus-btn:hover,
-.theme-cyberpunk .medication-add-btn:hover,
-.theme-synthwave .medication-add-btn:hover,
-.theme-lunar .medication-add-btn:hover,
-.theme-cyberpunk .settings-tab:hover,
-.theme-synthwave .settings-tab:hover,
-.theme-lunar .settings-tab:hover {
-  box-shadow: 0 0 4px 1px var(--primary), 0 0 8px 2px var(--glow-color); /* Combine primary and glow color */
-  transition: box-shadow 0.2s;
-}
-
-/* Chart bar and card glow for analysis page (flow intensity, etc) */
+/* Chart bar and card glow for analysis page */
 .theme-cyberpunk .chart-bar,
 .theme-synthwave .chart-bar,
 .theme-lunar .chart-bar {
   filter: drop-shadow(0 0 4px var(--primary)) drop-shadow(0 0 8px var(--glow-color));
 }
-.theme-cyberpunk .analysis-card, /* Apply to cards on analysis page if desired */
+.theme-cyberpunk .analysis-card,
 .theme-synthwave .analysis-card,
 .theme-lunar .analysis-card {
    box-shadow: 0 0 8px 1px hsl(var(--primary) / 0.5), 0 0 12px 2px var(--glow-color);
