@@ -20,6 +20,7 @@ interface DateNavProps {
 
 const DateNav: React.FC<DateNavProps> = ({ selectedDate, onDateChange, userId = 1 }) => {
   const [open, setOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState<Date>(selectedDate);
   const today = new Date();
   
   // Fetch flow records to mark period days in the calendar
@@ -68,6 +69,13 @@ const DateNav: React.FC<DateNavProps> = ({ selectedDate, onDateChange, userId = 
   const isToday = isSameDay(selectedDate, today);
   const isFutureDate = selectedDate > today;
   
+  // When popover opens, sync calendarMonth to selectedDate
+  useEffect(() => {
+    if (open) {
+      setCalendarMonth(selectedDate);
+    }
+  }, [open, selectedDate]);
+
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center">
@@ -88,10 +96,12 @@ const DateNav: React.FC<DateNavProps> = ({ selectedDate, onDateChange, userId = 
             <Calendar
               mode="single"
               selected={selectedDate}
-              month={selectedDate}
+              month={calendarMonth}
+              onMonthChange={setCalendarMonth}
               onSelect={(date) => {
                 if (date) {
                   onDateChange(date);
+                  setCalendarMonth(date); // keep month in sync with selected date
                   setOpen(false);
                 }
               }}
