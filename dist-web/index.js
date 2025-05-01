@@ -1135,17 +1135,25 @@ var FileStorage = class {
   // Analytics
   async getAverageCycleLength(userId) {
     const cycles = await this.getCycles(userId);
-    const completedCycles = cycles.filter((cycle) => cycle.startDate && cycle.endDate);
-    if (completedCycles.length < 2) {
+    if (cycles.length < 2) {
       return void 0;
     }
-    const durations = completedCycles.map((cycle) => {
-      const start = new Date(cycle.startDate);
-      const end = new Date(cycle.endDate);
-      return Math.round((end.getTime() - start.getTime()) / (1e3 * 60 * 60 * 24));
-    });
-    const totalDays = durations.reduce((sum, days) => sum + days, 0);
-    return Math.round(totalDays / durations.length);
+    const sortedCycles = cycles.filter((cycle) => cycle.startDate).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    const cycleLengths = [];
+    for (let i = 1; i < sortedCycles.length; i++) {
+      const prevStart = new Date(sortedCycles[i - 1].startDate);
+      const currStart = new Date(sortedCycles[i].startDate);
+      const diffDays = Math.round((currStart.getTime() - prevStart.getTime()) / (1e3 * 60 * 60 * 24));
+      if (diffDays > 0) {
+        cycleLengths.push(diffDays);
+      }
+    }
+    console.log("Sorted cycle start dates:", sortedCycles.map((c) => c.startDate));
+    console.log("Cycle lengths (days between starts):", cycleLengths);
+    if (cycleLengths.length === 0) return void 0;
+    const total = cycleLengths.reduce((a, b) => a + b, 0);
+    console.log("Average cycle length:", total / cycleLengths.length);
+    return Math.round(total / cycleLengths.length);
   }
   async getAveragePeriodLength(userId) {
     const flowRecords = await this.getFlowRecords(userId);
@@ -1354,7 +1362,8 @@ async function registerRoutes(app2) {
         medications: [],
         defaultCycleLength: 28,
         defaultPeriodLength: 5,
-        showPmddSymptoms: true
+        showPmddSymptoms: true,
+        showIntimateActivity: true
       });
       res.status(201).json(user);
     } catch (error) {
@@ -1812,7 +1821,8 @@ async function registerRoutes(app2) {
           medications: [],
           defaultCycleLength: 28,
           defaultPeriodLength: 5,
-          showPmddSymptoms: true
+          showPmddSymptoms: true,
+          showIntimateActivity: true
         });
       }
       res.json(settings);
@@ -1918,15 +1928,18 @@ async function registerRoutes(app2) {
       if (isNaN(userId)) {
         return res.status(400).json({ message: "Invalid user ID" });
       }
-      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, notes] = await Promise.all([
+      const [cycles, flowRecords, moodRecords, symptoms, symptomRecords, notes, cervicalMucusRecords, sexRecords, medicationRecords] = await Promise.all([
         storage.getCycles(userId),
         storage.getFlowRecords(userId),
         storage.getMoodRecords(userId),
         storage.getUserSymptoms(userId),
         storage.getSymptomRecords(userId),
-        storage.getDailyNotes(userId)
+        storage.getDailyNotes(userId),
+        storage.getCervicalMucusRecords ? storage.getCervicalMucusRecords(userId) : Promise.resolve([]),
+        storage.getSexRecords ? storage.getSexRecords(userId) : Promise.resolve([]),
+        typeof medicationStorage !== "undefined" && medicationStorage.getAll ? Promise.resolve(medicationStorage.getAll(userId)) : Promise.resolve([])
       ]);
-      let csvContent = "Date,CycleDay,Flow,Mood,Symptoms,Notes\n";
+      let csvContent = "Date,CycleDay,Flow,Mood,Symptoms,CervicalMucus,Medications,Intimacy,Notes\n";
       const datesToProcess = /* @__PURE__ */ new Set();
       flowRecords.forEach((record) => datesToProcess.add(record.date.toString().split("T")[0]));
       moodRecords.forEach((record) => datesToProcess.add(record.date.toString().split("T")[0]));
@@ -1962,9 +1975,20 @@ async function registerRoutes(app2) {
           }
           symptomsList = symptomNames.join(", ");
         }
+        const mucusRecord = cervicalMucusRecords.find((record) => record.date.toString().split("T")[0] === dateStr);
+        const cervicalMucus = mucusRecord ? mucusRecord.type : "";
+        let medicationsList = "";
+        if (Array.isArray(medicationRecords)) {
+          const medsForDate = medicationRecords.filter((record) => record.date && record.date.toString().split("T")[0] === dateStr);
+          if (medsForDate.length > 0) {
+            medicationsList = medsForDate.map((med) => med.name + (med.dose ? ` (${med.dose})` : "")).join("; ");
+          }
+        }
+        const sexRecord = sexRecords.find((record) => record.date && record.date.toString().split("T")[0] === dateStr);
+        const intimacy = sexRecord ? "Yes" : "";
         const dailyNote = notes.find((note) => note.date.toString().split("T")[0] === dateStr);
         const noteText = dailyNote ? dailyNote.notes.replace(/\n/g, " ").replace(/,/g, ";") : "";
-        csvContent += `${formattedDate},${cycleDay},${flow},${mood},${symptomsList},"${noteText}"
+        csvContent += `${formattedDate},${cycleDay},${flow},${mood},${symptomsList},${cervicalMucus},${medicationsList},${intimacy},"${noteText}"
 `;
       }
       res.setHeader("Content-Type", "text/csv");
