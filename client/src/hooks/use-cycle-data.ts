@@ -294,35 +294,47 @@ export function useCycleData({ userId }: UseCycleDataProps) {
   // Helper function to cancel/delete a cycle
   const cancelPeriod = useCallback((cycleId: number) => {
     if (!cycleId) return;
-    
-    // Delete the cycle
-    apiRequest('DELETE', `/api/cycles/${cycleId}`)
+
+    // Find the cycle to get its start date
+    const cycle = cycles?.find(c => c.id === cycleId);
+    if (!cycle) return;
+    const startDate = cycle.startDate;
+
+    // Delete all flow records from the cycle's start date onward
+    const flowRecordsToDelete = (flowRecords || []).filter(record => record.cycleId === cycleId || record.date >= startDate);
+    const deletePromises = flowRecordsToDelete.map(record => apiRequest('DELETE', `/api/flow-records/${record.id}`));
+
+    Promise.all(deletePromises)
+      .then(() => {
+        // Delete the cycle itself
+        return apiRequest('DELETE', `/api/cycles/${cycleId}`);
+      })
       .then(() => {
         // Invalidate all related queries
         queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/flow-records?userId=${userId}`] });
-        
+
         // Force refetch to update UI immediately
         refetchCycles();
         refetchCurrentCycle();
         refetchFlowRecords();
-        
+
         toast({ 
           title: "Period cancelled", 
-          description: "The period has been removed from your records", 
+          description: "The period and all associated flow records have been removed from your records", 
           variant: "default" 
         });
       })
       .catch(error => {
         toast({ 
           title: "Error", 
-          description: "Failed to cancel period", 
+          description: "Failed to cancel period and remove flow records", 
           variant: "destructive" 
         });
         console.error(error);
       });
-  }, [userId, refetchCycles, refetchCurrentCycle, refetchFlowRecords]);
+  }, [userId, cycles, flowRecords, refetchCycles, refetchCurrentCycle, refetchFlowRecords, queryClient, toast]);
   
   // Calculate average cycle length
   const getAverageCycleLength = useCallback(() => {

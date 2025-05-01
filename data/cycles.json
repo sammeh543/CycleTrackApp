@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "userId": 1,
+    "startDate": "2025-04-01",
+    "id": 10,
+    "endDate": "2025-04-05",
+    "notes": null
+  },
+  {
+    "userId": 1,
+    "startDate": "2025-03-01",
+    "id": 11,
+    "endDate": "2025-03-06",
+    "notes": null
+  }
+]

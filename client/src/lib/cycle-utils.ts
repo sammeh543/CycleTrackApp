@@ -6,14 +6,14 @@ import { addDays, differenceInDays, parseISO } from 'date-fns';
  * @param lastPeriodStartDate The start date of the last period
  * @param avgCycleLength Average cycle length in days (default 28)
  * @param avgPeriodLength Average period length in days (default 5)
- * @returns The phase name: 'Menstrual', 'Follicular', 'Ovulation', 'Luteal', or 'Unknown'
+ * @returns The phase name: 'period' | 'follicular' | 'ovulation' | 'luteal'
  */
 export function getCyclePhase(
   dateToCheck: Date | string, 
   lastPeriodStartDate: Date | string, 
   avgCycleLength = 28,
   avgPeriodLength = 5
-): 'period' | 'follicular' | 'ovulation' | 'luteal' | 'Unknown' {
+): 'period' | 'follicular' | 'ovulation' | 'luteal' {
   // Convert string dates to Date objects if needed
   const start = typeof lastPeriodStartDate === 'string' 
     ? parseISO(lastPeriodStartDate) 
@@ -32,33 +32,38 @@ export function getCyclePhase(
   const follicularStart = avgPeriodLength + 1;
   const follicularEnd = ovulationDay - 1;
   
-  // If the date is before the last period start, it's in a previous cycle
+  // If the date is before the last period start
   if (diffInDays < 0) {
-    // For dates before the last period, we can still calculate the phase 
-    // by working backwards from the cycle length
-    // Calculate how many days before the current cycle
-    const daysBeforeCurrentCycle = Math.abs(diffInDays);
-    
-    // Calculate which day in the previous cycle
-    const prevCycleDay = avgCycleLength - (daysBeforeCurrentCycle % avgCycleLength);
+    // Calculate how many complete cycles between the dates
+    const completeCycles = Math.floor(Math.abs(diffInDays) / avgCycleLength);
+    // Calculate remaining days in the current cycle
+    const remainingDays = Math.abs(diffInDays) % avgCycleLength;
+    // Calculate which day in the previous cycle, counting backwards from the start
+    const prevCycleDay = avgCycleLength - remainingDays;
     
     // Apply the same phase logic to the previous cycle
     if (prevCycleDay >= 1 && prevCycleDay <= avgPeriodLength) return 'period';
     if (prevCycleDay >= follicularStart && prevCycleDay <= follicularEnd) return 'follicular';
     if (prevCycleDay === ovulationDay) return 'ovulation';
-    if (prevCycleDay > ovulationDay) return 'luteal';
+    if (prevCycleDay > ovulationDay && prevCycleDay <= avgCycleLength) return 'luteal';
   }
   
   // For dates after or on the last period start
-  // Calculate cycle day (1-based)
+  // Calculate cycle day (1-based), making sure we stay within cycle bounds
   const cycleDay = (diffInDays % avgCycleLength) + 1;
 
+  // For the current or future cycles
   if (cycleDay >= 1 && cycleDay <= avgPeriodLength) return 'period';
   if (cycleDay >= follicularStart && cycleDay <= follicularEnd) return 'follicular';
   if (cycleDay === ovulationDay) return 'ovulation';
   if (cycleDay > ovulationDay && cycleDay <= avgCycleLength) return 'luteal';
-
-  return 'Unknown'; // This should rarely happen now
+  
+  // If we get here, wrap to next cycle
+  const nextCycleDay = cycleDay % avgCycleLength || avgCycleLength; // If 0, use avgCycleLength
+  if (nextCycleDay >= 1 && nextCycleDay <= avgPeriodLength) return 'period';
+  if (nextCycleDay >= follicularStart && nextCycleDay <= follicularEnd) return 'follicular';
+  if (nextCycleDay === ovulationDay) return 'ovulation';
+  return 'luteal';
 }
 
 /**

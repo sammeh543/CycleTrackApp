@@ -1,1 +1,72 @@
-[]
+[
+  {
+    "userId": 1,
+    "date": "2025-04-01",
+    "intensity": "light",
+    "id": 48
+  },
+  {
+    "userId": 1,
+    "cycleId": 10,
+    "date": "2025-04-02",
+    "intensity": "medium",
+    "id": 49
+  },
+  {
+    "userId": 1,
+    "cycleId": 10,
+    "date": "2025-04-03",
+    "intensity": "medium",
+    "id": 50
+  },
+  {
+    "userId": 1,
+    "cycleId": 10,
+    "date": "2025-04-04",
+    "intensity": "medium",
+    "id": 51
+  },
+  {
+    "userId": 1,
+    "cycleId": 10,
+    "date": "2025-04-05",
+    "intensity": "medium",
+    "id": 52
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-01",
+    "intensity": "light",
+    "id": 53
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-02",
+    "intensity": "medium",
+    "id": 54
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-04",
+    "intensity": "medium",
+    "id": 55
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-03",
+    "intensity": "medium",
+    "id": 56
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-05",
+    "intensity": "medium",
+    "id": 57
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-06",
+    "intensity": "medium",
+    "id": 58
+  }
+]

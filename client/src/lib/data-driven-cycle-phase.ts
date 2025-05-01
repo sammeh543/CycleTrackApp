@@ -17,8 +17,12 @@ export function getDataDrivenCyclePhase(
   anchorDate?: Date
 ): 'period' | 'follicular' | 'ovulation' | 'luteal' | 'Unknown' {
   const checkDate = typeof dateToCheck === 'string' ? parseISO(dateToCheck) : new Date(dateToCheck);
-  // Find all non-spotting flow records
-  const periodRecords = flowRecords.filter(r => r.intensity !== 'spotting');
+  
+  // Sort all records chronologically ONCE
+  const periodRecords = flowRecords
+    .filter(r => r.intensity !== 'spotting')
+    .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+
   // Find all period days (logged)
   const periodDates = new Set(periodRecords.map(r => r.date));
   // Add ongoing fill days
@@ -32,10 +36,16 @@ export function getDataDrivenCyclePhase(
   let anchor = anchorDate;
   if (!anchor) {
     // Find the most recent period start before or on this date
-    const sortedPeriodRecords = [...periodRecords].sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
-    const lastPeriodRecord = sortedPeriodRecords.find(r => parseISO(r.date) <= checkDate);
-    if (!lastPeriodRecord) return 'Unknown';
-    anchor = parseISO(lastPeriodRecord.date);
+    // Records are already sorted chronologically, so scan backwards
+    for (let i = periodRecords.length - 1; i >= 0; i--) {
+      const record = periodRecords[i];
+      const recordDate = parseISO(record.date);
+      if (recordDate <= checkDate) {
+        anchor = recordDate;
+        break;
+      }
+    }
+    if (!anchor) return 'Unknown';
   }
 
   // Get user-specific averages

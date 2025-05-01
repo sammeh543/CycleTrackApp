@@ -100,18 +100,21 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
   });
   // For ongoing period fill logic, you may want to calculate fillOngoingPeriodDates here if needed
   const fillOngoingPeriodDates: string[] = [];
-  // Compute today's phase using actual data
-  // --- Predicted Period logic (match calendar) ---
-  // 1. Get period starts
-  const periodRecordsNoSpotting = (flowRecords || []).filter(r => r.intensity !== 'spotting');
-  const sortedPeriodRecordsNoSpotting = [...periodRecordsNoSpotting].sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  
+  // Get all non-spotting records and sort chronologically ONCE
+  const periodRecordsNoSpotting = (flowRecords || [])
+    .filter(r => r.intensity !== 'spotting')
+    .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  
+  // Find period starts by looking for gaps > 2 days
   const periodStarts: Date[] = [];
-  for (let i = 0; i < sortedPeriodRecordsNoSpotting.length; i++) {
-    if (i === 0 || differenceInDays(parseISO(sortedPeriodRecordsNoSpotting[i].date), parseISO(sortedPeriodRecordsNoSpotting[i-1].date)) > 2) {
-      periodStarts.push(parseISO(sortedPeriodRecordsNoSpotting[i].date));
+  for (let i = 0; i < periodRecordsNoSpotting.length; i++) {
+    if (i === 0 || differenceInDays(parseISO(periodRecordsNoSpotting[i].date), parseISO(periodRecordsNoSpotting[i-1].date)) > 2) {
+      periodStarts.push(parseISO(periodRecordsNoSpotting[i].date));
     }
   }
-  // 2. Predict future periods
+  
+  // Predict future periods
   const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords || [], userSettings);
   const predictedPeriodDates: string[] = [];
   if (periodStarts.length > 0) {
@@ -127,23 +130,28 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
       });
     }
   }
+  
+  // Check if today is a period day
   const todayKey = format(selectedDate, 'yyyy-MM-dd');
   const isActualPeriod = periodRecordsNoSpotting.some(r => format(parseISO(r.date), 'yyyy-MM-dd') === todayKey);
   const isPredictedPeriod = !isActualPeriod && predictedPeriodDates.includes(todayKey);
+  
+  // Calculate phase using data-driven logic
   const todayPhase = isActualPeriod || isPredictedPeriod
     ? 'period'
     : getDataDrivenCyclePhase(selectedDate, flowRecords || [], userSettings, fillOngoingPeriodDates);
 
-
-  // Fertile window logic (match calendar)
-  // Find all non-spotting flow records
-  const periodRecords = (flowRecords || []).filter(r => r.intensity !== 'spotting');
-  // Find the most recent period start before or on selectedDate
-  const sortedPeriodRecords = [...periodRecords].sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
-  const lastPeriodRecord = sortedPeriodRecords.find(r => parseISO(r.date) <= selectedDate);
+  // Calculate fertile window using same logic as calendar
   let isFertileWindowDay = false;
+  // Find most recent period start before or on selectedDate by scanning backwards
+  let lastPeriodRecord = null;
+  for (let i = periodRecordsNoSpotting.length - 1; i >= 0; i--) {
+    if (parseISO(periodRecordsNoSpotting[i].date) <= selectedDate) {
+      lastPeriodRecord = periodRecordsNoSpotting[i];
+      break;
+    }
+  }
   if (lastPeriodRecord) {
-    const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords || [], userSettings);
     isFertileWindowDay = isInFertileWindow(selectedDate, lastPeriodRecord.date, avgCycleLength, avgPeriodLength) && todayPhase !== 'period';
   }
 
@@ -324,7 +332,7 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
                       onClick={() => recordFlow('spotting', selectedDate)}
                       style={{ minWidth: 110 }}
                     >
-                      <DropletIcon className="h-5 w-5 mr-2" fillOpacity={currentFlow?.intensity === 'spotting' ? 0.3 : 0} />
+                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'spotting' ? 0.3 : 0} />
                       <span className="period-status-label">Spotting</span>
                     </Button>
                     <Button

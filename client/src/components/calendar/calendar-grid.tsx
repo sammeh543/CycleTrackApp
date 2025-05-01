@@ -80,8 +80,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   // Determine period days, fertile window, and symptoms for each date
   // Use best available cycle/period length for predictions
   const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords, userSettings);
-  // Find the latest logged period (non-spotting flow records)
-  const nonSpotting = flowRecords.filter(r => r.intensity !== 'spotting').sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  // Find the latest logged period (non-spotting flow records) and sort chronologically
+  const nonSpotting = flowRecords
+    .filter(r => r.intensity !== 'spotting')
+    .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
   let lastPeriodStart: Date | null = null;
   let lastPeriodEnd: Date | null = null;
   let isOngoingPeriod = false;
@@ -236,10 +238,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     if (isActualPeriod || isPredictedPeriod) {
       phase = 'period';
     } else {
-      // Sort period records by date descending (newest first)
-      const sortedPeriodRecords = [...nonSpotting].sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
       // Find most recent period start before or on this date
-      const lastPeriodRecord = sortedPeriodRecords.find(r => parseISO(r.date) <= date);
+      // Records are already sorted chronologically, so scan backwards
+      let lastPeriodRecord = null;
+      for (let i = nonSpotting.length - 1; i >= 0; i--) {
+        if (parseISO(nonSpotting[i].date) <= date) {
+          lastPeriodRecord = nonSpotting[i];
+          break;
+        }
+      }
       if (lastPeriodRecord) {
         // Use the last period start as anchor
         phase = getDataDrivenCyclePhase(date, flowRecords, userSettings, predictedPeriodDates);
@@ -249,8 +256,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     }
     
     // 5. Determine fertile window (using same logic as Today page)
-    const sortedPeriodRecordsForFertile = [...nonSpotting].sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
-    const lastPeriodRecordForFertile = sortedPeriodRecordsForFertile.find(r => parseISO(r.date) <= date);
+    // Use the same lastPeriodRecord we found above
+    let lastPeriodRecordForFertile = null;
+    for (let i = nonSpotting.length - 1; i >= 0; i--) {
+      if (parseISO(nonSpotting[i].date) <= date) {
+        lastPeriodRecordForFertile = nonSpotting[i];
+        break;
+      }
+    }
     const isFertile = lastPeriodRecordForFertile && 
       isInFertileWindow(date, parseISO(lastPeriodRecordForFertile.date), avgCycleLength, avgPeriodLength) && 
       phase !== 'period';
