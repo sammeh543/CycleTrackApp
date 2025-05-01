@@ -1,4 +1,4 @@
-import { addDays, differenceInDays, parseISO } from 'date-fns';
+import { addDays, differenceInDays, parseISO, endOfDay, isAfter, isBefore } from 'date-fns';
 
 /**
  * Determines the phase of menstrual cycle
@@ -48,8 +48,7 @@ export function getCyclePhase(
     if (prevCycleDay > ovulationDay && prevCycleDay <= avgCycleLength) return 'luteal';
   }
   
-  // For dates after or on the last period start
-  // Calculate cycle day (1-based), making sure we stay within cycle bounds
+  // For dates after or on the last period start 
   const cycleDay = (diffInDays % avgCycleLength) + 1;
 
   // For the current or future cycles
@@ -299,4 +298,89 @@ export function getBestCyclePredictionLengths(
     };
   }
   return { avgCycleLength: 28, avgPeriodLength: 5, used: 'default' };
+}
+
+/**
+ * Returns which days should be auto-logged as "light" flow, and which should be removed if period ends early.
+ *
+ * @param periodStartDate Start date of the period (Date or string)
+ * @param periodEndDate End date of the period (Date or string, optional)
+ * @param periodLength Average/default period length
+ * @param flowRecords Array of { date, intensity }
+ * @returns { toLog: string[], toRemove: string[] }
+ */
+export function getAutoLogLightDays(
+  periodStartDate: Date | string,
+  periodEndDate: Date | string | undefined,
+  periodLength: number,
+  flowRecords: Array<{ date: string; intensity: string }>
+): { toLog: string[]; toRemove: string[] } {
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+  const start = typeof periodStartDate === 'string' ? parseISO(periodStartDate) : periodStartDate;
+  // If endDate is provided, use the length between start and end (inclusive)
+  let windowLength = periodLength;
+  if (periodEndDate) {
+    const end = typeof periodEndDate === 'string' ? parseISO(periodEndDate) : periodEndDate;
+    windowLength = differenceInDays(end, start) + 1;
+  }
+  const expectedDays = [];
+  for (let i = 0; i < windowLength; i++) {
+    expectedDays.push(formatDate(addDays(start, i)));
+  }
+  // If periodEndDate is provided, adjust the window
+  let endIdx = expectedDays.length;
+  if (periodEndDate) {
+    const end = typeof periodEndDate === 'string' ? parseISO(periodEndDate) : periodEndDate;
+    // Include the end date in the window (find first day AFTER the end)
+    endIdx = expectedDays.findIndex(d => isAfter(parseISO(d), end));
+    if (endIdx === -1) endIdx = expectedDays.length;
+  }
+  const windowDays = expectedDays.slice(0, endIdx);
+  // Find days in window not logged at all
+  const loggedDays = new Set(flowRecords.map(r => r.date.split('T')[0]));
+  const toLog = windowDays.filter(d => !loggedDays.has(d));
+  // For early end, find auto-logged light days after endIdx
+  let toRemove: string[] = [];
+  if (periodEndDate && endIdx < expectedDays.length) {
+    const afterEndDays = expectedDays.slice(endIdx);
+    toRemove = afterEndDays.filter(d => {
+      const rec = flowRecords.find(r => r.date.split('T')[0] === d);
+      return rec && rec.intensity === 'light';
+    });
+  }
+  return { toLog, toRemove };
+}
+
+/**
+ * Returns which days should be deleted if a period ends early or is backlogged.
+ * Deletes any non-spotting flow days between an END and the next START.
+ *
+ * @param periodEndDate End date of the period (Date or string)
+ * @param nextPeriodStartDate Start date of the next period (Date or string, optional)
+ * @param flowRecords Array of { date, intensity }
+ * @returns string[] of dates to remove
+ */
+export function getDaysToRemoveBetweenPeriods(
+  periodEndDate: Date | string,
+  nextPeriodStartDate: Date | string | undefined,
+  flowRecords: Array<{ date: string; intensity: string }>
+): string[] {
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+  const end = typeof periodEndDate === 'string' ? parseISO(periodEndDate) : periodEndDate;
+  const endDay = endOfDay(end);  // Use end of day for comparison
+  let nextStart: Date | undefined = undefined;
+  if (nextPeriodStartDate) {
+    nextStart = typeof nextPeriodStartDate === 'string' ? parseISO(nextPeriodStartDate) : nextPeriodStartDate;
+  }
+  // Defensive: sort flowRecords by date just in case
+  const sortedRecords = [...flowRecords].sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  return sortedRecords
+    .filter(r => {
+      const d = parseISO(r.date);
+      if (r.intensity === 'spotting') return false;
+      // Remove if it's after the end date (inclusive) and before next start
+      if (isAfter(d, endDay) && (!nextStart || isBefore(d, nextStart))) return true;
+      return false;
+    })
+    .map(r => r.date.split('T')[0]);
 }

@@ -11,7 +11,7 @@ export interface UserSettings {
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { addDays, format, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { getCyclePhase, isInFertileWindow } from '@/lib/cycle-utils';
+import { getCyclePhase, isInFertileWindow, getBestCyclePredictionLengths, getExpectedPeriodDays, getAutoLogLightDays, getDaysToRemoveBetweenPeriods } from '@/lib/cycle-utils';
 
 interface CycleData {
   id: number;
@@ -210,10 +210,74 @@ export function useCycleData({ userId }: UseCycleDataProps) {
       refetchFlowRecords();
     },
     onError: (error) => {
+      // If error is a 404 "not found", silently ignore
+      if (error && error.message && error.message.includes("404")) {
+        // Optionally, log to console for debugging
+        console.warn("Flow record already deleted (404), ignoring.");
+        return;
+      }
       toast({ title: "Error", description: "Failed to remove flow record", variant: "destructive" });
       console.error(error);
     }
   });
+
+  // Helper to auto-log light flow for period window
+  const autoLogLightFlow = useCallback((cycle: CycleData, flowRecords: FlowRecord[], userSettings?: UserSettings) => {
+    // Get average/default period length
+    const { avgPeriodLength } = getBestCyclePredictionLengths(flowRecords, userSettings);
+    const { toLog } = getAutoLogLightDays(
+      cycle.startDate,
+      cycle.endDate,
+      avgPeriodLength,
+      flowRecords
+    );
+    // Log 'light' for all missing days in window
+    toLog.forEach(dateStr => {
+      recordFlowMutation.mutate({
+        userId: cycle.userId,
+        cycleId: cycle.id,
+        date: dateStr,
+        intensity: 'light'
+      });
+    });
+  }, [recordFlowMutation]);
+
+  // Helper to remove auto-logged light flow after early end
+  const removeAutoLoggedLightAfterEnd = useCallback((cycle: CycleData, flowRecords: FlowRecord[], userSettings?: UserSettings) => {
+    const { avgPeriodLength } = getBestCyclePredictionLengths(flowRecords, userSettings);
+    const { toRemove } = getAutoLogLightDays(
+      cycle.startDate,
+      cycle.endDate,
+      avgPeriodLength,
+      flowRecords
+    );
+    // Remove only auto-logged 'light' days after end
+    toRemove.forEach(dateStr => {
+      const rec = flowRecords.find(r => r.date.split('T')[0] === dateStr && r.intensity === 'light');
+      if (rec) {
+        deleteFlowMutation.mutate(rec.id);
+      }
+    });
+  }, [deleteFlowMutation]);
+
+  // Helper to robustly remove all non-spotting flow days between end and next start
+  const removeAllBetweenEndAndNextStart = useCallback((cycle: CycleData, cycles: CycleData[], flowRecords: FlowRecord[]) => {
+    // Find the next period after this cycle
+    const thisEnd = cycle.endDate;
+    if (!thisEnd) return;
+    // Find next cycle (by start date > this end)
+    const nextCycle = cycles
+      .filter(c => c.startDate && parseISO(c.startDate) > parseISO(thisEnd))
+      .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime())[0];
+    const nextStart = nextCycle ? nextCycle.startDate : undefined;
+    const toRemove = getDaysToRemoveBetweenPeriods(thisEnd, nextStart, flowRecords);
+    toRemove.forEach(dateStr => {
+      const rec = flowRecords.find(r => r.date.split('T')[0] === dateStr && r.intensity !== 'spotting');
+      if (rec) {
+        deleteFlowMutation.mutate(rec.id);
+      }
+    });
+  }, [deleteFlowMutation]);
 
   // Helper function to start a new cycle
   const startPeriod = useCallback((date: Date = new Date()) => {
@@ -221,25 +285,43 @@ export function useCycleData({ userId }: UseCycleDataProps) {
       userId,
       startDate: format(date, 'yyyy-MM-dd')
     }, {
-      onSuccess: () => {
+      onSuccess: async (response: Response) => {
+        // Parse the response as JSON to get the createdCycle object
+        let createdCycle: CycleData;
+        try {
+          createdCycle = await response.json();
+        } catch (e) {
+          // Fallback: skip auto-log if parse fails
+          return;
+        }
         // Explicitly refetch current cycle to ensure UI updates
         refetchCurrentCycle();
         refetchCycles();
-        
         // Also invalidate all cycle-related queries
         queryClient.invalidateQueries({ queryKey: ['/api/cycles'] });
         queryClient.invalidateQueries({ queryKey: ['/api/cycles/current'] });
+        // Auto-log 'light' for period window
+        if (flowRecords && userSettings) {
+          autoLogLightFlow(
+            { ...createdCycle, startDate: format(date, 'yyyy-MM-dd') },
+            flowRecords,
+            userSettings
+          );
+        }
       }
     });
-  }, [createCycleMutation, userId, refetchCurrentCycle, refetchCycles, queryClient]);
-  
+  }, [createCycleMutation, userId, refetchCurrentCycle, refetchCycles, queryClient, flowRecords, userSettings, autoLogLightFlow]);
+
   // Helper function to end the current cycle
   const endPeriod = useCallback((date: Date = new Date(), cycleId?: number) => {
     // If cycleId is provided, use it; otherwise use the current cycle's ID
     const targetCycleId = cycleId || currentCycle?.id;
-    
     if (!targetCycleId) return;
-    
+
+    // Find the target cycle data
+    const targetCycle = cycles?.find(c => c.id === targetCycleId) || currentCycle;
+    if (!targetCycle) return;
+
     updateCycleMutation.mutate({
       id: targetCycleId,
       data: {
@@ -250,11 +332,21 @@ export function useCycleData({ userId }: UseCycleDataProps) {
         // Explicitly refetch to ensure UI updates
         refetchCurrentCycle();
         refetchCycles();
-        
         // Also invalidate all cycle-related queries
         queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
-        
+        // After end, fill missing days or remove extras
+        if (flowRecords && userSettings) {
+          const updatedCycle = { ...targetCycle, endDate: format(date, 'yyyy-MM-dd') };
+          // If end date is after expected, fill missing
+          autoLogLightFlow(updatedCycle, flowRecords, userSettings);
+          // If end date is before expected, remove extra
+          removeAutoLoggedLightAfterEnd(updatedCycle, flowRecords, userSettings);
+          // NEW: Remove all non-spotting flow between this end and next start
+          if (cycles) {
+            removeAllBetweenEndAndNextStart(updatedCycle, cycles, flowRecords);
+          }
+        }
         toast({
           title: "Success",
           description: "Period cycle ended",
@@ -269,7 +361,7 @@ export function useCycleData({ userId }: UseCycleDataProps) {
         console.error("Error ending period:", error);
       }
     });
-  }, [currentCycle, updateCycleMutation, refetchCurrentCycle, refetchCycles, queryClient, userId]);
+  }, [currentCycle, updateCycleMutation, refetchCurrentCycle, refetchCycles, queryClient, userId, flowRecords, userSettings, autoLogLightFlow, removeAutoLoggedLightAfterEnd, cycles, removeAllBetweenEndAndNextStart]);
   
   // Helper function to record flow intensity or remove flow record if the same intensity is clicked again
   const recordFlow = useCallback((intensity: 'spotting' | 'light' | 'medium' | 'heavy', date?: Date) => {

@@ -1,72 +1,184 @@
 [
   {
     "userId": 1,
-    "date": "2025-04-01",
-    "intensity": "light",
-    "id": 48
-  },
-  {
-    "userId": 1,
-    "cycleId": 10,
-    "date": "2025-04-02",
-    "intensity": "medium",
-    "id": 49
-  },
-  {
-    "userId": 1,
-    "cycleId": 10,
-    "date": "2025-04-03",
-    "intensity": "medium",
-    "id": 50
-  },
-  {
-    "userId": 1,
-    "cycleId": 10,
-    "date": "2025-04-04",
-    "intensity": "medium",
-    "id": 51
-  },
-  {
-    "userId": 1,
-    "cycleId": 10,
-    "date": "2025-04-05",
-    "intensity": "medium",
-    "id": 52
-  },
-  {
-    "userId": 1,
+    "cycleId": 42,
     "date": "2025-03-01",
     "intensity": "light",
-    "id": 53
+    "id": 221
   },
   {
     "userId": 1,
+    "cycleId": 42,
     "date": "2025-03-02",
-    "intensity": "medium",
-    "id": 54
+    "intensity": "light",
+    "id": 222
   },
   {
     "userId": 1,
-    "date": "2025-03-04",
-    "intensity": "medium",
-    "id": 55
-  },
-  {
-    "userId": 1,
+    "cycleId": 42,
     "date": "2025-03-03",
-    "intensity": "medium",
-    "id": 56
+    "intensity": "light",
+    "id": 223
   },
   {
     "userId": 1,
+    "cycleId": 42,
+    "date": "2025-03-04",
+    "intensity": "light",
+    "id": 224
+  },
+  {
+    "userId": 1,
+    "cycleId": 42,
     "date": "2025-03-05",
-    "intensity": "medium",
-    "id": 57
+    "intensity": "light",
+    "id": 225
   },
   {
     "userId": 1,
+    "cycleId": 42,
     "date": "2025-03-06",
-    "intensity": "medium",
-    "id": 58
+    "intensity": "light",
+    "id": 226
+  },
+  {
+    "userId": 1,
+    "cycleId": 42,
+    "date": "2025-03-07",
+    "intensity": "light",
+    "id": 227
+  },
+  {
+    "userId": 1,
+    "cycleId": 42,
+    "date": "2025-03-08",
+    "intensity": "light",
+    "id": 228
+  },
+  {
+    "userId": 1,
+    "cycleId": 42,
+    "date": "2025-03-09",
+    "intensity": "light",
+    "id": 229
+  },
+  {
+    "userId": 1,
+    "cycleId": 42,
+    "date": "2025-03-10",
+    "intensity": "light",
+    "id": 230
+  },
+  {
+    "userId": 1,
+    "cycleId": 42,
+    "date": "2025-03-11",
+    "intensity": "light",
+    "id": 231
+  },
+  {
+    "userId": 1,
+    "cycleId": 42,
+    "date": "2025-03-12",
+    "intensity": "light",
+    "id": 232
+  },
+  {
+    "userId": 1,
+    "cycleId": 41,
+    "date": "2025-04-01",
+    "intensity": "light",
+    "id": 233
+  },
+  {
+    "userId": 1,
+    "cycleId": 41,
+    "date": "2025-04-02",
+    "intensity": "light",
+    "id": 234
+  },
+  {
+    "userId": 1,
+    "cycleId": 41,
+    "date": "2025-04-03",
+    "intensity": "light",
+    "id": 235
+  },
+  {
+    "userId": 1,
+    "cycleId": 41,
+    "date": "2025-04-04",
+    "intensity": "light",
+    "id": 236
+  },
+  {
+    "userId": 1,
+    "cycleId": 41,
+    "date": "2025-04-05",
+    "intensity": "light",
+    "id": 237
+  },
+  {
+    "userId": 1,
+    "cycleId": 41,
+    "date": "2025-04-06",
+    "intensity": "light",
+    "id": 238
+  },
+  {
+    "userId": 1,
+    "cycleId": 41,
+    "date": "2025-04-07",
+    "intensity": "light",
+    "id": 239
+  },
+  {
+    "userId": 1,
+    "cycleId": 41,
+    "date": "2025-04-08",
+    "intensity": "light",
+    "id": 240
+  },
+  {
+    "userId": 1,
+    "cycleId": 46,
+    "date": "2025-05-01",
+    "intensity": "light",
+    "id": 241
+  },
+  {
+    "userId": 1,
+    "cycleId": 46,
+    "date": "2025-05-02",
+    "intensity": "light",
+    "id": 242
+  },
+  {
+    "userId": 1,
+    "cycleId": 46,
+    "date": "2025-05-03",
+    "intensity": "light",
+    "id": 243
+  },
+  {
+    "userId": 1,
+    "cycleId": 46,
+    "date": "2025-05-04",
+    "intensity": "light",
+    "id": 244
+  },
+  {
+    "userId": 1,
+    "cycleId": 46,
+    "date": "2025-05-05",
+    "intensity": "light",
+    "id": 245
+  },
+  {
+    "userId": 1,
+    "cycleId": 46,
+    "date": "2025-05-06",
+    "intensity": "light",
+    "id": 246
   }
 ]
