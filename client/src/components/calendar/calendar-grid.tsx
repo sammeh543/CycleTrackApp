@@ -235,19 +235,25 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     let phase: string;
     if (isActualPeriod || isPredictedPeriod) {
       phase = 'period';
-    } else if (lastClusterEnd) {
-      // Use the day AFTER the last cluster end as the anchor
-      const anchor = addDays(lastClusterEnd, 1);
-      phase = getDataDrivenCyclePhase(date, flowRecords, userSettings, [], anchor);
     } else {
-      phase = 'follicular'; // Default to follicular for blanks at the start
+      // Sort period records by date descending (newest first)
+      const sortedPeriodRecords = [...nonSpotting].sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+      // Find most recent period start before or on this date
+      const lastPeriodRecord = sortedPeriodRecords.find(r => parseISO(r.date) <= date);
+      if (lastPeriodRecord) {
+        // Use the last period start as anchor
+        phase = getDataDrivenCyclePhase(date, flowRecords, userSettings, predictedPeriodDates);
+      } else {
+        phase = 'follicular';
+      }
     }
     
     // 5. Determine fertile window (using same logic as Today page)
-    const isFertile = lastPeriodEnd && 
-      isInFertileWindow(date, addDays(lastPeriodEnd, 1), avgCycleLength, avgPeriodLength) && 
-      !isActualPeriod && 
-      !isPredictedPeriod;
+    const sortedPeriodRecordsForFertile = [...nonSpotting].sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+    const lastPeriodRecordForFertile = sortedPeriodRecordsForFertile.find(r => parseISO(r.date) <= date);
+    const isFertile = lastPeriodRecordForFertile && 
+      isInFertileWindow(date, parseISO(lastPeriodRecordForFertile.date), avgCycleLength, avgPeriodLength) && 
+      phase !== 'period';
     
     // 6. Check for symptoms and spotting
     const hasSymptoms = symptomRecords.some(r => isSameDay(date, parseISO(r.date)));
@@ -305,6 +311,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             borderStyle = "border-2 border-red-400 border-dashed"; // Dotted red border
           } else if (isFertile) {
             phaseColor = "bg-blue-400/70";
+          } else if (phase === 'ovulation') {
+            phaseColor = "bg-teal-600/80"; // Deep teal color
           } else if (phase === 'follicular') {
             phaseColor = "bg-yellow-400/60";
           } else if (phase === 'luteal') {
