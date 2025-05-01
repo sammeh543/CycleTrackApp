@@ -41,10 +41,10 @@ const SymptomCharts: React.FC<SymptomChartsProps> = ({ userId }) => {
       <CardHeader className="pb-0 pt-4 px-4 flex flex-row items-center justify-between">
         <h3 className="text-lg font-semibold text-foreground">Symptom Analysis</h3>
         <div className="w-40">
-          <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as any)} className="bg-background text-foreground">
-            <SelectTrigger>
-              <SelectValue placeholder="Time Period" />
-            </SelectTrigger>
+          <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as any)}>
+  <SelectTrigger className="bg-background text-foreground">
+    <SelectValue placeholder="Time Period" />
+  </SelectTrigger>
             <SelectContent>
               <SelectItem value="week">
                 <div className="flex items-center">

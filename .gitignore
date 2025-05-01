@@ -3,6 +3,10 @@
 
 # Build output
 /dist/
+/dist-web/  # Web build output
+
+# Scripts (personal/temporary)
+scripts/
 
 # Logs
 logs
@@ -106,4 +110,4 @@ ehthumbs_vista.db
 *.session.sql
 
 # Raspberry Pi personal notes and scripts
-/pi/ # Re-added to exclude personal notes and flowcharts from git
+/pi/  # Re-added to exclude personal notes and flowcharts from git

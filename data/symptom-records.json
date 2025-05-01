@@ -12,5 +12,19 @@
     "date": "2025-04-30",
     "intensity": 1,
     "id": 43
+  },
+  {
+    "userId": 1,
+    "symptomId": 5,
+    "date": "2025-03-17",
+    "intensity": 1,
+    "id": 44
+  },
+  {
+    "userId": 1,
+    "symptomId": 3,
+    "date": "2025-03-17",
+    "intensity": 1,
+    "id": 45
   }
 ]
