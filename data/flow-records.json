@@ -3,75 +3,69 @@
     "userId": 1,
     "date": "2025-01-01",
     "intensity": "light",
-    "id": 94
+    "id": 127
   },
   {
     "userId": 1,
-    "cycleId": 20,
+    "cycleId": 25,
     "date": "2025-01-02",
-    "intensity": "heavy",
-    "id": 95
+    "intensity": "medium",
+    "id": 128
   },
   {
     "userId": 1,
-    "cycleId": 20,
+    "cycleId": 25,
     "date": "2025-01-03",
     "intensity": "medium",
-    "id": 96
+    "id": 129
   },
   {
     "userId": 1,
-    "cycleId": 20,
+    "cycleId": 25,
     "date": "2025-01-04",
     "intensity": "medium",
-    "id": 97
+    "id": 130
   },
   {
     "userId": 1,
-    "cycleId": 20,
+    "cycleId": 25,
     "date": "2025-01-05",
-    "intensity": "heavy",
-    "id": 98
-  },
-  {
-    "userId": 1,
-    "cycleId": 20,
-    "date": "2025-01-06",
     "intensity": "medium",
-    "id": 99
+    "id": 131
   },
   {
     "userId": 1,
     "date": "2025-02-01",
-    "intensity": "light",
-    "id": 100
+    "intensity": "heavy",
+    "id": 132,
+    "cycleId": 26
   },
   {
     "userId": 1,
-    "cycleId": 21,
+    "cycleId": 26,
     "date": "2025-02-02",
-    "intensity": "medium",
-    "id": 101
+    "intensity": "heavy",
+    "id": 133
   },
   {
     "userId": 1,
-    "cycleId": 21,
+    "cycleId": 26,
     "date": "2025-02-03",
     "intensity": "heavy",
-    "id": 102
+    "id": 134
   },
   {
     "userId": 1,
-    "cycleId": 21,
+    "cycleId": 26,
     "date": "2025-02-04",
-    "intensity": "medium",
-    "id": 103
+    "intensity": "heavy",
+    "id": 135
   },
   {
     "userId": 1,
-    "cycleId": 21,
+    "cycleId": 26,
     "date": "2025-02-05",
-    "intensity": "medium",
-    "id": 104
+    "intensity": "heavy",
+    "id": 136
   }
 ]

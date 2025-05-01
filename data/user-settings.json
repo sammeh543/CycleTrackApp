@@ -10,7 +10,7 @@
     "hiddenSymptoms": [],
     "medications": [],
     "defaultCycleLength": 28,
-    "defaultPeriodLength": 5,
+    "defaultPeriodLength": 9,
     "showPmddSymptoms": true,
     "showIntimateActivity": true,
     "id": 1

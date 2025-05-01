@@ -150,7 +150,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       // END IS periodStart + avgPeriodLength (inclusive)
       eachDayOfInterval({
         start: periodStart,
-        end: addDays(periodStart, avgPeriodLength - 1 + 1) // Fix -1 day issue
+        end: addDays(periodStart, avgPeriodLength - 1)
       }).forEach(d => {
         predictedPeriodDates.push(format(d, 'yyyy-MM-dd'));
       });
