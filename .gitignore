@@ -55,7 +55,6 @@ web_modules/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
-!.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
 
@@ -111,9 +110,3 @@ ehthumbs_vista.db
 
 # Raspberry Pi personal notes and scripts
 /pi/  # Re-added to exclude personal notes and flowcharts from git
-
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
