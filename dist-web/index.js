@@ -106,6 +106,14 @@ var cervicalMucusSchema = z.object({
   type: z.enum(["dry", "sticky", "creamy", "watery", "eggwhite"])
 });
 var insertCervicalMucusSchema = cervicalMucusSchema.omit({ id: true });
+var spottingRecordSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  date: z.string(),
+  // ISO date string
+  note: z.string().optional()
+});
+var insertSpottingRecordSchema = spottingRecordSchema.omit({ id: true });
 
 // server/file-storage.ts
 import fs4 from "fs";
@@ -509,6 +517,7 @@ var FileStorage = class {
     this.userSettings = /* @__PURE__ */ new Map();
     this.cervicalMucusRecords = /* @__PURE__ */ new Map();
     this.sexRecords = /* @__PURE__ */ new Map();
+    this.spottingRecords = /* @__PURE__ */ new Map();
     this.loadData();
     this.deduplicateSymptomsAndSave();
     if (this.symptoms.size === 0) {
@@ -527,6 +536,7 @@ var FileStorage = class {
     this.currentUserSettingsId = this.getMaxId(this.userSettings) + 1;
     this.currentCervicalMucusRecordId = this.getMaxId(this.cervicalMucusRecords) + 1;
     this.currentSexRecordId = this.getMaxId(this.sexRecords) + 1;
+    this.currentSpottingRecordId = this.getMaxId(this.spottingRecords) + 1;
   }
   // Helper to get max ID from a map 
   getMaxId(map) {
@@ -545,6 +555,7 @@ var FileStorage = class {
     this.saveMapToFile(this.userSettings, "user-settings.json");
     this.saveMapToFile(this.cervicalMucusRecords, "cervical-mucus-records.json");
     this.saveMapToFile(this.sexRecords, "sex-records.json");
+    this.saveMapToFile(this.spottingRecords, "spotting-records.json");
     this.backupManager.createBackup();
   }
   // Load all data from files
@@ -559,6 +570,7 @@ var FileStorage = class {
     this.loadMapFromFile(this.userSettings, "user-settings.json");
     this.loadMapFromFile(this.cervicalMucusRecords, "cervical-mucus-records.json");
     this.loadMapFromFile(this.sexRecords, "sex-records.json");
+    this.loadMapFromFile(this.spottingRecords, "spotting-records.json");
   }
   // Save a map to a JSON file
   saveMapToFile(map, filename) {
@@ -800,7 +812,7 @@ var FileStorage = class {
   async deleteCycle(id) {
     const deleted = this.cycles.delete(id);
     if (deleted) {
-      const flowRecordsToDelete = Array.from(this.flowRecords.values()).filter((record) => record.cycleId === id).map((record) => record.id);
+      const flowRecordsToDelete = Array.from(this.flowRecords.values()).filter((record) => record.cycleId === id && record.intensity !== "spotting").map((record) => record.id);
       flowRecordsToDelete.forEach((recordId) => {
         this.flowRecords.delete(recordId);
       });
@@ -1062,8 +1074,7 @@ var FileStorage = class {
     console.log(`[FileStorage] Updating cervical mucus record id=${id}`, updateRecord);
     let dateStr = record.date;
     if (updateRecord.date) {
-      const dateObjUpdate = parseISO(updateRecord.date);
-      dateStr = format(dateObjUpdate, "yyyy-MM-dd");
+      dateStr = format(new Date(updateRecord.date), "yyyy-MM-dd");
     }
     const updatedRecord = {
       ...record,
@@ -1130,6 +1141,48 @@ var FileStorage = class {
   async deleteSexRecord(id) {
     const deleted = this.sexRecords.delete(id);
     if (deleted) this.saveData();
+    return deleted;
+  }
+  // Spotting records
+  async getSpottingRecords(userId, startDate, endDate) {
+    let records = Array.from(this.spottingRecords.values()).filter((record) => record.userId === userId);
+    if (startDate) {
+      const startStr = startDate.toISOString().slice(0, 10);
+      records = records.filter((record) => record.date >= startStr);
+    }
+    if (endDate) {
+      const endStr = endDate.toISOString().slice(0, 10);
+      records = records.filter((record) => record.date <= endStr);
+    }
+    return records.sort((a, b) => a.date.localeCompare(b.date));
+  }
+  async getSpottingRecord(userId, date) {
+    const dateStr = date.toISOString().slice(0, 10);
+    return Array.from(this.spottingRecords.values()).find((record) => record.userId === userId && record.date === dateStr);
+  }
+  async createSpottingRecord(insertRecord) {
+    const id = this.currentSpottingRecordId++;
+    const dateStr = insertRecord.date.slice(0, 10);
+    const record = { ...insertRecord, id, date: dateStr };
+    this.spottingRecords.set(id, record);
+    this.saveData();
+    return record;
+  }
+  async updateSpottingRecord(id, updateRecord) {
+    const record = this.spottingRecords.get(id);
+    if (!record) return void 0;
+    let dateStr = record.date;
+    if (updateRecord.date) {
+      dateStr = updateRecord.date.slice(0, 10);
+    }
+    const updated = { ...record, ...updateRecord, date: dateStr };
+    this.spottingRecords.set(id, updated);
+    this.saveData();
+    return updated;
+  }
+  async deleteSpottingRecord(id) {
+    const deleted = this.spottingRecords.delete(id);
+    this.saveData();
     return deleted;
   }
   // Analytics
@@ -1266,6 +1319,11 @@ var FileStorage = class {
       medicationStorage2.resetUserMedications(userId);
     } catch (e) {
       console.error("[resetUserData] Failed to clear medication records:", e);
+    }
+    for (const [id, record] of this.spottingRecords.entries()) {
+      if (record.userId === userId) {
+        this.spottingRecords.delete(id);
+      }
     }
     this.saveData();
     this.deduplicateSymptomsAndSave();
@@ -2429,18 +2487,12 @@ function serveStatic(app2) {
 // server/ensure-data-dir.ts
 import fs7 from "fs";
 import path8 from "path";
+import { dirname } from "path";
+import { fileURLToPath as fileURLToPath3 } from "url";
 console.log("LOADING ENSURE DATA DIR");
+var __dirname3 = dirname(fileURLToPath3(import.meta.url));
 function ensureDataDirectory() {
-  const dataPath = config.dataPath;
-  console.log(`Creating data directory at ${dataPath}`);
-  if (!fs7.existsSync(dataPath)) {
-    fs7.mkdirSync(dataPath, { recursive: true });
-  }
-  const backupsPath = path8.join(dataPath, "backups");
-  if (!fs7.existsSync(backupsPath)) {
-    fs7.mkdirSync(backupsPath, { recursive: true });
-  }
-  const dataFiles = [
+  const requiredFiles = [
     "users.json",
     "cycles.json",
     "flow-records.json",
@@ -2448,12 +2500,45 @@ function ensureDataDirectory() {
     "symptoms.json",
     "symptom-records.json",
     "daily-notes.json",
-    "user-settings.json"
+    "user-settings.json",
+    "cervical-mucus-records.json",
+    "sex-records.json",
+    "medication-records.json",
+    "spotting-records.json"
+    // NEW: Ensure spotting records file exists
   ];
-  for (const file of dataFiles) {
-    const filePath = path8.join(dataPath, file);
+  const rootDataPath = path8.resolve(__dirname3, "../data");
+  if (!fs7.existsSync(rootDataPath)) {
+    fs7.mkdirSync(rootDataPath, { recursive: true });
+    console.log(`Created root data directory at ${rootDataPath}`);
+  }
+  const rootBackupsPath = path8.join(rootDataPath, "backups");
+  if (!fs7.existsSync(rootBackupsPath)) {
+    fs7.mkdirSync(rootBackupsPath, { recursive: true });
+  }
+  for (const file of requiredFiles) {
+    const filePath = path8.join(rootDataPath, file);
     if (!fs7.existsSync(filePath)) {
       fs7.writeFileSync(filePath, "[]");
+      console.log(`Created missing file in root data: ${file}`);
+    }
+  }
+  const configDataPath = path8.resolve(config.dataPath);
+  if (configDataPath !== rootDataPath) {
+    if (!fs7.existsSync(configDataPath)) {
+      fs7.mkdirSync(configDataPath, { recursive: true });
+      console.log(`Created custom data directory at ${configDataPath}`);
+    }
+    const customBackupsPath = path8.join(configDataPath, "backups");
+    if (!fs7.existsSync(customBackupsPath)) {
+      fs7.mkdirSync(customBackupsPath, { recursive: true });
+    }
+    for (const file of requiredFiles) {
+      const filePath = path8.join(configDataPath, file);
+      if (!fs7.existsSync(filePath)) {
+        fs7.writeFileSync(filePath, "[]");
+        console.log(`Created missing file in custom data: ${file}`);
+      }
     }
   }
 }

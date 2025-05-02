@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // <-- Added useQueryClient import
 
 // --- UserSettings interface for user settings shape ---
 export interface UserSettings {
@@ -8,9 +8,9 @@ export interface UserSettings {
   // Add other settings as needed
 }
 
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { apiRequest } from '@/lib/queryClient'; // <-- Keep original apiRequest import
 import { addDays, format, parseISO } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast'; // <-- Keep useToast import
 import { getCyclePhase, isInFertileWindow, getBestCyclePredictionLengths, getExpectedPeriodDays, getAutoLogLightDays, getDaysToRemoveBetweenPeriods } from '@/lib/cycle-utils';
 
 interface CycleData {
@@ -34,11 +34,12 @@ interface UseCycleDataProps {
 }
 
 export function useCycleData({ userId }: UseCycleDataProps) {
-  const { toast } = useToast();
+  const { toast } = useToast(); // <-- Initialize toast
+  const queryClient = useQueryClient(); // <-- Initialize queryClient
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
-  // Fetch all cycles
-  const { 
+
+  // --- Keep all existing useQuery calls ---
+  const {
     data: cycles,
     isLoading: cyclesLoading,
     error: cyclesError,
@@ -47,9 +48,8 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     queryKey: [`/api/cycles?userId=${userId}`],
     enabled: !!userId
   });
-  
-  // Fetch current cycle
-  const { 
+
+  const {
     data: currentCycle,
     isLoading: currentCycleLoading,
     refetch: refetchCurrentCycle
@@ -57,8 +57,7 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     queryKey: [`/api/cycles/current?userId=${userId}`],
     enabled: !!userId
   });
-  
-  // Fetch flow records
+
   const {
     data: flowRecords,
     isLoading: flowRecordsLoading,
@@ -67,8 +66,7 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     queryKey: [`/api/flow-records?userId=${userId}`],
     enabled: !!userId
   });
-  
-  // Fetch symptom records
+
   const {
     data: symptomRecords,
     isLoading: symptomRecordsLoading
@@ -76,8 +74,7 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     queryKey: [`/api/symptom-records?userId=${userId}`],
     enabled: !!userId
   });
-  
-  // Fetch mood records
+
   const {
     data: moodRecords,
     isLoading: moodRecordsLoading
@@ -86,16 +83,14 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     enabled: !!userId
   });
 
-  // Fetch cervical mucus records
   const {
     data: cervicalMucusRecords,
     isLoading: cervicalMucusRecordsLoading
   } = useQuery({
     queryKey: [`/api/cervical-mucus-records?userId=${userId}`],
-    enabled: !!userId && false // Temporarily disable until UI is ready
+    enabled: !!userId && false
   });
-  
-  // Fetch all symptoms
+
   const {
     data: symptoms,
     isLoading: symptomsLoading
@@ -103,8 +98,7 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     queryKey: [`/api/user-symptoms?userId=${userId}`],
     enabled: !!userId
   });
-  
-  // Fetch user settings
+
   const {
     data: userSettings,
     isLoading: userSettingsLoading
@@ -112,107 +106,128 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     queryKey: [`/api/user-settings/${userId}`],
     enabled: !!userId
   });
-  
-  // Calculate cycle day for the selected date
+
+  // Calculate cycle day for selected date
   const getCycleDay = useCallback(() => {
     if (!currentCycle) return null;
-    
     const cycleStartDate = parseISO(currentCycle.startDate);
-    
-    // Calculate the difference in days
+    // Calculate day difference in days
     const dayDiff = Math.floor(
       (selectedDate.getTime() - cycleStartDate.getTime()) / (1000 * 60 * 60 * 24)
     ) + 1; // Add 1 to include the start day
-    
     return dayDiff > 0 ? dayDiff : null;
   }, [currentCycle, selectedDate]);
-  
-  // Get flow record for a specific date
+
+  // Get flow record for selected date
   const getFlowForDate = useCallback((date: Date) => {
     if (!flowRecords) return null;
-    
     const dateStr = format(date, 'yyyy-MM-dd');
     return flowRecords.find(record => record.date.split('T')[0] === dateStr);
   }, [flowRecords]);
-  
+
   // Mutations for updating data
   const createCycleMutation = useMutation({
     mutationFn: (newCycle: Omit<CycleData, 'id'>) => {
       return apiRequest('POST', '/api/cycles', newCycle);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
-      toast({
-        title: "Success",
-        description: "Period cycle started",
-      });
+    onSuccess: (response: Response /* Adjust type if apiRequest returns differently */) => {
+       // --- Keep onSuccess logic here ---
+       queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
+       queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
+       toast({ title: "Success", description: "Period cycle started" });
+
+       // The logic to handle response and call autoLogLightFlow
+       async function handleSuccess() {
+            let createdCycle: CycleData;
+            try {
+              // Try parsing only if response looks ok and has body
+              if (response.ok && response.headers.get('content-length') !== '0') {
+                  createdCycle = await response.json();
+                   // Auto-log 'light' for period window only if cycle created successfully
+                  if (createdCycle && flowRecords && userSettings) {
+                     autoLogLightFlow(
+                         { ...createdCycle }, // Pass the newly created cycle
+                         flowRecords,
+                         userSettings
+                     );
+                 }
+              } else {
+                  console.warn("Cycle creation response was not OK or empty, skipping auto-log.");
+              }
+            } catch (e) {
+                console.error("Error parsing create cycle response:", e);
+                // Fallback: maybe still invalidate/refetch even if parsing fails
+            } finally {
+                // Explicitly refetch AFTER potential autoLog to ensure UI shows everything
+                refetchCurrentCycle();
+                refetchCycles();
+                refetchFlowRecords(); // Also refetch flow records if autoLog happened
+            }
+       }
+       handleSuccess(); // Call the async handler
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to start period cycle",
-        variant: "destructive",
-      });
-      console.error(error);
+        // --- Keep onError logic here ---
+        toast({ title: "Error", description: "Failed to start period cycle", variant: "destructive" });
+        console.error(error);
     }
   });
-  
+
   const updateCycleMutation = useMutation({
     mutationFn: ({ id, data }: { id: number, data: Partial<CycleData> }) => {
       return apiRequest('PATCH', `/api/cycles/${id}`, data);
     },
     onSuccess: () => {
+      // --- Keep onSuccess logic here ---
       queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
-      toast({
-        title: "Success",
-        description: "Period cycle updated",
-      });
+      toast({ title: "Success", description: "Period cycle updated" });
+      // Consider refetching if needed for immediate UI consistency after update
+      refetchCycles();
+      refetchCurrentCycle();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update period cycle",
-        variant: "destructive",
-      });
+      // --- Keep onError logic here ---
+      toast({ title: "Error", description: "Failed to update period cycle", variant: "destructive" });
       console.error(error);
     }
   });
-  
+
   const recordFlowMutation = useMutation({
     mutationFn: (data: { userId: number; cycleId?: number; date: string; intensity: string }) => {
       return apiRequest('POST', '/api/flow-records', data);
     },
     onSuccess: () => {
-      // Invalidate all related queries to ensure UI updates immediately
+      // --- Keep onSuccess logic here ---
       queryClient.invalidateQueries({ queryKey: [`/api/flow-records?userId=${userId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
-      
+      // Maybe invalidate cycles too if flow affects cycle calculations -- not needed for now
+      // queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
+      // queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
+
       // Force refetch to update UI immediately
       refetchFlowRecords();
-      refetchCycles();
-      refetchCurrentCycle();
+      // refetchCycles(); // Only if needed
+      // refetchCurrentCycle(); // Only if needed
     },
     onError: (error) => {
+      // --- Keep onError logic here ---
       toast({ title: "Error", description: "Failed to save flow record", variant: "destructive" });
       console.error(error);
     }
   });
-  
+
   const deleteFlowMutation = useMutation({
     mutationFn: (id: number) => {
       return apiRequest('DELETE', `/api/flow-records/${id}`);
     },
     onSuccess: () => {
+      // --- Keep onSuccess logic here ---
       queryClient.invalidateQueries({ queryKey: [`/api/flow-records?userId=${userId}`] });
       refetchFlowRecords();
     },
     onError: (error) => {
-      // If error is a 404 "not found", silently ignore
+      // --- Keep onError logic here ---
       if (error && error.message && error.message.includes("404")) {
-        // Optionally, log to console for debugging
         console.warn("Flow record already deleted (404), ignoring.");
         return;
       }
@@ -221,339 +236,356 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     }
   });
 
-  // Helper to auto-log light flow for period window
-  const autoLogLightFlow = useCallback((cycle: CycleData, flowRecords: FlowRecord[], userSettings?: UserSettings) => {
-    // Get average/default period length
-    const { avgPeriodLength } = getBestCyclePredictionLengths(flowRecords, userSettings);
+  // --- Helper autolog callbacks (autoLogLightFlow, removeAutoLoggedLightAfterEnd, removeAllBetweenEndAndNextStart) ---
+  const autoLogLightFlow = useCallback((cycle: CycleData, currentFlowRecords: FlowRecord[], currentUserSettings?: UserSettings) => {
+    if (!cycle || !currentFlowRecords) return; // Add null checks
+    const { avgPeriodLength } = getBestCyclePredictionLengths(currentFlowRecords, currentUserSettings);
     const { toLog } = getAutoLogLightDays(
       cycle.startDate,
       cycle.endDate,
       avgPeriodLength,
-      flowRecords
+      currentFlowRecords
     );
-    // Log 'light' for all missing days in window
+    // Log 'light' for all missing days in the period window
     toLog.forEach(dateStr => {
-      recordFlowMutation.mutate({
-        userId: cycle.userId,
-        cycleId: cycle.id,
-        date: dateStr,
-        intensity: 'light'
-      });
+      // Check if a record for this day already exists before mutating
+      const existing = currentFlowRecords.find(r => r.date.split('T')[0] === dateStr);
+      if (!existing) {
+        console.log(`Auto-logging light flow for ${dateStr} in cycle ${cycle.id}`);
+        recordFlowMutation.mutate({
+          userId: cycle.userId,
+          cycleId: cycle.id,
+          date: dateStr,
+          intensity: 'light'
+        });
+      }
     });
-  }, [recordFlowMutation]);
+  }, [recordFlowMutation]); // Dependency: only needs the mutation function
 
-  // Helper to remove auto-logged light flow after early end
-  const removeAutoLoggedLightAfterEnd = useCallback((cycle: CycleData, flowRecords: FlowRecord[], userSettings?: UserSettings) => {
-    const { avgPeriodLength } = getBestCyclePredictionLengths(flowRecords, userSettings);
+  // Remove 'light' flow records after the end date of the cycle
+  const removeAutoLoggedLightAfterEnd = useCallback((cycle: CycleData, currentFlowRecords: FlowRecord[], currentUserSettings?: UserSettings) => {
+     if (!cycle || !cycle.endDate || !currentFlowRecords) return; // Add null checks
+    const { avgPeriodLength } = getBestCyclePredictionLengths(currentFlowRecords, currentUserSettings);
     const { toRemove } = getAutoLogLightDays(
       cycle.startDate,
-      cycle.endDate,
+      cycle.endDate, // Pass endDate here
       avgPeriodLength,
-      flowRecords
+      currentFlowRecords
     );
-    // Remove only auto-logged 'light' days after end
+    // Remove 'light' flow records after the end date of the cycle
     toRemove.forEach(dateStr => {
-      const rec = flowRecords.find(r => r.date.split('T')[0] === dateStr && r.intensity === 'light');
+      const rec = currentFlowRecords.find(r => r.date.split('T')[0] === dateStr && r.intensity === 'light');
       if (rec) {
-        deleteFlowMutation.mutate(rec.id);
+          console.log(`Removing auto-logged light flow for ${dateStr} after end date ${cycle.endDate}`);
+          deleteFlowMutation.mutate(rec.id);
       }
     });
-  }, [deleteFlowMutation]);
+  }, [deleteFlowMutation]); // Dependency: only needs the mutation function
 
-  // Helper to robustly remove all non-spotting flow days between end and next start
-  const removeAllBetweenEndAndNextStart = useCallback((cycle: CycleData, cycles: CycleData[], flowRecords: FlowRecord[]) => {
-    // Find the next period after this cycle
+  const removeAllBetweenEndAndNextStart = useCallback((cycle: CycleData, allCycles: CycleData[], currentFlowRecords: FlowRecord[]) => {
+      if (!cycle || !cycle.endDate || !allCycles || !currentFlowRecords) return; // Add null checks
     const thisEnd = cycle.endDate;
-    if (!thisEnd) return;
-    // Find next cycle (by start date > this end)
-    const nextCycle = cycles
-      .filter(c => c.startDate && parseISO(c.startDate) > parseISO(thisEnd))
+    const nextCycle = allCycles
+      .filter(c => c.id !== cycle.id && c.startDate && parseISO(c.startDate) > parseISO(thisEnd))
       .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime())[0];
     const nextStart = nextCycle ? nextCycle.startDate : undefined;
-    const toRemove = getDaysToRemoveBetweenPeriods(thisEnd, nextStart, flowRecords);
+    const toRemove = getDaysToRemoveBetweenPeriods(thisEnd, nextStart, currentFlowRecords);
+
     toRemove.forEach(dateStr => {
-      const rec = flowRecords.find(r => r.date.split('T')[0] === dateStr && r.intensity !== 'spotting');
+      const rec = currentFlowRecords.find(r => r.date.split('T')[0] === dateStr && r.intensity !== 'spotting');
       if (rec) {
-        deleteFlowMutation.mutate(rec.id);
+          console.log(`Removing flow record ${rec.id} (${rec.intensity}) for date ${dateStr} between end ${thisEnd} and next start ${nextStart}`);
+          deleteFlowMutation.mutate(rec.id);
       }
     });
-  }, [deleteFlowMutation]);
+  }, [deleteFlowMutation]); // Dependency: only needs the mutation function
 
-  // Helper function to start a new cycle
+
+  // --- Keep startPeriod and endPeriod (make sure they use the updated helpers correctly) ---
   const startPeriod = useCallback((date: Date = new Date()) => {
-    createCycleMutation.mutate({
-      userId,
-      startDate: format(date, 'yyyy-MM-dd')
-    }, {
-      onSuccess: async (response: Response) => {
-        // Parse the response as JSON to get the createdCycle object
-        let createdCycle: CycleData;
-        try {
-          createdCycle = await response.json();
-        } catch (e) {
-          // Fallback: skip auto-log if parse fails
-          return;
-        }
-        // Explicitly refetch current cycle to ensure UI updates
-        refetchCurrentCycle();
-        refetchCycles();
-        // Also invalidate all cycle-related queries
-        queryClient.invalidateQueries({ queryKey: ['/api/cycles'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/cycles/current'] });
-        // Auto-log 'light' for period window
-        if (flowRecords && userSettings) {
-          autoLogLightFlow(
-            { ...createdCycle, startDate: format(date, 'yyyy-MM-dd') },
-            flowRecords,
-            userSettings
-          );
-        }
-      }
-    });
-  }, [createCycleMutation, userId, refetchCurrentCycle, refetchCycles, queryClient, flowRecords, userSettings, autoLogLightFlow]);
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      console.log(`Attempting to start period on ${formattedDate}`);
+      createCycleMutation.mutate({
+          userId,
+          startDate: formattedDate
+      } /* onSuccess is handled within the mutation definition */);
+  }, [createCycleMutation, userId]); // Dependencies might include other state if needed inside
 
-  // Helper function to end the current cycle
   const endPeriod = useCallback((date: Date = new Date(), cycleId?: number) => {
-    // If cycleId is provided, use it; otherwise use the current cycle's ID
     const targetCycleId = cycleId || currentCycle?.id;
-    if (!targetCycleId) return;
+    if (!targetCycleId) {
+        console.warn("endPeriod called without a valid cycle ID.");
+        return;
+    }
 
-    // Find the target cycle data
-    const targetCycle = cycles?.find(c => c.id === targetCycleId) || currentCycle;
-    if (!targetCycle) return;
+    const targetCycle = cycles?.find(c => c.id === targetCycleId); // Prefer finding in all cycles
+    if (!targetCycle) {
+        console.warn(`endPeriod could not find cycle with ID ${targetCycleId}.`);
+        return;
+    }
+
+    const formattedEndDate = format(date, 'yyyy-MM-dd');
+    console.log(`Attempting to end period ${targetCycleId} on ${formattedEndDate}`);
 
     updateCycleMutation.mutate({
       id: targetCycleId,
-      data: {
-        endDate: format(date, 'yyyy-MM-dd')
-      }
+      data: { endDate: formattedEndDate }
     }, {
       onSuccess: () => {
-        // Explicitly refetch to ensure UI updates
-        refetchCurrentCycle();
-        refetchCycles();
-        // Also invalidate all cycle-related queries
-        queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
-        // After end, fill missing days or remove extras
-        if (flowRecords && userSettings) {
-          const updatedCycle = { ...targetCycle, endDate: format(date, 'yyyy-MM-dd') };
-          // If end date is after expected, fill missing
-          autoLogLightFlow(updatedCycle, flowRecords, userSettings);
-          // If end date is before expected, remove extra
-          removeAutoLoggedLightAfterEnd(updatedCycle, flowRecords, userSettings);
-          // NEW: Remove all non-spotting flow between this end and next start
-          if (cycles) {
-            removeAllBetweenEndAndNextStart(updatedCycle, cycles, flowRecords);
-          }
-        }
-        toast({
-          title: "Success",
-          description: "Period cycle ended",
-        });
+        // Fetch fresh data AFTER mutation succeeds
+        Promise.all([refetchCycles(), refetchFlowRecords()]).then(([cyclesResult, flowResult]) => {
+            const latestCycles = cyclesResult.data || [];
+            const latestFlowRecords = flowResult.data || [];
+            const updatedCycle = latestCycles.find(c => c.id === targetCycleId);
+
+            if (updatedCycle && updatedCycle.endDate) { // Ensure cycle was actually updated
+                console.log(`Cycle ${targetCycleId} ended. Running cleanup/fill logic.`);
+                 // Auto-fill/remove logic using the FRESH data
+                 if (latestFlowRecords && userSettings) {
+                    autoLogLightFlow(updatedCycle, latestFlowRecords, userSettings);
+                    removeAutoLoggedLightAfterEnd(updatedCycle, latestFlowRecords, userSettings);
+                }
+                 // Remove flow between periods using FRESH data
+                 if (latestCycles && latestFlowRecords) {
+                    removeAllBetweenEndAndNextStart(updatedCycle, latestCycles, latestFlowRecords);
+                }
+             } else {
+                 console.warn(`Cycle ${targetCycleId} not found or endDate not set after update mutation success.`);
+             }
+
+             // Refetch current cycle state as well
+             refetchCurrentCycle();
+
+             toast({ title: "Success", description: "Period cycle ended" });
+
+         }).catch(err => {
+             console.error("Error refetching data after ending period:", err);
+             toast({ title: "Warning", description: "Period ended, but UI might need manual refresh.", variant: "destructive" });
+         });
       },
       onError: (error) => {
-        toast({
-          title: "Error",
-          description: "Failed to end period cycle",
-          variant: "destructive",
-        });
+        // Error handling remains the same
+        toast({ title: "Error", description: "Failed to end period cycle", variant: "destructive" });
         console.error("Error ending period:", error);
       }
     });
-  }, [currentCycle, updateCycleMutation, refetchCurrentCycle, refetchCycles, queryClient, userId, flowRecords, userSettings, autoLogLightFlow, removeAutoLoggedLightAfterEnd, cycles, removeAllBetweenEndAndNextStart]);
-  
-  // Helper function to cancel/delete a cycle
+  }, [
+      currentCycle?.id, // Use currentCycle.id as a dependency for default case
+      cycles, // Need all cycles to find the target
+      updateCycleMutation,
+      refetchCycles,
+      refetchFlowRecords, // Need to refetch flow records for helpers
+      refetchCurrentCycle,
+      userSettings, // Needed for helpers
+      autoLogLightFlow, // Helpers are dependencies
+      removeAutoLoggedLightAfterEnd,
+      removeAllBetweenEndAndNextStart,
+      toast
+  ]); // Add necessary dependencies
+
+
+  // ==================================================================
+  // ===== THIS IS THE REPLACED/CORRECTED cancelPeriod FUNCTION =====
+  // ==================================================================
   const cancelPeriod = useCallback((cycleId: number) => {
-    if (!cycleId) return;
+    if (!cycleId) {
+      console.warn('cancelPeriod called with invalid cycleId');
+      return;
+    }
+    console.log(`Attempting to cancel period cycle ${cycleId}`);
 
-    // Find the cycle to get its start date and end date
-    const cycle = cycles?.find(c => c.id === cycleId);
-    if (!cycle) return;
-
-    // If the period is not ended yet (active period), delete all flow records from start date onward
-    // If the period is ended (past period), only delete flow records within this period's window
+    // Filter flow records PRECISELY before sending delete requests
+    // Uses the flowRecords state directly available in the hook's scope
     const flowRecordsToDelete = (flowRecords || []).filter(record => {
-      if (!cycle.endDate) {
-        // For active periods: delete all from start date onward (existing behavior)
-        return record.cycleId === cycleId || record.date >= cycle.startDate;
-      } else {
-        // For completed periods: only delete records within this period's window
-        return record.cycleId === cycleId || 
-          (record.date >= cycle.startDate && record.date <= cycle.endDate);
+      // Rule 1: NEVER delete spotting, regardless of cycleId or date.
+      if (record.intensity === 'spotting') {
+        return false;
       }
+      // Rule 2: ONLY delete flow records (light, medium, heavy) that
+      // explicitly belong to the cycle being cancelled, identified by cycleId.
+      return record.cycleId === cycleId;
     });
 
-    const deletePromises = flowRecordsToDelete.map(record => 
+    console.log(`Found ${flowRecordsToDelete.length} non-spotting flow records associated with cycle ${cycleId} to delete.`);
+
+    // Map the filtered records to DELETE requests
+    const deletePromises = flowRecordsToDelete.map(record =>
       apiRequest('DELETE', `/api/flow-records/${record.id}`)
+        .catch(err => {
+           if (!err?.message?.includes('404')) { // Log errors other than "Not Found"
+             console.error(`Failed to delete flow record ${record.id} for cycle ${cycleId}:`, err);
+           }
+           // Allow Promise.all to continue even if one fails (optional, prevents stopping entire cancel)
+           return null;
+        })
     );
 
+    // Wait for all flow record deletions to attempt completion
     Promise.all(deletePromises)
       .then(() => {
-        // Delete the cycle itself
+        console.log(`Finished attempting to delete associated flow records for cycle ${cycleId}. Now deleting the cycle itself.`);
+        // AFTER attempting flow deletion, delete the cycle itself.
         return apiRequest('DELETE', `/api/cycles/${cycleId}`);
       })
       .then(() => {
-        // Invalidate all related queries
+        // Successfully deleted cycle, now invalidate and refetch
+        toast({
+          title: "Period Cancelled",
+          description: "The period cycle and its associated flow data have been removed.",
+          variant: "default"
+        });
+        console.log(`Successfully cancelled cycle ${cycleId}. Invalidating queries.`);
+
+        // Invalidate queries to trigger data refresh from the server
         queryClient.invalidateQueries({ queryKey: [`/api/cycles?userId=${userId}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/cycles/current?userId=${userId}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/flow-records?userId=${userId}`] });
 
-        // Force refetch to update UI immediately
+        // Explicitly refetch for potentially faster UI update
         refetchCycles();
         refetchCurrentCycle();
         refetchFlowRecords();
-
-        toast({ 
-          title: "Period cancelled", 
-          description: cycle.endDate 
-            ? "The period and its flow records have been removed." 
-            : "The period and all following flow records have been removed.", 
-          variant: "default" 
-        });
       })
       .catch(error => {
-        toast({ 
-          title: "Error", 
-          description: "Failed to cancel period and remove flow records", 
-          variant: "destructive" 
+        // Handle errors from deleting the CYCLE or critical flow record errors if not caught above
+        toast({
+          title: "Error",
+          description: "Failed to fully cancel the period cycle.",
+          variant: "destructive"
         });
-        console.error(error);
+        console.error(`Error cancelling period cycle ${cycleId}:`, error);
+         // Attempt to refetch to sync state after partial failure
+         refetchCycles();
+         refetchCurrentCycle();
+         refetchFlowRecords();
       });
-  }, [userId, cycles, flowRecords, refetchCycles, refetchCurrentCycle, refetchFlowRecords, queryClient, toast]);
-  
-  // Helper function to record flow intensity or remove flow record if the same intensity is clicked again
+
+  }, [ // ===== THIS IS THE DEPENDENCY ARRAY =====
+      userId,           // Used in query keys for invalidation
+      flowRecords,      // Used to filter records to delete
+      refetchCycles,    // Called on success/error
+      refetchCurrentCycle, // Called on success/error
+      refetchFlowRecords,  // Called on success/error
+      queryClient,      // Used to invalidate queries
+      toast             // Used to show notifications
+      // apiRequest is stable if defined outside, but include if needed
+  ]);
+  // ==================================================================
+  // ================= END OF REPLACED FUNCTION =======================
+  // ==================================================================
+
+
+  // --- Keep recordFlow ---
   const recordFlow = useCallback((intensity: 'spotting' | 'light' | 'medium' | 'heavy', date?: Date) => {
     const dateToUse = date || selectedDate;
     const formattedDate = format(dateToUse, 'yyyy-MM-dd');
     const existingFlow = flowRecords?.find(r => r.date.split('T')[0] === formattedDate);
-    
-    // If the same intensity is clicked again, delete the flow record (toggle behavior)
+
     if (existingFlow && existingFlow.intensity === intensity) {
+      console.log(`Deleting existing flow record ${existingFlow.id} for date ${formattedDate}`);
       deleteFlowMutation.mutate(existingFlow.id);
     } else {
-      // Otherwise create or update the flow record
-      recordFlowMutation.mutate({ 
-        userId, 
-        cycleId: currentCycle?.id, 
-        date: formattedDate, 
-        intensity 
-      });
+        // Determine the correct cycleId for the flow record
+        // Find the cycle that ENCLOSES this date (if any)
+        let targetCycleId: number | undefined = undefined;
+        if (intensity !== 'spotting' && cycles) { // Only assign cycleId for non-spotting
+            const enclosingCycle = cycles.find(c => {
+                const start = parseISO(c.startDate);
+                 // Treat ongoing cycles as potentially infinite end date for this check
+                 const end = c.endDate ? parseISO(c.endDate) : new Date(8640000000000000); // Far future date
+                 return dateToUse >= start && dateToUse <= end;
+            });
+            targetCycleId = enclosingCycle?.id;
+            // If no enclosing cycle, check if it's the current cycle start date
+            if (!targetCycleId && currentCycle && formattedDate === currentCycle.startDate.split('T')[0]) {
+                targetCycleId = currentCycle.id;
+            }
+        }
+
+        console.log(`Recording ${intensity} flow for ${formattedDate}. Assigning cycleId: ${targetCycleId}`);
+        recordFlowMutation.mutate({
+            userId,
+            cycleId: targetCycleId, // Assign the determined cycleId (undefined for spotting or if no cycle matches)
+            date: formattedDate,
+            intensity
+        });
     }
-  }, [recordFlowMutation, deleteFlowMutation, userId, currentCycle, selectedDate, flowRecords]);
-  
-  // Calculate average cycle length
+  }, [
+      recordFlowMutation,
+      deleteFlowMutation,
+      userId,
+      // currentCycle?.id, // Use cycles list instead for broader check
+      selectedDate,
+      flowRecords,
+      cycles, // Need cycles to find the correct cycleId
+      currentCycle // Needed as fallback for start date check
+  ]);
+
+  // --- Keep prediction logic (getAverageCycleLength, getLastPeriodStartDate, predictNextPeriod, getCyclePhaseForDate, isInFertileWindowForDate) ---
   const getAverageCycleLength = useCallback(() => {
-    if (!cycles || cycles.length < 2) return 28; // Default to 28 days
-    
+    // Filter out cycles without an end date for length calculation
+    const completeCycles = (cycles || []).filter(c => c.endDate);
+    if (!completeCycles || completeCycles.length < 2) return userSettings?.defaultCycleLength || 28;
+
     let totalDays = 0;
     let count = 0;
-    
-    // Sort cycles by start date (newest first)
-    const sortedCycles = [...cycles].sort((a, b) => 
-      new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+    const sortedCycles = [...completeCycles].sort((a, b) =>
+        parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime() // Sort oldest to newest
     );
-    
-    for (let i = 0; i < sortedCycles.length - 1; i++) {
-      const currentStart = new Date(sortedCycles[i].startDate);
-      const nextStart = new Date(sortedCycles[i + 1].startDate);
-      
-      const daysDiff = Math.round(
-        (currentStart.getTime() - nextStart.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      
-      if (daysDiff > 0) {
+    for (let i = 1; i < sortedCycles.length; i++) {
+      const currentStart = parseISO(sortedCycles[i].startDate);
+      const previousStart = parseISO(sortedCycles[i - 1].startDate);
+      const daysDiff = Math.round((currentStart.getTime() - previousStart.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysDiff > 10 && daysDiff < 60) { // Basic sanity check for cycle length
         totalDays += daysDiff;
         count++;
       }
     }
-    
-    return count > 0 ? Math.round(totalDays / count) : 28;
-  }, [cycles]);
-  
-  // Get the most recent period start date
+    return count > 0 ? Math.round(totalDays / count) : (userSettings?.defaultCycleLength || 28);
+  }, [cycles, userSettings?.defaultCycleLength]);
+
+
   const getLastPeriodStartDate = useCallback(() => {
-    if (!flowRecords || flowRecords.length === 0) return null;
-    
-    // Sort flow records by date (newest first)
-    const sortedFlowRecords = [...flowRecords]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
-    // Find records that are either the first day of a period or isolated spotting
-    const periodStartRecords = sortedFlowRecords.filter(record => {
-      const recordDate = new Date(record.date);
-      const oneDayBefore = new Date(recordDate);
-      oneDayBefore.setDate(recordDate.getDate() - 1);
-      
-      // Check if there's no flow record for the day before
-      const hasFlowOnDayBefore = sortedFlowRecords.some(r => {
-        const rDate = new Date(r.date);
-        return rDate.getFullYear() === oneDayBefore.getFullYear() &&
-               rDate.getMonth() === oneDayBefore.getMonth() &&
-               rDate.getDate() === oneDayBefore.getDate();
-      });
-      
-      return !hasFlowOnDayBefore;
-    });
-    
-    if (periodStartRecords.length === 0) return null;
-    return new Date(periodStartRecords[0].date);
-  }, [flowRecords]);
-  
-  // Calculate prediction for next period
+     // Find the cycle with the most recent start date
+     if (!cycles || cycles.length === 0) return null;
+     const sortedCycles = [...cycles].sort((a, b) =>
+         parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime() // Newest first
+     );
+     return parseISO(sortedCycles[0].startDate);
+ }, [cycles]);
+
   const predictNextPeriod = useCallback(() => {
-    // Use currentCycle if available
-    if (currentCycle) {
-      const averageCycleLength = getAverageCycleLength();
-      const startDate = parseISO(currentCycle.startDate);
-      return addDays(startDate, averageCycleLength);
-    }
-    
-    // If there's no current cycle, try using the last flow record
-    const lastPeriodStart = getLastPeriodStartDate();
-    if (lastPeriodStart) {
-      const averageCycleLength = getAverageCycleLength();
-      return addDays(lastPeriodStart, averageCycleLength);
-    }
-    
-    // If we have flowRecords but no current cycle, use the most recent flow record
-    if (flowRecords && flowRecords.length > 0) {
-      const sortedFlowRecords = [...flowRecords]
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      
-      const mostRecentFlowDate = parseISO(sortedFlowRecords[0].date);
-      const averageCycleLength = getAverageCycleLength();
-      return addDays(mostRecentFlowDate, averageCycleLength);
-    }
-    
-    return null;
-  }, [currentCycle, getAverageCycleLength, getLastPeriodStartDate, flowRecords]);
-  
-  // Get cycle phase for the selected date
+    const lastStart = getLastPeriodStartDate();
+    if (!lastStart) return null;
+    const avgLength = getAverageCycleLength();
+    return addDays(lastStart, avgLength);
+  }, [getLastPeriodStartDate, getAverageCycleLength]);
+
   const getCyclePhaseForDate = useCallback((date: Date = selectedDate) => {
     const lastPeriodStart = getLastPeriodStartDate();
     if (!lastPeriodStart) return 'Unknown';
-    
-    const avgCycleLength = getAverageCycleLength();
-    return getCyclePhase(date, lastPeriodStart, avgCycleLength);
-  }, [getLastPeriodStartDate, getAverageCycleLength, selectedDate]);
-  
-  // Check if the selected date is in the fertile window
+    const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords || [], userSettings);
+    // Use the utility function for calculation
+    return getCyclePhase(date, lastPeriodStart, avgCycleLength, avgPeriodLength);
+  }, [getLastPeriodStartDate, flowRecords, userSettings, selectedDate]);
+
   const isInFertileWindowForDate = useCallback((date: Date = selectedDate) => {
     const lastPeriodStart = getLastPeriodStartDate();
     if (!lastPeriodStart) return false;
-    
-    const avgCycleLength = getAverageCycleLength();
-    return isInFertileWindow(date, lastPeriodStart, avgCycleLength);
-  }, [getLastPeriodStartDate, getAverageCycleLength, selectedDate]);
-  
+    const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords || [], userSettings);
+    // Use the utility function for calculation
+    return isInFertileWindow(date, lastPeriodStart, avgCycleLength, avgPeriodLength);
+  }, [getLastPeriodStartDate, flowRecords, userSettings, selectedDate]);
+
+  // --- Return all the necessary values ---
   return {
     selectedDate,
     setSelectedDate,
     cycles,
     currentCycle,
     cycleDay: getCycleDay(),
-    cyclePhase: getCyclePhaseForDate(),
+    // Use the more accurate phase calculation if needed, otherwise keep the simpler one
+    cyclePhase: getCyclePhaseForDate(), // Or use dataDrivenCyclePhase if preferred
     isInFertileWindow: isInFertileWindowForDate(),
     flowRecords,
     currentFlow: getFlowForDate(selectedDate),
@@ -566,10 +598,11 @@ export function useCycleData({ userId }: UseCycleDataProps) {
     error: cyclesError,
     startPeriod,
     endPeriod,
-    cancelPeriod,
+    cancelPeriod, // <-- Ensure the corrected function is returned
     recordFlow,
     refetchCurrentCycle,
     refetchCycles,
+    // Return prediction/utility functions if used by the UI
     getCyclePhaseForDate,
     isInFertileWindowForDate,
     predictNextPeriod,

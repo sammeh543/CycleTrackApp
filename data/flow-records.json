@@ -1,128 +1,137 @@
 [
   {
     "userId": 1,
-    "cycleId": 42,
+    "cycleId": 32,
+    "date": "2025-04-01",
+    "intensity": "light",
+    "id": 246
+  },
+  {
+    "userId": 1,
+    "cycleId": 32,
+    "date": "2025-04-02",
+    "intensity": "light",
+    "id": 247
+  },
+  {
+    "userId": 1,
+    "cycleId": 32,
+    "date": "2025-04-03",
+    "intensity": "light",
+    "id": 248
+  },
+  {
+    "userId": 1,
+    "cycleId": 32,
+    "date": "2025-04-04",
+    "intensity": "light",
+    "id": 249
+  },
+  {
+    "userId": 1,
+    "cycleId": 32,
+    "date": "2025-04-05",
+    "intensity": "light",
+    "id": 250
+  },
+  {
+    "userId": 1,
+    "cycleId": 32,
+    "date": "2025-04-06",
+    "intensity": "light",
+    "id": 251
+  },
+  {
+    "userId": 1,
+    "cycleId": 32,
+    "date": "2025-04-07",
+    "intensity": "light",
+    "id": 252
+  },
+  {
+    "userId": 1,
+    "cycleId": 32,
+    "date": "2025-04-08",
+    "intensity": "light",
+    "id": 253
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-26",
+    "intensity": "spotting",
+    "id": 254
+  },
+  {
+    "userId": 1,
+    "date": "2025-03-27",
+    "intensity": "spotting",
+    "id": 255
+  },
+  {
+    "userId": 1,
     "date": "2025-03-01",
     "intensity": "light",
-    "id": 322
+    "id": 264,
+    "cycleId": 34
   },
   {
     "userId": 1,
-    "cycleId": 42,
+    "cycleId": 34,
     "date": "2025-03-02",
     "intensity": "light",
-    "id": 323
+    "id": 265
   },
   {
     "userId": 1,
-    "cycleId": 42,
+    "cycleId": 34,
     "date": "2025-03-03",
     "intensity": "light",
-    "id": 324
+    "id": 266
   },
   {
     "userId": 1,
-    "cycleId": 42,
+    "cycleId": 34,
     "date": "2025-03-04",
     "intensity": "light",
-    "id": 325
+    "id": 267
   },
   {
     "userId": 1,
-    "cycleId": 42,
+    "cycleId": 34,
     "date": "2025-03-05",
     "intensity": "light",
-    "id": 326
+    "id": 268
   },
   {
     "userId": 1,
-    "cycleId": 42,
+    "cycleId": 34,
     "date": "2025-03-06",
     "intensity": "light",
-    "id": 327
+    "id": 269
   },
   {
     "userId": 1,
-    "cycleId": 42,
+    "cycleId": 34,
     "date": "2025-03-07",
-    "intensity": "light",
-    "id": 328
+    "intensity": "medium",
+    "id": 270
   },
   {
     "userId": 1,
-    "cycleId": 42,
-    "date": "2025-03-08",
-    "intensity": "light",
-    "id": 329
+    "date": "2025-04-24",
+    "intensity": "spotting",
+    "id": 279
   },
   {
     "userId": 1,
-    "cycleId": 42,
-    "date": "2025-03-09",
-    "intensity": "light",
-    "id": 330
+    "date": "2025-04-25",
+    "intensity": "spotting",
+    "id": 280
   },
   {
     "userId": 1,
-    "cycleId": 42,
-    "date": "2025-03-10",
-    "intensity": "light",
-    "id": 331
-  },
-  {
-    "userId": 1,
-    "cycleId": 42,
-    "date": "2025-03-11",
-    "intensity": "light",
-    "id": 332
-  },
-  {
-    "userId": 1,
-    "cycleId": 42,
-    "date": "2025-03-12",
-    "intensity": "light",
-    "id": 333
-  },
-  {
-    "userId": 1,
-    "cycleId": 58,
-    "date": "2025-05-01",
-    "intensity": "light",
-    "id": 361
-  },
-  {
-    "userId": 1,
-    "cycleId": 58,
-    "date": "2025-05-02",
-    "intensity": "light",
-    "id": 362
-  },
-  {
-    "userId": 1,
-    "cycleId": 58,
-    "date": "2025-05-03",
-    "intensity": "light",
-    "id": 363
-  },
-  {
-    "userId": 1,
-    "cycleId": 58,
-    "date": "2025-05-04",
-    "intensity": "light",
-    "id": 364
-  },
-  {
-    "userId": 1,
-    "cycleId": 58,
-    "date": "2025-05-05",
-    "intensity": "light",
-    "id": 365
-  },
-  {
-    "userId": 1,
-    "cycleId": 58,
-    "date": "2025-05-06",
-    "intensity": "light",
-    "id": 367
+    "date": "2025-04-26",
+    "intensity": "spotting",
+    "id": 308
   }
 ]

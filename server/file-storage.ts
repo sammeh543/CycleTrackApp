@@ -476,15 +476,15 @@ export class FileStorage implements IStorage {
   async deleteCycle(id: number): Promise<boolean> {
     const deleted = this.cycles.delete(id);
     if (deleted) {
-      // Also delete associated flow records
+      // Also delete associated flow records, but NEVER delete spotting days
       const flowRecordsToDelete = Array.from(this.flowRecords.values())
-        .filter(record => record.cycleId === id)
+        .filter(record => record.cycleId === id && record.intensity !== 'spotting')
         .map(record => record.id);
-      
+
       flowRecordsToDelete.forEach(recordId => {
         this.flowRecords.delete(recordId);
       });
-      
+
       this.saveData(); // Make sure to save the data
     }
     return deleted;
