@@ -1,5 +1,5 @@
 {
-  "_comment": "CycleTrackApp config. For Tailscale/Termux: set host to '0.0.0.0' for LAN/VPN access. Set corsEnabled true for cross-device access. Set uiPassword for basic web UI protection. Edit port if needed.",
+  "_comment": "CycleTrackApp config. For Tailscale/Termux: set host to '0.0.0.0' for LAN/VPN access. Set corsEnabled true for cross-device access. Set uiPassword for basic web UI protection. Edit port if needed and .bat files.",
   "dataPath": "./data",
   "port": 5000,
   "host": "0.0.0.0",

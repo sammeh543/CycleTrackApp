@@ -1,1 +1,93 @@
-[]
+[
+  {
+    "userId": 1,
+    "symptomId": 1,
+    "date": "2025-04-18",
+    "intensity": 4,
+    "id": 1
+  },
+  {
+    "userId": 1,
+    "symptomId": 1,
+    "date": "2025-04-19",
+    "intensity": 4,
+    "id": 2
+  },
+  {
+    "userId": 1,
+    "symptomId": 2,
+    "date": "2025-04-19",
+    "intensity": 2,
+    "id": 3
+  },
+  {
+    "userId": 1,
+    "symptomId": 5,
+    "date": "2025-04-21",
+    "intensity": 2,
+    "id": 4
+  },
+  {
+    "userId": 1,
+    "symptomId": 6,
+    "date": "2025-04-21",
+    "intensity": 1,
+    "id": 5
+  },
+  {
+    "userId": 1,
+    "symptomId": 28,
+    "date": "2025-04-22",
+    "intensity": 1,
+    "id": 6
+  },
+  {
+    "userId": 1,
+    "symptomId": 35,
+    "date": "2025-04-22",
+    "intensity": 1,
+    "id": 7
+  },
+  {
+    "userId": 1,
+    "symptomId": 5,
+    "date": "2025-05-01",
+    "intensity": 1,
+    "id": 9
+  },
+  {
+    "userId": 1,
+    "symptomId": 2,
+    "date": "2025-05-01",
+    "intensity": 1,
+    "id": 10
+  },
+  {
+    "userId": 1,
+    "symptomId": 6,
+    "date": "2025-05-01",
+    "intensity": 1,
+    "id": 11
+  },
+  {
+    "userId": 1,
+    "symptomId": 1,
+    "date": "2025-05-01",
+    "intensity": 1,
+    "id": 12
+  },
+  {
+    "userId": 1,
+    "symptomId": 15,
+    "date": "2025-05-07",
+    "intensity": 1,
+    "id": 13
+  },
+  {
+    "userId": 1,
+    "symptomId": 2,
+    "date": "2025-05-07",
+    "intensity": 1,
+    "id": 14
+  }
+]

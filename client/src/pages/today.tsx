@@ -1,409 +1,456 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  parseISO, 
-  isSameDay, 
-  isBefore, 
-  isAfter, 
-  format, 
-  addDays, 
-  differenceInDays, 
-  eachDayOfInterval, 
-  isToday 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+    parseISO,
+    isSameDay,
+    isBefore,
+    isAfter,
+    format,
+    addDays,
+    differenceInDays,
+    eachDayOfInterval,
+    isToday
 } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle2, Circle } from 'lucide-react';
+// Consider importing specific icons if CheckCircle2, Circle aren't used directly here
+// import { CheckCircle2, Circle } from 'lucide-react';
 import DropletIcon from '@/icons/DropletIcon';
 import IntimateActivityButton from '@/components/symptoms/IntimateActivityButton';
-import { useIntimateActivity } from '@/hooks/use-intimate-activity';
 import SymptomsList from '@/components/symptoms/symptoms-list';
 import MoodSelector from '@/components/symptoms/mood-selector';
 import CervicalMucusSelector from '@/components/symptoms/cervical-mucus-selector';
 import DateNav from '@/components/date-nav';
 import MedicationTracker from '@/components/medications/medication-tracker';
-import { useCycleData } from '@/hooks/use-cycle-data';
+import { useCycleData, UserSettings } from '@/hooks/use-cycle-data'; 
 import { useSymptoms } from '@/hooks/use-symptoms';
+import { useIntimateActivity } from '@/hooks/use-intimate-activity';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'wouter'; 
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { getDataDrivenCyclePhase } from '@/lib/data-driven-cycle-phase';
 import { getBestCyclePredictionLengths, isInFertileWindow } from '@/lib/cycle-utils';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
 
-interface TodayProps {
-  userId: number;
+interface UserSettingsProps {
+    showPmddSymptoms?: boolean;
+    showIntimacyCard?: boolean;
+    defaultCycleLength?: number;
+    defaultPeriodLength?: number;
 }
 
+interface TodayProps {
+    userId: number;
+}
+
+// Helper to parse date from URL safely
+const getInitialDateFromUrl = (): Date => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dateParam = urlParams.get('date');
+        if (dateParam) {
+            const parsed = parseISO(dateParam);
+            // Basic validation: check if it's a valid date object
+            if (!isNaN(parsed.getTime())) {
+                return parsed;
+            }
+            console.error("Invalid date parameter in URL:", dateParam);
+        }
+    } catch (e) {
+        console.error("Error parsing date from URL:", e);
+    }
+    return new Date(); // Default to today
+};
+
 const Today: React.FC<TodayProps> = ({ userId }) => {
-  const [notes, setNotes] = useState('');
-  const [location] = useLocation();
-  
-  // Parse date from URL if available
-  const urlParams = new URLSearchParams(window.location.search);
-  const dateParam = urlParams.get('date');
-  
-  // Initialize selectedDate with URL param or current date
-  const [selectedDate, setSelectedDate] = useState(() => {
-    if (dateParam) {
-      try {
-        return parseISO(dateParam);
-      } catch (e) {
-        console.error("Invalid date parameter:", dateParam);
-        return new Date();
-      }
-    }
-    return new Date();
-  });
-  
-  const { 
-    selectedDate: cycleSelectedDate,
-    setSelectedDate: setCycleSelectedDate,
-    cycles,
-    currentCycle,
-    cycleDay,
-    flowRecords,
-    isLoading: cycleLoading,
-    startPeriod,
-    endPeriod,
-    cancelPeriod,
-    recordFlow,
-    refetchCycles
-  } = useCycleData({ userId });
+    const { toast } = useToast();
+    const [, setLocation] = useLocation(); // Initialize setLocation with useLocation
 
-  
-  // Fetch user settings for PMDD toggle and Intimacy card
-  const { data: settings } = useQuery<{ showPmddSymptoms?: boolean; showIntimacyCard?: boolean; defaultCycleLength?: number; defaultPeriodLength?: number }>({
-    queryKey: [`/api/user-settings/${userId}`],
-    enabled: userId > 0,
-  });
-  const userSettings = settings || {};
-  // (settings is now only declared once)
+    // --- State ---
+    const [selectedDate, setSelectedDate] = useState<Date>(getInitialDateFromUrl);
+    const [notes, setNotes] = useState<string>('');
 
-
-  // Compute current flow for the selected date
-  const currentFlow = (flowRecords || []).find(r => {
-    const d = typeof r.date === 'string' ? parseISO(r.date) : r.date;
-    return isSameDay(d, selectedDate);
-  });
-  // For ongoing period fill logic, you may want to calculate fillOngoingPeriodDates here if needed
-  const fillOngoingPeriodDates: string[] = [];
-  
-  // Get all non-spotting records and sort chronologically ONCE
-  const periodRecordsNoSpotting = (flowRecords || [])
-    .filter(r => r.intensity !== 'spotting')
-    .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
-  
-  // Find period starts by looking for gaps > 2 days
-  const periodStarts: Date[] = [];
-  for (let i = 0; i < periodRecordsNoSpotting.length; i++) {
-    if (i === 0 || differenceInDays(parseISO(periodRecordsNoSpotting[i].date), parseISO(periodRecordsNoSpotting[i-1].date)) > 2) {
-      periodStarts.push(parseISO(periodRecordsNoSpotting[i].date));
-    }
-  }
-  
-  // Predict future periods
-  const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords || [], userSettings);
-  const predictedPeriodDates: string[] = [];
-  if (periodStarts.length > 0) {
-    const lastLoggedStart = periodStarts[periodStarts.length - 1];
-    let nextStart = addDays(lastLoggedStart, avgCycleLength);
-    for (let i = 0; i < 3; i++) {
-      const periodStart = i === 0 ? nextStart : addDays(nextStart, i * avgCycleLength);
-      eachDayOfInterval({
-        start: periodStart,
-        end: addDays(periodStart, avgPeriodLength - 1)
-      }).forEach((d: Date) => {
-        predictedPeriodDates.push(format(d, 'yyyy-MM-dd'));
-      });
-    }
-  }
-  
-  // Check if today is a period day
-  const todayKey = format(selectedDate, 'yyyy-MM-dd');
-  const isActualPeriod = periodRecordsNoSpotting.some(r => format(parseISO(r.date), 'yyyy-MM-dd') === todayKey);
-  const isPredictedPeriod = !isActualPeriod && predictedPeriodDates.includes(todayKey);
-  
-  // Calculate phase using data-driven logic
-  const todayPhase = isActualPeriod || isPredictedPeriod
-    ? 'period'
-    : getDataDrivenCyclePhase(selectedDate, flowRecords || [], userSettings, fillOngoingPeriodDates);
-
-  // Calculate fertile window using same logic as calendar
-  let isFertileWindowDay = false;
-  // Find most recent period start before or on selectedDate by scanning backwards
-  let lastPeriodRecord = null;
-  for (let i = periodRecordsNoSpotting.length - 1; i >= 0; i--) {
-    if (parseISO(periodRecordsNoSpotting[i].date) <= selectedDate) {
-      lastPeriodRecord = periodRecordsNoSpotting[i];
-      break;
-    }
-  }
-  if (lastPeriodRecord) {
-    isFertileWindowDay = isInFertileWindow(selectedDate, lastPeriodRecord.date, avgCycleLength, avgPeriodLength) && todayPhase !== 'period';
-  }
-
-  // Intimate Activity (Sex) logging
-  const {
-    isLogged: isIntimateLogged,
-    logIntimateActivity,
-    isLoading: isIntimateLoading,
-  } = useIntimateActivity({ userId, date: selectedDate });
-  
-  // Get cycle for the selected date
-  const getCycleForSelectedDate = useCallback(() => {
-    if (!cycles) return null;
-    
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    
-    // Find any cycle that starts on or before the selected date and either has no end date
-    // or ends on or after the selected date
-    return cycles.find(cycle => {
-      const cycleStartDate = parseISO(cycle.startDate);
-      const cycleEndDate = cycle.endDate ? parseISO(cycle.endDate) : null;
-      
-      const isStartOnOrBeforeSelectedDate = isSameDay(cycleStartDate, selectedDate) || 
-                                          isBefore(cycleStartDate, selectedDate);
-      
-      const isEndOnOrAfterSelectedDate = !cycleEndDate || 
-                                        isSameDay(cycleEndDate, selectedDate) || 
-                                        isAfter(cycleEndDate, selectedDate);
-      
-      return isStartOnOrBeforeSelectedDate && isEndOnOrAfterSelectedDate;
-    });
-  }, [cycles, selectedDate]);
-
-  // Active cycle for the selected date
-  const activeCycleForSelectedDate = getCycleForSelectedDate();
-  
-  // Keep the dates in sync between components
-  useEffect(() => {
-    setCycleSelectedDate(selectedDate);
-    // Force refetch when selected date changes to ensure we have the latest data
-    refetchCycles();
-  }, [selectedDate, setCycleSelectedDate, refetchCycles]);
-  
-  const { 
-    physicalSymptoms,
-    emotionalSymptoms,
-    pmddSymptoms,
-    dailyNote,
-    moodRecord,
-    cervicalMucusType,
-    toggleSymptom,
-    isSymptomActive,
-    recordMood,
-    recordCervicalMucus,
-    saveDailyNote,
-    getSymptomIntensity,
-    updateSymptomIntensity,
-    isLoading: symptomsLoading
-  } = useSymptoms({ userId, date: selectedDate, showPmddSymptoms: settings?.showPmddSymptoms ?? true });
-  
-  // Initialize notes from dailyNote when available
-  useEffect(() => {
-    if (dailyNote?.notes) {
-      setNotes(dailyNote.notes);
-    } else {
-      setNotes(''); // Clear notes when changing to a date with no notes
-    }
-  }, [dailyNote]);
-  
-  // Save notes when user edits
-  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNotes(e.target.value);
-  };
-  
-  const { toast } = useToast();
-  
-  // Save all daily data
-  const handleSaveNotes = () => {
-    // Save daily notes
-    saveDailyNote(notes);
-    
-    // Show confirmation to user
-    toast({
-      title: "Entry Saved",
-      description: `Your daily entry for ${format(selectedDate, 'MMMM d, yyyy')} has been saved.`,
-      duration: 3000,
-    });
-  };
-  
-  const handleDateChange = (date: Date) => {
-    setSelectedDate(date);
-  };
-  
-  const isLoading = cycleLoading || symptomsLoading;
-  
-  if (isLoading) {
-    return (
-      <div className="px-4 py-6 flex justify-center items-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>Loading your data...</p>
-        </div>
-      </div>
+    // --- Hooks for Data Fetching ---
+    // Get user settings (including UI preferences)
+    const { data: userSettings, isLoading: settingsLoading } = useQuery<UserSettingsProps>(
+        {
+            queryKey: [`/api/user-settings/${userId}`],
+            enabled: userId > 0,
+            staleTime: 1000 * 60 * 5 // Cache settings for 5 mins
+        }
     );
-  }
-  
-  return (
-    <div className="tab-content px-4 py-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-4">{isToday(selectedDate) ? 'Today' : 'Day View'}</h2>
-        <Card>
-          <CardContent className="p-4">
-            <DateNav 
-              selectedDate={selectedDate}
-              onDateChange={handleDateChange}
-              userId={userId}
-            />
-            <Separator className="my-3" />
-            <div className="flex flex-wrap gap-2 mb-2">
-              {cycleDay !== null && (
-                <div className="text-sm px-3 py-1 rounded-full bg-primary period-status-label">
-                  Cycle Day {cycleDay}
+
+    const {
+        setSelectedDate: setCycleHookDate, // Renamed to avoid conflict
+        cycles,
+        // currentCycle, // Less reliable than finding active cycle for selected date
+        cycleDay, // Cycle day relative to the current ongoing cycle, might be confusing for past dates
+        flowRecords,
+        isLoading: cycleLoading,
+        startPeriod,
+        endPeriod,
+        cancelPeriod,
+        recordFlow,
+        refetchCycles
+    } = useCycleData({ userId });
+
+    const {
+        physicalSymptoms,
+        emotionalSymptoms,
+        pmddSymptoms,
+        dailyNote,
+        moodRecord,
+        cervicalMucusType,
+        toggleSymptom,
+        isSymptomActive,
+        recordMood,
+        recordCervicalMucus,
+        saveDailyNote,
+        getSymptomIntensity,
+        updateSymptomIntensity,
+        isLoading: symptomsLoading
+    } = useSymptoms({
+        userId,
+        date: selectedDate,
+        showPmddSymptoms: userSettings?.showPmddSymptoms ?? true // Default to true if not set
+    });
+
+    const {
+        isLogged: isIntimateLogged,
+        logIntimateActivity,
+        isLoading: isIntimateLoading,
+    } = useIntimateActivity({ userId, date: selectedDate });
+
+    // --- Derived Data and Calculations (Memoized) ---
+
+    // Find the flow record specifically for the selected date
+    const currentFlow = useMemo(() => {
+        if (!flowRecords) return null;
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        return flowRecords.find(record => record.date.split('T')[0] === dateStr);
+    }, [flowRecords, selectedDate]);
+
+    // Find the cycle (if any) that covers the selected date
+    const activeCycleForSelectedDate = useMemo(() => {
+        if (!cycles) return null;
+        return cycles.find(cycle => {
+            const cycleStartDate = parseISO(cycle.startDate);
+            // Consider a cycle active on its start/end dates
+            if (isSameDay(selectedDate, cycleStartDate)) return true;
+            if (cycle.endDate && isSameDay(selectedDate, parseISO(cycle.endDate))) return true;
+
+            // Check if selectedDate falls between start and end (exclusive of start/end handled above)
+            const isAfterStart = isAfter(selectedDate, cycleStartDate);
+            const isBeforeEnd = !cycle.endDate || isBefore(selectedDate, parseISO(cycle.endDate));
+
+            return isAfterStart && isBeforeEnd;
+        });
+    }, [cycles, selectedDate]);
+
+    // Calculate cycle phase, predictions, fertile window etc. based on selectedDate
+    const cycleAnalysis = useMemo(() => {
+        if (!flowRecords) {
+            return {
+                phase: 'Unknown',
+                isFertile: false,
+                isPredictedPeriod: false,
+                dayOfCycle: null // Placeholder for a more specific calculation if needed
+            };
+        }
+
+        // Filter and sort non-spotting records once
+        const periodRecords = flowRecords
+            .filter(r => r.intensity !== 'spotting')
+            .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+
+        // Identify period starts
+        const periodStarts = periodRecords.reduce((acc, record, index) => {
+            const currentDate = parseISO(record.date);
+            if (index === 0 || differenceInDays(currentDate, parseISO(periodRecords[index - 1].date)) > 2) {
+                acc.push(currentDate);
+            }
+            return acc;
+        }, [] as Date[]);
+
+        const { avgCycleLength, avgPeriodLength } = getBestCyclePredictionLengths(flowRecords, userSettings);
+
+        // Find the most recent period start relative to the selected date
+        const lastPeriodStart = periodStarts.filter(start => !isAfter(start, selectedDate)).pop();
+
+        // --- Predictions ---
+        const predictedPeriodDates = new Set<string>();
+        if (periodStarts.length > 0) {
+            const lastLoggedStart = periodStarts[periodStarts.length - 1];
+            // Predict next 3 cycles based on the *last logged* start
+            for (let cycleIndex = 1; cycleIndex <= 3; cycleIndex++) {
+                const predictedStart = addDays(lastLoggedStart, avgCycleLength * cycleIndex);
+                // Only predict future periods
+                if (isAfter(predictedStart, new Date()) || isToday(predictedStart)) {
+                    eachDayOfInterval({
+                        start: predictedStart,
+                        end: addDays(predictedStart, avgPeriodLength - 1)
+                    }).forEach((d: Date) => {
+                        predictedPeriodDates.add(format(d, 'yyyy-MM-dd'));
+                    });
+                }
+            }
+        }
+        const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+        const isPredicted = predictedPeriodDates.has(selectedDateStr);
+
+        // --- Phase Calculation ---
+        let phase: 'period' | 'follicular' | 'ovulation' | 'luteal' | 'Unknown' = 'Unknown';
+        // Use currentFlow for *actual* period status on the day
+        if (currentFlow && currentFlow.intensity !== 'spotting') {
+            phase = 'period';
+        } else if (isPredicted) {
+             // If no actual flow but predicted, show as predicted
+             phase = 'period'; // Treat as period for display, but flag it
+        } else if (lastPeriodStart) {
+            // Calculate phase based on last start only if not an actual/predicted period day
+            phase = getDataDrivenCyclePhase(selectedDate, flowRecords, userSettings, [], lastPeriodStart);
+        }
+
+        // --- Fertile Window ---
+        // Calculate based on the last *actual* period start
+        const isFertile = lastPeriodStart
+            ? isInFertileWindow(selectedDate, lastPeriodStart, avgCycleLength, avgPeriodLength) && phase !== 'period'
+            : false;
+
+
+        // --- Cycle Day (relative to the cycle containing selectedDate) ---
+        let dayOfCycle = null;
+        if (activeCycleForSelectedDate) {
+            const cycleStartDate = parseISO(activeCycleForSelectedDate.startDate);
+             // +1 because cycle day 1 is the start date itself
+            dayOfCycle = differenceInDays(selectedDate, cycleStartDate) + 1;
+             // Ensure day is not negative if selectedDate is somehow before start date (shouldn't happen with activeCycle logic)
+             if (dayOfCycle < 1) dayOfCycle = null;
+        }
+
+
+        return {
+            phase,
+            isFertile,
+            isPredictedPeriod: isPredicted && phase === 'period' && !(currentFlow && currentFlow.intensity !== 'spotting'), // Only true if predicted AND no actual flow logged
+            dayOfCycle
+        };
+    }, [flowRecords, selectedDate, userSettings, activeCycleForSelectedDate, currentFlow]);
+
+
+    // --- Effects ---
+
+    // Update date in cycle hook and URL when local selectedDate changes
+    useEffect(() => {
+        setCycleHookDate(selectedDate);
+        // Update URL query parameter without causing a full page reload
+        const url = new URL(window.location.href);
+        url.searchParams.set('date', format(selectedDate, 'yyyy-MM-dd'));
+        // Use history.pushState or replaceState to avoid triggering router navigation
+        window.history.replaceState({}, '', url.toString());
+
+        // Optionally refetch data if staleTime isn't sufficient
+        // refetchCycles(); // Might be too frequent, rely on query cache invalidation mostly
+    }, [selectedDate, setCycleHookDate]);
+
+    // Load notes when dailyNote data arrives or selected date changes
+    useEffect(() => {
+        setNotes(dailyNote?.notes || '');
+    }, [dailyNote, selectedDate]); // Add selectedDate to reset notes when date changes
+
+    // --- Event Handlers ---
+    const handleDateChange = useCallback((newDate: Date) => {
+        setSelectedDate(newDate);
+    }, []); // No dependencies needed if it just sets state
+
+    const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setNotes(e.target.value);
+    }, []);
+
+    const handleSaveDailyEntry = useCallback(() => {
+        saveDailyNote(notes);
+        // You might want to save other things here if needed, but typically symptoms/mood etc are saved on interaction
+        toast({
+            title: "Entry Saved",
+            description: `Your daily entry for ${format(selectedDate, 'MMMM d, yyyy')} has been saved.`,
+            duration: 3000,
+        });
+    }, [notes, saveDailyNote, selectedDate, toast]);
+
+    const handleStartPeriod = useCallback(() => {
+        startPeriod(selectedDate);
+        // Optionally record 'light' flow immediately after starting
+        // Wait a moment for the cycle creation to potentially finish before recording flow
+        // Note: This might still have race conditions. The robust way is handle this in startPeriod's onSuccess.
+        setTimeout(() => {
+            // Check if flow isn't already logged for the day before adding 'light'
+             const currentFlowForStart = (flowRecords || []).find(r => isSameDay(parseISO(r.date), selectedDate));
+             if (!currentFlowForStart || currentFlowForStart.intensity === 'spotting') { // Avoid overwriting existing medium/heavy
+                 recordFlow('light', selectedDate);
+             }
+        }, 500); // Delay slightly (adjust as needed)
+    }, [startPeriod, selectedDate, recordFlow, flowRecords]);
+
+    const handleEndPeriod = useCallback(() => {
+        if (!activeCycleForSelectedDate?.id) return;
+        endPeriod(selectedDate, activeCycleForSelectedDate.id);
+    }, [endPeriod, selectedDate, activeCycleForSelectedDate?.id]);
+
+    const handleCancelPeriod = useCallback(() => {
+        if (!activeCycleForSelectedDate?.id) return;
+        cancelPeriod(activeCycleForSelectedDate.id);
+    }, [cancelPeriod, activeCycleForSelectedDate?.id]);
+
+    // --- Loading State ---
+    const isLoading = cycleLoading || symptomsLoading || settingsLoading;
+
+    if (isLoading) {
+        return (
+            <div className="px-4 py-6 flex justify-center items-center min-h-[60vh]">
+                <div className="text-center">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p>Loading your data...</p>
                 </div>
-              )}
-              {!cycleLoading && (
-                <>
-                  <div className={`text-sm px-3 py-1 rounded-full 
-                    ${todayPhase === 'period' ? 'bg-red-400/90 period-status-label' : 
-                      todayPhase === 'follicular' ? 'bg-yellow-400/90 period-status-label' : 
-                      todayPhase === 'ovulation' ? 'bg-blue-400/90 period-status-label' : 
-                      todayPhase === 'luteal' ? 'bg-purple-400/90 period-status-label' : 
-                      'bg-muted text-muted-foreground'}`}>
-                    {isPredictedPeriod
-                      ? 'Predicted Period'
-                      : todayPhase !== 'Unknown'
-                        ? `${todayPhase.charAt(0).toUpperCase() + todayPhase.slice(1)} Phase`
-                        : 'Phase Unknown'}
-                  </div>
-                  {isFertileWindowDay && (
-                    <div className="text-sm px-3 py-1 rounded-full bg-blue-500 period-status-label flex items-center">
-                      <span className="inline-block w-2 h-2 bg-white rounded-full mr-1"></span>
-                      Fertile Window
-                    </div>
-                  )}
-                </>
-              )}
             </div>
-            
-            {/* Phase Description */}
-            {!cycleLoading && todayPhase !== 'Unknown' && (
-              <div className="mb-4 p-3 rounded-md text-sm bg-muted/40">
-                {todayPhase === 'period' && (
-                  <p>Menstrual phase: Your period is ongoing or logged for this day. Hormone levels are at their lowest.</p>
-                )}
-                {todayPhase === 'follicular' && (
-                  <p>Follicular phase: This phase began after your last period ended and lasts until ovulation. Estrogen rises as follicles grow.</p>
-                )}
-                {todayPhase === 'ovulation' && (
-                  <p>Ovulation phase: An egg is released from the ovary. This is your most fertile time.</p>
-                )}
-                {todayPhase === 'luteal' && (
-                  <p>Luteal phase: After ovulation, progesterone rises. Your body prepares for a possible pregnancy or your next period.</p>
-                )}
-              </div>
-            )}
-            
-            {/* Period Status Card */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold">Period Status</h3>
-                {/* Spotting and period action buttons row */}
-                {!activeCycleForSelectedDate || (activeCycleForSelectedDate && activeCycleForSelectedDate.endDate && !currentFlow) ? (
-                  <div className="flex gap-3">
-                    <Button
-                      variant={currentFlow?.intensity === 'spotting' ? 'default' : 'outline'}
-                      size="sm"
-                      className={`text-xs flex items-center px-4 py-2 period-status-btn border-primary ${currentFlow?.intensity === 'spotting' ? 'bg-primary selected' : 'bg-primary/20 hover:bg-primary/30 border-primary'}`}
-                      onClick={() => recordFlow('spotting', selectedDate)}
-                      style={{ minWidth: 110 }}
-                    >
-                      <DropletIcon className="h-5 w-5" fillOpacity={currentFlow?.intensity === 'spotting' ? 0.3 : 0} />
-                      <span className="period-status-label">Spotting</span>
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="text-xs flex items-center px-4 py-2 period-status-btn"
-                      onClick={() => {
-                        startPeriod(selectedDate);
-                        setTimeout(() => recordFlow('light', selectedDate), 300);
-                      }}
-                      style={{ minWidth: 110 }}
-                    >
-                      Start Period
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    {/* Hide End Period for completed periods, but keep Cancel Period */}
-                    {(!activeCycleForSelectedDate?.endDate) && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs border-primary text-primary"
-                          >
-                            End Period
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Confirm End Period</AlertDialogTitle>
-                          </AlertDialogHeader>
-                          <AlertDialogDescription>
-                            Are you sure you want to end your period? This will update your cycle data.
-                          </AlertDialogDescription>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => endPeriod(selectedDate, activeCycleForSelectedDate?.id)}>End Period</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="text-xs"
-                        >
-                          Cancel Period
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Cancel Period</AlertDialogTitle>
-                        </AlertDialogHeader>
-                        <AlertDialogDescription>
-                          Are you sure you want to cancel this period? This will remove all data for this cycle.
-                        </AlertDialogDescription>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>No, Keep It</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => cancelPeriod(activeCycleForSelectedDate.id)}>Yes, Delete It</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                )}
-              </div>
-              {/* Flow intensity buttons only show during an active period or for past logged flow days */}
-              {(activeCycleForSelectedDate && !activeCycleForSelectedDate.endDate || currentFlow) && (
+        );
+    }
+
+    // --- Render Logic ---
+    const canEditFlow = !activeCycleForSelectedDate?.endDate || isSameDay(selectedDate, parseISO(activeCycleForSelectedDate.endDate)); // Allow editing on end date
+    const isPeriodActive = activeCycleForSelectedDate && !activeCycleForSelectedDate.endDate;
+
+    return (
+        <div className="tab-content px-4 py-6">
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-4">{isToday(selectedDate) ? 'Today' : 'Day View'}</h2>
+                <Card>
+                    <CardContent className="p-4">
+                        {/* Date Navigation */}
+                        <DateNav
+                            selectedDate={selectedDate}
+                            onDateChange={handleDateChange}
+                            userId={userId} // Pass userId if needed by DateNav
+                        />
+                        <Separator className="my-3" />
+
+                        {/* Cycle Status Badges */}
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            {cycleAnalysis.dayOfCycle !== null && (
+                                <div className="text-sm px-3 py-1 rounded-full bg-primary text-primary-foreground period-status-label">
+                                    Cycle Day {cycleAnalysis.dayOfCycle}
+                                </div>
+                            )}
+                            {cycleAnalysis.phase !== 'Unknown' && (
+                                <div className={`text-sm px-3 py-1 rounded-full text-white period-status-label
+                                    ${cycleAnalysis.phase === 'period' ? (cycleAnalysis.isPredictedPeriod ? 'bg-red-300' : 'bg-red-500') :
+                                      cycleAnalysis.phase === 'follicular' ? 'bg-yellow-500' :
+                                      cycleAnalysis.phase === 'ovulation' ? 'bg-blue-500' :
+                                      cycleAnalysis.phase === 'luteal' ? 'bg-purple-500' :
+                                      'bg-muted text-muted-foreground'}`}>
+                                    {cycleAnalysis.isPredictedPeriod ? 'Predicted Period' : `${cycleAnalysis.phase.charAt(0).toUpperCase() + cycleAnalysis.phase.slice(1)} Phase`}
+                                </div>
+                            )}
+                            {cycleAnalysis.isFertile && (
+                                <div className="text-sm px-3 py-1 rounded-full bg-teal-500 text-white period-status-label flex items-center">
+                                    <span className="inline-block w-2 h-2 bg-white rounded-full mr-1.5"></span>
+                                    Fertile Window
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Phase Description */}
+                        {cycleAnalysis.phase !== 'Unknown' && !cycleAnalysis.isPredictedPeriod && (
+                            <div className="mb-4 p-3 rounded-md text-sm bg-muted/40">
+                                {cycleAnalysis.phase === 'period' && <p>Menstrual phase: Your period is logged for this day. Hormone levels are typically at their lowest.</p>}
+                                {cycleAnalysis.phase === 'follicular' && <p>Follicular phase: Began after your last period and lasts until ovulation. Estrogen rises.</p>}
+                                {cycleAnalysis.phase === 'ovulation' && <p>Ovulation phase: An egg is released. This is typically your most fertile time.</p>}
+                                {cycleAnalysis.phase === 'luteal' && <p>Luteal phase: After ovulation, progesterone rises, preparing for potential pregnancy or the next period.</p>}
+                            </div>
+                        )}
+
+                        {/* === Period Status Card === */}
+                        <div className="mb-4">
+                            <div className="flex items-center justify-between mb-2 flex-wrap gap-2"> {/* Added flex-wrap and gap */}
+                                <h3 className="text-lg font-semibold">Period Status</h3>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-2">
+                                    {/* Show Spotting/Start Period buttons if NO active cycle */}
+                                    {!activeCycleForSelectedDate && (
+                                        <>
+                                            <Button
+                                                variant={currentFlow?.intensity === 'spotting' ? 'default' : 'outline'}
+                                                size="sm"
+                                                className={`text-xs flex items-center gap-1 px-3 py-1.5 period-status-btn border-primary ${currentFlow?.intensity === 'spotting' ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                                                onClick={() => recordFlow('spotting', selectedDate)}
+                                            >
+                                                <DropletIcon className="h-4 w-4" fillOpacity={currentFlow?.intensity === 'spotting' ? 0.3 : 0} />
+                                                Spotting
+                                            </Button>
+                                            <Button
+                                                variant="default"
+                                                size="sm"
+                                                className="text-xs flex items-center px-3 py-1.5 period-status-btn"
+                                                onClick={handleStartPeriod}
+                                            >
+                                                Start Period
+                                            </Button>
+                                        </>
+                                    )}
+
+                                    {/* Show End/Cancel Period buttons if there IS an active cycle */}
+                                    {activeCycleForSelectedDate && (
+                                        <>
+                                            {/* Only show End Period if cycle is not already ended */}
+                                            {!activeCycleForSelectedDate.endDate && (
+                                                 <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="outline" size="sm" className="text-xs border-primary text-primary">End Period</Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader><AlertDialogTitle>Confirm End Period</AlertDialogTitle></AlertDialogHeader>
+                                                        <AlertDialogDescription>End your period on {format(selectedDate, 'MMMM d, yyyy')}? This will finalize the cycle length.</AlertDialogDescription>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={handleEndPeriod}>End Period</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
+                                             <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="destructive" size="sm" className="text-xs">Cancel Period</Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader><AlertDialogTitle>Cancel Period</AlertDialogTitle></AlertDialogHeader>
+                                                    <AlertDialogDescription>Permanently remove this period cycle ({format(parseISO(activeCycleForSelectedDate.startDate), 'MMM d')} - {activeCycleForSelectedDate.endDate ? format(parseISO(activeCycleForSelectedDate.endDate), 'MMM d') : 'Ongoing'}) and all its associated flow data?</AlertDialogDescription>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>No, Keep It</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={handleCancelPeriod}>Yes, Delete It</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Flow intensity buttons show if: 
+              1. Period is active for this date OR 
+              2. Period is completed for this date AND actual (non-spotting) flow was logged */ }
+              {(activeCycleForSelectedDate && !activeCycleForSelectedDate.endDate) || (activeCycleForSelectedDate && activeCycleForSelectedDate.endDate && currentFlow && currentFlow.intensity !== 'spotting') && (
                 <div className="flex flex-col items-center mb-3">
                   {/* Tooltip for past log days */}
                   {!!activeCycleForSelectedDate?.endDate && currentFlow && (
@@ -460,130 +507,127 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
               )}
               {!currentFlow && (
                 <div className="text-sm text-muted-foreground mb-3 p-2 bg-muted/20 rounded">
-                  No period data for this date. Use the "Start Period" button to begin tracking.
+                  Log spotting or use the "Start Period" button to begin tracking.
                 </div>
               )}
             </div>
+                        {/* === End Period Status Card === */}
 
 
-            {/* Mood Tracking */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Mood</h3>
-              <MoodSelector 
-                currentMood={moodRecord?.mood} 
-                onMoodSelect={recordMood} 
-              />
-            </div>
-            
-            {/* Cervical Mucus Tracking */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Cervical Mucus</h3>
-              <div>
-                <CervicalMucusSelector
-                  currentType={cervicalMucusType}
-                  onTypeSelect={recordCervicalMucus}
-                />
-              </div>
-            </div>
-            
-            {/* Physical Symptoms */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Physical Symptoms</h3>
-              <SymptomsList 
-                symptoms={physicalSymptoms}
-                activeSymptomIds={physicalSymptoms.filter((s: any) => isSymptomActive(s.id)).map((s: any) => s.id)}
-                onToggleSymptom={toggleSymptom}
-                getSymptomIntensity={getSymptomIntensity}
-                updateSymptomIntensity={updateSymptomIntensity}
-              />
-            </div>
-            
-            {/* Emotional Symptoms */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Emotional Symptoms</h3>
-              <SymptomsList 
-                symptoms={emotionalSymptoms}
-                activeSymptomIds={emotionalSymptoms.filter((s: any) => isSymptomActive(s.id)).map((s: any) => s.id)}
-                onToggleSymptom={toggleSymptom}
-                getSymptomIntensity={getSymptomIntensity}
-                updateSymptomIntensity={updateSymptomIntensity}
-              />
-            </div>
-            
-            {/* PMDD Symptoms */}
-            {pmddSymptoms && pmddSymptoms.length > 0 && (
-              <div className="mb-6">
-                <div className="flex items-center mb-2">
-                  <h3 className="text-lg font-semibold">PMDD Symptoms</h3>
-                  <div className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full">
-                    Premenstrual Dysphoric Disorder
-                  </div>
-                </div>
-                <div className="p-3 mb-3 bg-muted/20 rounded-md text-sm text-muted-foreground">
-                  <p>Track symptoms that are severe during the luteal phase (7-14 days before period) and improve within a few days of menstruation.</p>
-                </div>
-                <SymptomsList 
-                  symptoms={pmddSymptoms}
-                  activeSymptomIds={pmddSymptoms.filter((s: any) => isSymptomActive(s.id)).map((s: any) => s.id)}
-                  onToggleSymptom={toggleSymptom}
-                  getSymptomIntensity={getSymptomIntensity}
-                  updateSymptomIntensity={updateSymptomIntensity}
-                />
-              </div>
-            )}
-            
-            {/* Medication Tracking */}
-            <div className="mb-6">
-              <MedicationTracker userId={userId} selectedDate={selectedDate} />
-            </div>
-            
-            {/* Intimacy Section */}
-            {((settings?.showIntimacyCard ?? true)) && (
-              <Card className="mb-6">
-                <CardContent className="flex items-center justify-between py-2 px-3">
-                  <div className="flex flex-col items-start">
-                    <span className="font-semibold">Intimacy</span>
-                    {isIntimateLogged && (
-                      <span className="block text-xs mt-0.5 text-muted-foreground">Logged</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <IntimateActivityButton
-                      active={isIntimateLogged}
-                      onClick={logIntimateActivity}
-                      disabled={isIntimateLoading}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                        {/* Mood Tracking */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-2">Mood</h3>
+                            <MoodSelector
+                                currentMood={moodRecord?.mood}
+                                onMoodSelect={recordMood}
+                            />
+                        </div>
 
-            {/* Notes Section */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Notes</h3>
-              <Textarea 
-                className="h-24 bg-muted bg-opacity-40 border-border mb-2"
-                placeholder="Add notes about your day..."
-                value={notes}
-                onChange={handleNotesChange}
-              />
+                        {/* Cervical Mucus Tracking */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-2">Cervical Mucus</h3>
+                            <CervicalMucusSelector
+                                currentType={cervicalMucusType}
+                                onTypeSelect={recordCervicalMucus}
+                            />
+                        </div>
+
+                        {/* Physical Symptoms */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-2">Physical Symptoms</h3>
+                            <SymptomsList
+                                symptoms={physicalSymptoms}
+                                activeSymptomIds={physicalSymptoms.filter((s: any) => isSymptomActive(s.id)).map((s: any) => s.id)}
+                                onToggleSymptom={toggleSymptom}
+                                getSymptomIntensity={getSymptomIntensity}
+                                updateSymptomIntensity={updateSymptomIntensity}
+                            />
+                        </div>
+
+                        {/* Emotional Symptoms */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-2">Emotional Symptoms</h3>
+                            <SymptomsList
+                                symptoms={emotionalSymptoms}
+                                activeSymptomIds={emotionalSymptoms.filter((s: any) => isSymptomActive(s.id)).map((s: any) => s.id)}
+                                onToggleSymptom={toggleSymptom}
+                                getSymptomIntensity={getSymptomIntensity}
+                                updateSymptomIntensity={updateSymptomIntensity}
+                            />
+                        </div>
+
+                        {/* PMDD Symptoms (Conditional) */}
+                        {userSettings?.showPmddSymptoms && pmddSymptoms && pmddSymptoms.length > 0 && (
+                            <div className="mb-6">
+                                <div className="flex items-center mb-2">
+                                    <h3 className="text-lg font-semibold">PMDD Symptoms</h3>
+                                    <div className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full">
+                                        PMDD
+                                    </div>
+                                </div>
+                                <div className="p-3 mb-3 bg-muted/20 rounded-md text-sm text-muted-foreground">
+                                    <p>Track symptoms typically severe during the luteal phase (before period) and improving shortly after menstruation starts.</p>
+                                </div>
+                                <SymptomsList
+                                    symptoms={pmddSymptoms}
+                                    activeSymptomIds={pmddSymptoms.filter((s: any) => isSymptomActive(s.id)).map((s: any) => s.id)}
+                                    onToggleSymptom={toggleSymptom}
+                                    getSymptomIntensity={getSymptomIntensity}
+                                    updateSymptomIntensity={updateSymptomIntensity}
+                                />
+                            </div>
+                        )}
+
+                        {/* Medication Tracking */}
+                        <div className="mb-6">
+                            <MedicationTracker userId={userId} selectedDate={selectedDate} />
+                        </div>
+
+                        {/* Intimacy Section (Conditional) */}
+                        {(userSettings?.showIntimacyCard ?? true) && ( // Default to show if setting is undefined
+                            <Card className="mb-6">
+                                <CardContent className="flex items-center justify-between py-2 px-3">
+                                    <div className="flex flex-col items-start">
+                                        <span className="font-semibold">Intimacy</span>
+                                        {isIntimateLogged && (
+                                            <span className="block text-xs mt-0.5 text-muted-foreground">Logged</span>
+                                        )}
+                                    </div>
+                                    <IntimateActivityButton
+                                        active={isIntimateLogged}
+                                        onClick={logIntimateActivity}
+                                        disabled={isIntimateLoading}
+                                    />
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Notes Section */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-2">Notes</h3>
+                            <Textarea
+                                className="h-24 bg-muted/20 border mb-2" // Slightly adjust style
+                                placeholder="Add notes about your day..."
+                                value={notes}
+                                onChange={handleNotesChange}
+                            />
+                        </div>
+
+                        {/* Save Button */}
+                        <div className="flex justify-center mt-4">
+                            <Button
+                                className="w-full max-w-sm"
+                                size="lg"
+                                onClick={handleSaveDailyEntry}
+                            >
+                                Save Daily Entry
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
-            
-            {/* Save Button */}
-            <div className="flex justify-center">
-              <Button 
-                className="w-full max-w-sm" 
-                size="lg"
-                onClick={handleSaveNotes}
-              >
-                Save Daily Entry
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default Today;

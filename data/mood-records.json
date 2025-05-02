@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "userId": 1,
+    "date": "2025-04-18",
+    "mood": "awful",
+    "id": 1
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-19",
+    "mood": "great",
+    "id": 2
+  },
+  {
+    "userId": 1,
+    "date": "2025-05-01",
+    "mood": "okay",
+    "id": 3
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-30",
+    "mood": "good",
+    "id": 4
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-29",
+    "mood": "great",
+    "id": 5
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-28",
+    "mood": "awful",
+    "id": 6
+  }
+]

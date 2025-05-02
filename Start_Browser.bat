@@ -36,6 +36,9 @@ if not exist node_modules (
     )
 )
 
+REM Open the browser with hardcoded port 5000
+start http://localhost:5000
+
 REM Start the production server with production environment (NO BUILD)
 echo Starting production server (NO BUILD)...
 set NODE_ENV=production
