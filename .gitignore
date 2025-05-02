@@ -2,8 +2,8 @@
 /node_modules/
 
 # Build output
-/dist/
-/dist-web/  # Web build output
+dist
+dist-web
 
 # Scripts (personal/temporary)
 scripts/
