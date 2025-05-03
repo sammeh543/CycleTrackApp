@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Start Full Dev",
+        "type": "npm",
+        "script": "dev:full",
+        "problemMatcher": []
+      },
+      {
+        "label": "Build All",
+        "type": "npm",
+        "script": "build",
+        "problemMatcher": []
+      }
+    ]
+  }
