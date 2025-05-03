@@ -205,7 +205,7 @@ const Calendar: React.FC<CalendarProps> = ({ userId }) => {
         </div>
       </div>
       {/* Disclaimer - Card for visual consistency and theming */}
-      <Card className="mt-8 mb-4 mx-auto max-w-2xl border border-primary border-l-4 border-primary bg-period-expected">
+      <Card className="mt-8 mb-4 mx-auto max-w-2xl border border-primary border-l-4 bg-period-expected">
         <CardContent className="py-3 px-4 text-center">
           <span className="text-xs font-medium block">
             <strong>Disclaimer:</strong> {(() => {
