@@ -12,6 +12,9 @@ npx
 # Scripts (personal/temporary)
 scripts/
 
+# IDE
+.idea/
+
 # Logs
 logs
 *.log
