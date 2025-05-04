@@ -1,0 +1,20 @@
+[
+  {
+    "userId": 1,
+    "date": "2025-04-21",
+    "notes": "test",
+    "id": 1
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-22",
+    "notes": "test",
+    "id": 2
+  },
+  {
+    "userId": 1,
+    "date": "2025-04-23",
+    "notes": "test",
+    "id": 3
+  }
+]

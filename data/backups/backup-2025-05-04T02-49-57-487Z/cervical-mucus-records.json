@@ -1,0 +1,20 @@
+[
+  {
+    "userId": 1,
+    "date": "2025-04-18",
+    "type": "dry",
+    "id": 1
+  },
+  {
+    "userId": 1,
+    "date": "2025-05-07",
+    "type": "dry",
+    "id": 2
+  },
+  {
+    "userId": 1,
+    "date": "2025-05-03",
+    "type": "sticky",
+    "id": 3
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "userId": 1,
+    "startDate": "2025-04-01",
+    "id": 39,
+    "endDate": "2025-04-08",
+    "notes": null
+  },
+  {
+    "userId": 1,
+    "startDate": "2025-03-01",
+    "id": 40,
+    "endDate": "2025-03-12",
+    "notes": null
+  },
+  {
+    "userId": 1,
+    "startDate": "2025-05-01",
+    "id": 41,
+    "endDate": "2025-05-04",
+    "notes": null
+  }
+]

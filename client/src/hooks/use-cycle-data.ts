@@ -301,6 +301,38 @@ export function useCycleData({ userId }: UseCycleDataProps) {
   }, [deleteFlowMutation]); // Dependency: only needs the mutation function
 
 
+  // Helper function to convert any "spotting" to "light" when starting a period
+  const convertSpottingToLight = useCallback(async (date: Date) => {
+    if (!flowRecords) return;
+
+    // Format date to match the format in records
+    const dateStr = format(date, 'yyyy-MM-dd');
+
+    // Find any existing spotting record for this date
+    const spottingRecord = flowRecords.find(
+      r => r.date.split('T')[0] === dateStr && r.intensity === 'spotting'
+    );
+
+    // If a spotting record exists, convert it to light
+    if (spottingRecord) {
+      console.log(`Converting spotting to light for ${dateStr} (ID: ${spottingRecord.id})`);
+
+      // First delete the spotting record
+      await deleteFlowMutation.mutateAsync(spottingRecord.id);
+
+      // Then create a new light record for the same date
+      await recordFlowMutation.mutateAsync({
+        userId,
+        date: dateStr,
+        intensity: 'light',
+        cycleId: spottingRecord.cycleId // Preserve the cycle ID if it exists
+      });
+
+      // Refresh flow records to get the latest data
+      await refetchFlowRecords();
+    }
+  }, [flowRecords, deleteFlowMutation, recordFlowMutation, userId, refetchFlowRecords]);
+
   // --- Keep startPeriod and endPeriod (make sure they use the updated helpers correctly) ---
   const startPeriod = useCallback((date: Date = new Date()) => {
       const formattedDate = format(date, 'yyyy-MM-dd');

@@ -1,23 +1,30 @@
 [
   {
     "userId": 1,
-    "startDate": "2025-04-01",
-    "id": 39,
-    "endDate": "2025-04-08",
+    "startDate": "2025-04-04",
+    "id": 44,
+    "endDate": "2025-04-10",
     "notes": null
   },
   {
     "userId": 1,
-    "startDate": "2025-03-01",
-    "id": 40,
-    "endDate": "2025-03-12",
+    "startDate": "2025-02-01",
+    "id": 45,
+    "endDate": "2025-02-05",
     "notes": null
   },
   {
     "userId": 1,
-    "startDate": "2025-05-01",
-    "id": 41,
-    "endDate": "2025-05-04",
+    "startDate": "2025-01-01",
+    "id": 46,
+    "endDate": "2025-01-06",
+    "notes": null
+  },
+  {
+    "userId": 1,
+    "startDate": "2025-05-03",
+    "id": 64,
+    "endDate": null,
     "notes": null
   }
 ]
