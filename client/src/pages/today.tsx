@@ -168,7 +168,7 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
     });
   }, [cycles, selectedDate]);
 
-  // Calculate cycle phase, predictions, fertile window etc. based on selectedDate
+  // Calculate cycle phase, predictions, fertile window, etc. based on selectedDate
   const cycleAnalysis = useMemo(() => {
     if (!flowRecords) {
       return {
@@ -323,7 +323,7 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
 
   const handleSaveDailyEntry = useCallback(() => {
     saveDailyNote(notes);
-    // You might want to save other things here if needed, but typically symptoms/mood etc are saved on interaction
+    // You might want to save other things here if needed, but typically symptoms/mood etc. are saved on interaction
     toast({
       title: "Entry Saved",
       description: `Your daily entry for ${format(
@@ -501,14 +501,16 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
                         />
                         Spotting
                       </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="text-xs flex items-center px-3 py-1.5 period-status-btn"
-                        onClick={handleStartPeriod}
-                      >
-                        Start Period
-                      </Button>
+                      {(!currentFlow || currentFlow.intensity !== "spotting") && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="text-xs flex items-center px-3 py-1.5 period-status-btn"
+                          onClick={handleStartPeriod}
+                        >
+                          Start Period
+                        </Button>
+                      )}
                     </>
                   )}
 
@@ -715,7 +717,7 @@ const Today: React.FC<TodayProps> = ({ userId }) => {
                     </div>
                   )}
 
-                  {/* Message if the cycle is ended and *only* spotting or nothing was logged */}
+                  {/* Message if the cycle is ended, and *only* spotting or nothing was logged */}
                   {activeCycleForSelectedDate.endDate &&
                     (!currentFlow || currentFlow.intensity === "spotting") && (
                       <div className="text-sm text-muted-foreground text-center mt-2">
