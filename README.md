@@ -19,16 +19,16 @@ This app was created to meet a real-life need for autonomy in health tracking, e
 - **Customizable**: Add custom symptoms and hide default ones that aren't relevant to you
 - **Theme Support**: Choose from multiple color themes (Ocean, Beach, Starry, etc.)
 - **Local Storage & Privacy**: All data is stored locally on your device for privacy
-- **Robust Export/Import**: Export your data as CSV or JSON, and restore from backup via import in Settings
+- **Robust Export/Import**: Export your data as CSV or JSON and restore from backup via import in Settings
 
 ## Quick Start for All Users
 
 ### 1. Downloading the App
 
 #### Option A: Download ZIP from GitHub
-- **Download:** Click the green "Code" button on GitHub and select "Download ZIP".
-- **Unzip:** Extract anywhere (Desktop, USB drive, etc.).
-- **Continue with 'Install Dependencies' below.**
+- **Download:** Click the green `Code` button on GitHub and select `Download ZIP`
+- **Unzip:** Extract anywhere (Desktop, USB drive, etc.)
+- **Continue with 'Install Dependencies' below**
 
 #### Option B: Clone the Repository
 - **Install [Git](https://git-scm.com/)** if you don't have it.
@@ -63,7 +63,7 @@ This app was created to meet a real-life need for autonomy in health tracking, e
 - **Access from Browser/Network:**
   - Only  `Start_Browser.bat` allow access from other devices on your network (e.g., your phone).
 
-### B. Run as Portable Windows App (No Network Needed) If you want more privacy
+### B. Run as a Portable Windows App (No Network Needed) If you want more privacy
 - Only after running `npm run build` the first time.
 - Double click `Start_Portable.bat` to run the app.
 
@@ -72,7 +72,7 @@ This app was created to meet a real-life need for autonomy in health tracking, e
 ## Quick Reference
 - First time: `npm run build` 
 - After build start `Start_Browser.bat`
-- **Run Portable App(No Network):** `Start_Portable.bat`
+- **Run Portable App (No Network):** `Start_Portable.bat`
 
 ---
 
@@ -97,9 +97,9 @@ You can customize the application settings by editing the `config.json` file:
   "uiPassword": "changeMe123"
 }
 ```
-## Network Access & IP Whitelisting (Web/Server Mode)
+## Network Access & IP Allowlisting (Web/Server Mode)
 
-You can access the app from other devices (like your phone) on the same WiFi network.
+You can access the app from other devices (like your phone) on the same Wi-Fi network.
 
 ### How to Find Your PC’s IP Address
 
@@ -206,14 +206,14 @@ Screenshots are available in the [Screenshots](#screenshots) section.
 
 ### Troubleshooting
 
-- **If you see a "Forbidden**: Your IP is not whitelisted." message, make sure your current device's IP is in `ip-whitelist.txt` and restart the server.
+- **If you see a "Forbidden**: Your IP is not allowlisted." message, make sure your current device's IP is in `ip-whitelist.txt` and restart the server.
 - **For import/export issues:** always reset data before importing a backup.
 - **If the Electron app window is blank:** wait a few seconds for the server to start.
 - **If you see errors:** check the terminal for details.
 - **If you see errors about missing Node.js or npm:** Install them from https://nodejs.org
 - **If you see errors about missing dependencies:** Run `npm install` in the project folder.
 
-- I can't offer much help but you can always ask AI lol.
+- I can offer little help, but you can always ask AI lol.
 
 ### Port & Process Cleanup (If you see 'port in use' errors)
 If you see an error like `Error: listen EADDRINUSE: address already in use` or suspect that Electron/Node processes are stuck, you can use the included cleanup script:
